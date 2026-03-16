@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project 1</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<nav>
+  <a href="../index.html">Home</a>
+  <a href="index.html">Projects</a>
+  <a href="../about/about.html">About Me</a>
+</nav>
+
+<section>
+<h2>Server</h2>
+
+<div style="display: flex; align-items: center; margin-bottom: 20px;">
+  <img src="../images/Server.jpeg" alt="Server" style="width: 60%; height: auto; margin-right: 20px;">
+</div>
+<p>My home server is built around an ASUS P7F-M uATX motherboard paired with an Intel Xeon X3450 processor, featuring 4 physical cores and 8 virtual cores with VT-x support. 
+    It has 16GB of DDR-3 RAM, a 64GB SSD where the operating system is installed, and a 500GB HDD for storage. 
+    It has no case and simply sits on a small table — one benefit being that no additional case fans are needed.
+    Networking is handled through a small USB Wi-Fi adapter for wireless connectivity. 
+    The motherboard offers six SATA ports and multiple PCIe slots for expansion, and the system is cooled with a standard CPU fan and heatsink. 
+    Power is supplied by a 750W PSU, and the server is turned on via a 16A house breaker rather than a switch. (I didn't have any switches)</p>
+<p>The server runs Ubuntu because Linux is lightweight, stable, and ideal for older hardware, while still being capable of running all the services I need. 
+    I have a small public Telnet server set up that can be accessed through the terminal; it responds to specific commands and was mostly a fun project because I enjoy how simple Telnet is. 
+    Remote access is also available via SSH, secured with key-based authentication only. 
+    On the local network, the server acts as a NAS using CasaOS, letting me store and access files from any device at home. 
+    Finally, it also hosts this website, making it a versatile home server.</p>
+<p>My server doesn't have a public IPv4 address because my internet plan uses DS-Lite, which normally prevents direct incoming connections.
+To work around this, I set up an EC2 instance on AWS since it has a public IPv4 and connected it to my home server using Tailscale.
+Tailscale creates a secure private network between the two machines, allowing them to communicate directly even without a public IP.
+On the EC2 instance, I use socat, a command-line tool that forwards or relays network connections between ports, addresses, or protocols, to make my server's services accessible to the EC2.
+Finally, I updated the A record for my domain, leviserver.eu, to point to the EC2 instance's IPv4, effectively making my home server publicly reachable while keeping the home server itself safely behind NAT.</p>
+
+</section>
+</body>
+</html>

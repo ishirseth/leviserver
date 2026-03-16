@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project 1</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<nav>
+  <a href="../index.html">Home</a>
+  <a href="index.html">Projects</a>
+  <a href="../about/about.html">About Me</a>
+</nav>
+
+<section>
+<h2>54LS83 Adder</h2>
+
+<div style="display: flex; align-items: center; margin-bottom: 20px;">
+  <img src="../images/54LS83Adder.jpeg" alt="54LS83 Adder" style="width: 50%; height: auto; margin-right: 20px;">
+  <div>
+  <p>This project is a simple 4-bit binary adder built using the SN54LS83 IC. 
+    It takes two 4-bit numbers as input (set using DIP switches) and outputs a 5-bit result, including the carry-out. 
+    The sum is shown on five LEDs so you can directly see the binary output. 
+    The whole circuit runs on 5V and was soldered by hand by me on a perfboard.</p>
+
+  <p>I built this as a follow-up to my earlier relay-based adder and as my first project using logic ICs. 
+    The relay version performed the same function, but it was much larger, required many more components, and consumed significantly more current. 
+    By switching to an integrated circuit, the design became far more compact, efficient, and practical while still preforming exactly the same binary addition. 
+    It was a great way to directly compare old electromechanical logic with modern semiconductor-based digital logic.</p>
+  </div>
+  </div>
+
+<div style="display: flex; flex-direction: row-reverse; align-items: center; margin-bottom: 20px;">
+  <img src="../images/54LS83AdderExample.jpeg" alt="54LS83 Adder Example" style="width: 50%; height: auto; margin-left: 20px;">
+  <div>
+  <p>The image above shows the adder in operation, adding 1100 (12) and 1010 (10). 
+    The LEDs display the result 10110 (22), correctly including the carry-out bit as the fifth output. 
+    This demonstrates the full 4-bit addition proces and confirms that the circuit is functioning exactly as expected.</p>
+  </div>
+  </div>
+
+<div style="display: flex; align-items: center; margin-bottom: 20px;">
+  <img src="../images/54LS83AdderSchematic.png" alt="schematic" style="width: 50%; height: auto; margin-right: 20px;">
+  <div>
+  <p>The schematic above shows a simplified overview of how the circuit is wired and how the connections are arranged around the IC. 
+    It reflects the general structure of the design rather than an exact pin-for-pin layout. 
+    One important detail is that, while the schematic represents standard 5V logic levels (with 5V as HIGH), the particular chip I used behaves inverted in my setup, meaning 0V acts as HIGH and 5V acts as LOW. 
+    (I don't know why—it works with 0V as HIGH and 5V as LOW even though the datasheet shows 5V as HIGH, but this is simply how I got it to work) 
+    Aside from this inverted logic behavior, the overall operation of the circuit remains the same and performs standard 4-bit binary addition.</p>
+  </div>
+  </div>
+
+</section>
+</body>
+</html>

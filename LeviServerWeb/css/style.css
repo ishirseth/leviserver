@@ -1,0 +1,143 @@
+/* /css/style.css */
+
+:root {
+    --text-color: #e0e0e0;
+    --accent-color: #2b6634;
+    --card-bg: #1f1f1f;
+  }
+  
+  body {
+    margin: 0;
+    padding: 0px 0px;
+    font-family: Arial, sans-serif;
+    background: #121212;
+    background: linear-gradient(90deg, rgba(18, 18, 18, 1) 0%, rgb(47, 47, 47) 50%, rgb(78, 78, 78) 100%);
+    color: var(--text-color);
+    text-align: left;
+  }
+  
+  nav {
+    background-color: #1f1f1f;
+    padding: 10px 20px;
+    display: flex;
+    gap: 20px;
+  }
+  
+  nav a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  nav a:hover {
+    color: var(--accent-color);
+  }
+  
+  section {
+    padding: 0px 10px;
+    max-width: 1000px;
+    margin: 0;
+  }
+
+  h1 {
+    font-weight: bold;
+    color: var(--text-color);
+    font-size: 70px;
+  }
+  
+  h2 {
+    font-weight: bold;
+    color: var(--text-color);
+    font-size: 25px;
+  }
+  
+  h3 {
+    font-weight: bold;
+    color: var(--text-color);
+    font-size: 18px;
+  }
+
+  p {
+    line-height: 1.5;
+  }
+
+  .intro-box{
+    border: 2px solid #2a1f1f;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 10px;
+    background-color: #1a1a1a;
+    border-left: 3px solid #c1a7a7;
+    padding-left: 10px;
+  }
+  
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 columns of equal width */
+    gap: 20px;
+  }
+  
+  .project-card {
+    background-color: var(--card-bg);
+    padding: 15px;
+    border-radius: 8px;
+    transition: transform 0.2s;
+  }
+  
+  .project-card:hover {
+    transform: scale(1.05);
+    border: 1px solid var(--accent-color);
+  }
+  
+  .project-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: fill;
+    border-radius: 5px;
+  }
+  
+  img {
+    max-width: 100%;
+    border-radius: 5px;
+  }
+
+  .levi {
+    max-width: 100%;
+    border-radius: 5px;
+    width: 250px;
+    height: 200px;
+    position: absolute;
+    top: 50px;
+    right: 20px;
+  }
+
+  .article {
+  max-width: 650px;
+  }
+
+  .subtitle {
+  font-weight: normal;
+  color: #aaa;
+  margin-bottom: 25px;
+  }
+
+  .article p {
+  line-height: 1.75;
+  margin-bottom: 1.4em;
+  color: #d6d6d6;
+  }
+
+  .article p.lead {
+  font-size: 1.1rem;
+  color: #ffffff;
+  }
+
+  section {
+    display: block;
+    margin: 0 auto;
+  }
+
+  * {
+    text-align: left;  
+  }
+  
