@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LeviServer</title>
+    <style>
+        :root {
+            --text-color: #e0e0e0;
+            --accent-color: #2b6634;
+            --card-bg: #1f1f1f;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #121212;
+            background: linear-gradient(90deg, rgba(18,18,18,1) 0%, rgb(47,47,47) 50%, rgb(78,78,78) 100%);
+            color: var(--text-color);
+        }
+        section {
+            padding: 40px 20px;
+            max-width: 1000px;
+        }
+        h1 {
+            font-size: 70px;
+            color: var(--text-color);
+        }
+        .cards {
+            display: flex;
+            gap: 20px;
+        }
+        .card {
+            background-color: var(--card-bg);
+            padding: 20px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 20px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: scale(1.05);
+            border: 1px solid var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+    <section>
+        <h1>LeviServer</h1>
+        <div class="cards">
+            <a class="card" href="http://sdr.leviserver.eu">📡 SDR</a>
+            <a class="card" href="http://ishir.leviserver.eu">🌐 Ishir</a>
+        </div>
+    </section>
+</body>
+</html>
