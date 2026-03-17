@@ -69,7 +69,7 @@ def handle_client(conn, addr):
 def main():
     with socket.socket(socket.AF_INET6, socket.SOCK_STREAM) as server:
         server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        server.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)  # accept both IPv4 and IPv6
+        server.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 1)  # accept both IPv4 and IPv6
         server.bind((HOST, PORT, 0, 0))
 
         while True:
