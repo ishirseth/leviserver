@@ -14,6 +14,10 @@ def handle_client(conn, addr):
     global add, addnum
     print("~Connection from", addr)
     conn.sendall(b"~Welcome to Ishir's Telnet Server!\r\n")
+    # Suppress telnet negotiation
+    conn.sendall(b'\xff\xfb\x01')  # WILL ECHO  
+    conn.sendall(b'\xff\xfb\x03')  # WILL SGA
+    conn.sendall(b'\xff\xfd\x03')  # DO SGA
 
     buffer = ""  # buffer for line input
 
