@@ -69,9 +69,9 @@ def handle_client(conn, addr):
 def main():
     with socket.socket(socket.AF_INET6, socket.SOCK_STREAM) as server:
         server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        server.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 1)  # accept both IPv4 and IPv6
-        server.bind((HOST, PORT, 0, 0))
-
+        server.bind(("::", PORT))
+        server.listen()
+        print(f"~Telnet server listening on {PORT}")
         while True:
             conn, addr = server.accept()
             threading.Thread(target=handle_client, args=(conn, addr), daemon=True).start()
