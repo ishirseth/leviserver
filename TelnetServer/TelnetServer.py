@@ -20,9 +20,8 @@ def handle_client(conn, addr):
     try:
         while True:
             data = conn.recv(1).decode(errors='ignore')
-            if not data:  # client disconnected
-                print(f"~Client disconnected: {addr}")
-                break
+            if not data:
+                continue
 
             if data in ("\n", "\r"):  # Enter pressed
                 message = buffer.strip()
