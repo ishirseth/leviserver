@@ -3,41 +3,36 @@ import socket
 import threading
 
 HOST = "::"
-PORT = 23
+PORT = 1437
 
+# Shared state for addition mode
 add = 0
 addnum = 0
-lock = threading.Lock()
+lock = threading.Lock()  # to safely modify add/addnum across clients
 
 def handle_client(conn, addr):
     global add, addnum
     print("~Connection from", addr)
     conn.sendall(b"~Welcome to Ishir's Telnet Server!\r\n")
-    buffer = ""
+
+    buffer = ""  # buffer for line input
+
     try:
         while True:
-            data = conn.recv(1)
-            if not data:
+            data = conn.recv(1).decode(errors='ignore')
+            if not data:  # client disconnected
                 print(f"~Client disconnected: {addr}")
                 break
 
-            # Handle telnet IAC negotiation bytes
-            if data == b'\xff':
-                conn.recv(2)  # skip the next 2 negotiation bytes
-                continue
-
-            char = data.decode(errors='ignore')
-            if not char:
-                continue
-
-            if char in ("\n", "\r"):
+            if data in ("\n", "\r"):  # Enter pressed
                 message = buffer.strip()
-                if not message:
-                    continue
                 print(f"~Client {addr}: {message}")
-                buffer = ""
+                buffer = ""  # reset buffer
+
                 response = b""
+
                 with lock:
+                    # Existing logic
                     if message.lower() == "levi" and add == 0:
                         response = b"~Yay, Levi!\r\n"
                     elif message.lower() == "add" and add == 0:
@@ -59,10 +54,13 @@ def handle_client(conn, addr):
                         response = b"~Goodbye!\r\n"
                         conn.sendall(response)
                         break
+
                 if response:
                     conn.sendall(response)
+
             else:
-                buffer += char
+                buffer += data  # accumulate character
+
     except Exception as e:
         print(f"~Error with client {addr}: {e}")
     finally:
