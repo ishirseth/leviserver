@@ -57,8 +57,8 @@ def handle_client(conn, addr):
                 if response:
                     conn.sendall(response)
 
-            elif ord(data) < 128:  # ignore telnet control characters
-                buffer += data
+            else:
+                buffer += data  # accumulate character
 
     except Exception as e:
         print(f"~Error with client {addr}: {e}")
