@@ -25,16 +25,19 @@
     Networking is handled through a small USB Wi-Fi adapter for wireless connectivity. 
     The motherboard offers six SATA ports and multiple PCIe slots for expansion, and the system is cooled with a standard CPU fan and heatsink. 
     Power is supplied by a 750W PSU, and the server is turned on via a 16A house breaker rather than a switch. (I didn't have any switches)</p>
+
 <p>The server runs Ubuntu because Linux is lightweight, stable, and ideal for older hardware, while still being capable of running all the services I need. 
     I have a small public Telnet server set up that can be accessed through the terminal; it responds to specific commands and was mostly a fun project because I enjoy how simple Telnet is. 
-    Remote access is also available via SSH, secured with key-based authentication only. 
-    On the local network, the server acts as a NAS using CasaOS, letting me store and access files from any device at home. 
+    Remote access is also available via SSH. 
+    On the local network, the server acts as a NAS using CasaOS, letting me store and access files from any device at home.
+    Also the server runs OpenWebRX, a software-defined radio (SDR) receiver that allows me to listen to radio signals with the connected SDR device and it is publicly accessible. 
     Finally, it also hosts this website, making it a versatile home server.</p>
-<p>My server doesn't have a public IPv4 address because my internet plan uses DS-Lite, which normally prevents direct incoming connections.
-To work around this, I set up an EC2 instance on AWS since it has a public IPv4 and connected it to my home server using Tailscale.
-Tailscale creates a secure private network between the two machines, allowing them to communicate directly even without a public IP.
-On the EC2 instance, I use socat, a command-line tool that forwards or relays network connections between ports, addresses, or protocols, to make my server's services accessible to the EC2.
-Finally, I updated the A record for my domain, leviserver.eu, to point to the EC2 instance's IPv4, effectively making my home server publicly reachable while keeping the home server itself safely behind NAT.</p>
+
+<p>My server doesn't have a public IPv4 address because my internet plan uses DS-Lite. 
+  However, my ISP does provide a public IPv6 address, so I use that instead.
+To make the server publicly reachable over IPv6, I added an AAAA record for my domain leviserver.eu pointing directly to my home server's public IPv6 address. 
+On the server I run nginx as a reverse proxy, which listens on port 80 and routes incoming traffic to the correct service based on the subdomain. 
+This allows me to host multiple services on the same server and access them via subdomains like ishir.leviserver.eu for my website. </p>
 
 </section>
 </body>

@@ -3,7 +3,7 @@ import socket
 import threading
 
 HOST = "::"
-PORT = 1437
+PORT = 23
 
 # Shared state for addition mode
 add = 0
