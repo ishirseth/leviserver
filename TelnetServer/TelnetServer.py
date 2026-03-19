@@ -2,7 +2,7 @@
 import socket
 import threading
 
-HOST = "::"
+HOST = "0.0.0.0"
 PORT = 1437
 
 # Shared state for addition mode
