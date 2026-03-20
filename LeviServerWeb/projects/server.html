@@ -33,13 +33,14 @@
     Also the server runs OpenWebRX, a software-defined radio (SDR) receiver that allows me to listen to radio signals with the connected SDR device and it is publicly accessible. 
     Finally, it also hosts this website, making it a versatile home server.</p>
 
-<p>My server doesn't have a public IPv4 address because my internet plan uses DS-Lite. 
-  However, my ISP does provide a public IPv6 address, so I use that instead.
-To make the server publicly reachable over IPv6, I added an AAAA record for my domain leviserver.eu pointing directly to my home server's public IPv6 address. 
-On the server I run nginx as a reverse proxy, which listens on port 80 and routes incoming traffic to the correct service based on the subdomain. 
-This allows me to host multiple services on the same server and access them via subdomains like ishir.leviserver.eu for my website. test </p>
+<p>My internet plan uses DS-Lite I don't have a public IPv4 address, so I can't expose my server directly to the internet.
+To solve this, I connected my home server to an AWS EC2 instance using Tailscale, which creates a private encrypted tunnel between the two machines.
+All the A records for the domain and subdomains point to the EC2's public IPv4, so all traffic enters through the EC2 first.
+The EC2 runs nginx on port 80, and depending on the subdomain used (like ishir. or sdr.), it proxies the request through the Tailscale tunnel to the correct port on my home server where the relevant service is running.
+For SSH and Telnet access, socat runs on the EC2 to forward those connections on specific ports directly to my home server's Tailscale IP.
+Finally, the home server has a script that pulls the latest code from my private GitHub repository every 30 seconds, 
+meaning I can push changes from any device with access to the repository and the changes go live almost instantly without needing to manually restart anything or even accessing the server.</p>
 
 </section>
-<p>test test hi!</p>
 </body>
 </html>
