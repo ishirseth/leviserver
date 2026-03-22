@@ -12,7 +12,7 @@ lock = threading.Lock()
 def handle_client(conn, addr):
     clients.append(addr)
     global addnum
-    conn.sendall(b"~Welcome to my Telnet Server!\r\n")
+    conn.sendall(b"~Welcome to Ishir's Telnet Server!\r\n")
     buf = ""
 
     try:
