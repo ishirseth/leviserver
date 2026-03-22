@@ -53,7 +53,7 @@ def handle_client(conn, addr):
                         if argument:
                             resp = b"~Unwanted argument\r\n"
                         else:
-                            resp = b"~Commands: help, levi, add <num>, clrnum, echo <msg>, who, whoami, prime<arg>, exit\r\n"
+                            resp = b"~Commands: help, levi, add <num>, clr, echo <msg>, who, whoami, prime <arg>, exit\r\n"
 
                     elif command == "echo":
                         if not argument or not echo:
@@ -71,7 +71,7 @@ def handle_client(conn, addr):
                         if argument:
                             resp = b"~Unwanted argument\r\n"
                         else:
-                            resp = f"~{len(clients)} clients connected\r\n".encode()
+                            resp = f"~{len(clients)} client/s connected\r\n".encode()
 
                     elif command == "prime":
                         if not argument:
