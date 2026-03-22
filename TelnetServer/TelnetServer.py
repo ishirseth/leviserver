@@ -4,74 +4,145 @@ import threading
 
 HOST = "0.0.0.0"
 PORT = 1437
+clients = []
 
-# Shared state for addition mode
-add = 0
 addnum = 0
-lock = threading.Lock()  # to safely modify add/addnum across clients
+lock = threading.Lock()
 
 def handle_client(conn, addr):
-    global add, addnum
-    print("~Connection from", addr)
+    clients.append(addr)
+    global addnum
     conn.sendall(b"~Welcome to Ishir's Telnet Server!\r\n")
-
-    buffer = ""  # buffer for line input
+    buf = ""
 
     try:
         while True:
-            data = conn.recv(1).decode(errors='ignore')
-            if not data:  # client disconnected
-                print(f"~Client disconnected: {addr}")
+            print (f"{clients}")
+            ch = conn.recv(1).decode(errors="ignore")
+            if not ch:
                 break
 
-            if data in ("\n", "\r"):  # Enter pressed
-                message = buffer.strip()
-                print(f"~Client {addr}: {message}")
-                buffer = ""  # reset buffer
+            if ch in "\r\n":
+                msg = buf.strip()
+                buf = ""
 
-                response = b""
+                parts = msg.split()
+                command = parts[0] if parts else "" # Handle empty input gracefully
+                argument = parts[1] if len(parts) > 1 else "" # Handle missing argument gracefully
+                echo = " ".join(parts[1:])
+
+                print(f"~{addr}: {msg}")
+                resp = b""
+
 
                 with lock:
-                    # Existing logic
-                    if message.lower() == "levi" and add == 0:
-                        response = b"~Yay, Levi!\r\n"
-                    elif message.lower() == "add" and add == 0:
-                        response = b"~Addition\r\n"
-                        add = 1
-                    elif message.lower() == "noadd" and add == 1:
-                        response = b"~No Addition\r\n"
-                        add = 0
-                    if add == 1:
-                        if message.isdigit():
-                            addnum += int(message)
-                            response = f"~{addnum}\r\n".encode()
-                        elif message.lower() == "clrnum":
-                            addnum = 0
-                            response = b"~Cleared\r\n"
-                        elif message.isalpha() and message.lower() != "add" and message.lower() != "clrnum":
-                            response = b"~Not a number\r\n"
-                    elif message.lower() == "exit":
-                        response = b"~Goodbye!\r\n"
-                        conn.sendall(response)
-                        break
+                    if command == "exit":
+                        if argument:
+                            resp = b"~Unwanted argument\r\n"
+                        else:
+                            conn.sendall(b"~Goodbye!\r\n")
+                            return
 
-                if response:
-                    conn.sendall(response)
+                    elif command == "levi":
+                        if argument:
+                            resp = b"~Unwanted argument\r\n"
+                        else:
+                            resp = b"~Yay, Levi!\r\n"
+
+                    elif command == "help":
+                        if argument:
+                            resp = b"~Unwanted argument\r\n"
+                        else:
+                            resp = b"~Commands: help, levi, add <num>, clrnum, echo <msg>, who, whoami, prime<arg>, exit\r\n"
+
+                    elif command == "echo":
+                        if not argument or not echo:
+                            resp = b"~Missing argument\r\n"
+                        else:
+                            resp = f"~{echo}\r\n".encode()
+
+                    elif command == "whoami":
+                        if argument:
+                            resp = b"~Unwanted argument\r\n"
+                        else:
+                            resp = f"~You are {addr[0]}:{addr[1]}\r\n".encode()
+                    
+                    elif command == "who":
+                        if argument:
+                            resp = b"~Unwanted argument\r\n"
+                        else:
+                            resp = f"~{len(clients)} clients connected\r\n".encode()
+
+                    elif command == "prime":
+                        if not argument:
+                            resp = b"~Missing argument\r\n"
+                        elif int(argument) > 1000000000000:
+                            resp = b"~Argument is too large\r\n"
+                        elif int(argument) < 0:
+                            resp = b"~Argument is not a positive number\r\n"
+                        elif argument.isdigit():
+                            n = int(argument)
+                            if n < 2:
+                                resp = b"~Not prime\r\n"
+                            else:
+                                for i in range(2, int(n**0.5) + 1):
+                                    if n % i == 0:
+                                        resp = b"~Not prime\r\n"
+                                        break
+                                else:
+                                    resp = b"~Prime\r\n"
+                        else:
+                            resp = b"~Argument is not a number\r\n"
+
+                    elif command == "add":
+                        if not argument:
+                            resp = b"~Missing argument\r\n"
+                        elif argument.isdigit():
+                            addnum = addnum + int(argument)
+                            resp = f"~{addnum}\r\n".encode()
+                        else:
+                            resp = b"~Argument is not a number\r\n"
+
+                    elif command == "clr":
+                        if argument:
+                            resp = b"~Unwanted argument\r\n"
+                        else:
+                            addnum = 0
+                            resp = b"~Cleared\r\n"
+
+                    elif command:
+                        resp = b"~Unknown command\r\n"
+
+
+                if resp:
+                    conn.sendall(resp)
+
+
+            elif ch == "\x08":  # backspace - terminal already moved cursor back
+                if buf:
+                    buf = buf[:-1]
+                    conn.sendall(b" \x08")  # just overwrite with space and stay
+            elif ch == "\x7f":  # delete
+                if buf:
+                    buf = buf[:-1]
+                    conn.sendall(b"\x08 \x08")
 
             else:
-                buffer += data  # accumulate character
+                buf += ch
 
     except Exception as e:
-        print(f"~Error with client {addr}: {e}")
+        print(f"~Error {addr}: {e}")
     finally:
+        clients.remove(addr)
         conn.close()
+        print(f"~Disconnected: {addr}")
 
 def main():
-    with socket.socket(socket.AF_INET6, socket.SOCK_STREAM) as server:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
         server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        server.bind(("::", PORT))
+        server.bind((HOST, PORT))
         server.listen()
-        print(f"~Telnet server listening on {PORT}")
+        print(f"~Listening on {PORT}")
         while True:
             conn, addr = server.accept()
             threading.Thread(target=handle_client, args=(conn, addr), daemon=True).start()
