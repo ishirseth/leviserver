@@ -7,7 +7,7 @@ HOST = "0.0.0.0"
 PORT = 1437
 clients = []
 
-jsonpath = "TelnetServer/saveddata.json"
+jsonpath = "saveddata.json"
 with open(jsonpath, "r") as f:
     saveddata = json.load(f)
 userdata = {}
