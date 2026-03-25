@@ -7,7 +7,7 @@ HOST = "0.0.0.0"
 PORT = 1437
 clients = []
 
-jsonpath = "saveddata.json"
+jsonpath = "TelnetServer/saveddata.json"
 with open(jsonpath, "r") as f:
     saveddata = json.load(f)
 userdata = {}
@@ -141,6 +141,8 @@ def cmd_who(argument):
 def cmd_prime(argument):
     if not argument:
         return b"~Missing argument\r\n"
+    elif argument < 0:
+        return b"~Argument is negative\r\n"
     elif not argument.isdigit():
         return b"~Argument is not a number\r\n"
     elif int(argument) > 1000000000000:
