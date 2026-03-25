@@ -3,6 +3,8 @@ import socket
 import threading
 import json
 
+from torch import addr
+
 HOST = "0.0.0.0"
 PORT = 1437
 clients = []
@@ -22,6 +24,13 @@ def is_logged_in(username):
             return True
     return False
 
+def find_port_by_username(username):
+    for port, data in userdata.items():
+        if data.get("username") == username:
+            return port
+    return None
+
+
 # Command functions
 
 def cmd_exit(conn, addr, argument):
@@ -32,7 +41,7 @@ def cmd_exit(conn, addr, argument):
         return None  # signals to break
 
 def cmd_login(addr, argument):
-    if "username" in userdata[addr[1]]:
+    if userdata[addr[1]]['save'] == True:
         return f"~Already logged in under: {userdata[addr[1]]['username']}\r\n".encode()
     elif argument:
         if is_logged_in(argument):
@@ -43,10 +52,22 @@ def cmd_login(addr, argument):
             return f"~Account created and logged in under: {argument}\r\n".encode()
         else:
             userdata[addr[1]] = saveddata[argument]
+            userdata[addr[1]]['username'] = argument
             userdata[addr[1]]['save'] = True
             return f"~Welcome back, {argument}!\r\n".encode()
     else:
         return b"~Missing username\r\n"
+    
+def cmd_logout(addr, argument):
+    if not argument:
+        if userdata[addr[1]]['save'] == True:
+            userdata[addr[1]]["username"] = ""
+            userdata[addr[1]]["save"] = False
+            return b"~Logged out\r\n"
+        else:
+            return b"~Already logged out\r\n"
+    else:
+        return b"~Unwanted argument\r\n"
 
 def cmd_levi(argument):
     if argument:
@@ -56,17 +77,63 @@ def cmd_levi(argument):
 def cmd_help(argument):
     if argument:
         return b"~Unwanted argument\r\n"
-    return b"~Commands: help, levi, login <username>, add <num>, clradd, echo <msg>, who, whoami, prime <arg>, note <msg>, clrnote <num>, notes, exit\r\n"
+    return b"~Commands: help, levi, login <username>, logout, add <num>, clradd, echo <msg>, who, whoami, message <user> <msg>, inbox, clrinbox, prime <arg>, note <msg>, clrnote <num>, notes, exit\r\n"
 
 def cmd_echo(argument, echo):
     if not argument or not echo:
         return b"~Missing argument\r\n"
     return f"~{echo}\r\n".encode()
 
+def cmd_message(addr, argument, message):
+    if not argument:
+        return b"~Missing user\r\n"
+    else:
+        target_port = find_port_by_username(argument)
+        sender = userdata[addr[1]]["username"]
+
+        if argument in saveddata and target_port is None:
+            if userdata[addr[1]]["save"] == True:
+                saveddata[argument]["messages"].append(f"From {sender}: {message}")
+            elif userdata[addr[1]]["save"] == False:
+                saveddata[argument]["messages"].append(f"From {addr[1]}: {message}")
+            with open(jsonpath, "w") as f: #save data to json
+                json.dump(saveddata, f)
+            return f"~Message sent to {argument}\r\n".encode()
+        elif target_port is None:
+            return b"~User not found\r\n"
+        else:
+            if userdata[addr[1]]["save"] == True:
+                userdata[target_port]["messages"].append(f"From {sender}: {message}")
+            elif userdata[addr[1]]["save"] == False:
+                userdata[target_port]["messages"].append(f"From {addr[1]}: {message}")
+            return f"~Message sent to {argument}\r\n".encode()
+
+def cmd_inbox(addr, argument):
+    if argument:
+        return b"~Unwanted argument\r\n"
+    else:
+        messages = userdata[addr[1]]["messages"]
+        if not messages:
+            return b"~No messages\r\n"
+        else:
+            response = ("~Inbox:\r\n" + "".join(f"~  {i+1}. {msg}\r\n" for i, msg in enumerate(userdata[addr[1]]["messages"])))
+            return response.encode()
+        
+def cmd_clrinbox(addr, argument):
+    if argument:
+        return b"~Unwanted argument\r\n"
+    else:
+        userdata[addr[1]]["messages"] = [] # clear messages
+        return b"~Inbox cleared\r\n"
+
 def cmd_whoami(addr, argument):
     if argument:
         return b"~Unwanted argument\r\n"
-    return f"~You are {addr[0]}:{addr[1]}\r\n".encode()
+    elif userdata[addr[1]]['save'] == False:
+        return f"~You are {addr[0]}:{addr[1]}\r\n".encode()
+    else:
+        return f"~You are {addr[0]}:{addr[1]} with the username: {userdata[addr[1]]['username']}\r\n".encode()
+
 
 def cmd_who(argument):
     if argument:
@@ -135,14 +202,15 @@ def handle_client(conn, addr):
     conn.sendall(b"~Welcome to Ishir's Telnet Server!\r\n")
     conn.sendall(b"~Type 'help' for a list of commands.\r\n")
     conn.sendall(b"~Login to have your data saved for the next time you connect.\r\n")
-    buf = ""
-    userdata[addr[1]] = {"addnum": 0, "notes": []}
 
+    buf = ""
+    userdata[addr[1]] = {"addnum": 0, "notes": [], "username": "", "save": False, "messages": []} # initialize userdata for this client
 
 
 
     try:
         while True:
+            print(userdata[addr[1]])
             ch = conn.recv(1).decode(errors="ignore")
             if not ch:
                 break
@@ -154,10 +222,12 @@ def handle_client(conn, addr):
                 parts = msg.split()
                 command = parts[0] if parts else ""
                 argument = parts[1] if len(parts) > 1 else ""
+
+
                 echo = " ".join(parts[1:])
                 note = " ".join(parts[1:])
+                message = " ".join(parts[2:])
 
-                print(f"~{addr}: {msg}")
                 resp = b""
 
                 with lock:
@@ -167,12 +237,20 @@ def handle_client(conn, addr):
                             return
                     elif command == "login":
                         resp = cmd_login(addr, argument)
+                    elif command == "logout":
+                        resp = cmd_logout(addr, argument)
                     elif command == "levi":
                         resp = cmd_levi(argument)
                     elif command == "help":
                         resp = cmd_help(argument)
                     elif command == "echo":
                         resp = cmd_echo(argument, echo)
+                    elif command == "message":
+                        resp = cmd_message(addr, argument, message)
+                    elif command == "inbox":
+                        resp = cmd_inbox(addr, argument)
+                    elif command == "clrinbox":
+                        resp = cmd_clrinbox(addr, argument)
                     elif command == "whoami":
                         resp = cmd_whoami(addr, argument)
                     elif command == "who":
