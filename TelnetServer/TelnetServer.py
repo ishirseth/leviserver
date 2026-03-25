@@ -3,8 +3,6 @@ import socket
 import threading
 import json
 
-from torch import addr
-
 HOST = "0.0.0.0"
 PORT = 1437
 clients = []
