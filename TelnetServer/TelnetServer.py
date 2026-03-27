@@ -2,6 +2,7 @@
 import socket
 import threading
 import json
+import subprocess
 
 HOST = "0.0.0.0"
 PORT = 1437
@@ -72,10 +73,20 @@ def cmd_levi(argument):
         return b"~Unwanted argument\r\n"
     return b"~Yay, Levi!\r\n"
 
+def cmd_ascii(argument):
+    if argument:
+        if len(argument) != 1:
+            return b"~Argument must be a single character\r\n"
+        else: 
+            result = subprocess.run(['./asm/ascii', argument])
+        return f"~ASCII assembly program exited with code: {result.returncode}\r\n".encode()
+    else:
+        return b"~Missing argument\r\n"
+
 def cmd_help(argument):
     if argument:
         return b"~Unwanted argument\r\n"
-    return b"~Commands: help, levi, login <username>, logout, add <num>, clradd, echo <msg>, who, whoami, message <user> <msg>, inbox, clrinbox, prime <arg>, note <msg>, clrnote <num>, notes, exit\r\n"
+    return b"~Commands: help, levi, ascii <char>, login <username>, logout, add <num>, clradd, echo <msg>, who, whoami, message <user> <msg>, inbox, clrinbox, prime <num>, note <msg>, clrnote <num>, notes, exit\r\n"
 
 def cmd_echo(argument, echo):
     if not argument or not echo:
@@ -241,6 +252,8 @@ def handle_client(conn, addr):
                         resp = cmd_logout(addr, argument)
                     elif command == "levi":
                         resp = cmd_levi(argument)
+                    elif command == "ascii":
+                        resp = cmd_ascii(argument)
                     elif command == "help":
                         resp = cmd_help(argument)
                     elif command == "echo":
