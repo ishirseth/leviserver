@@ -207,6 +207,10 @@ def cmd_clrnote(addr, argument):
         del userdata[addr[1]]["notes"][int(argument) - 1]
         return f"~Note {argument} cleared\r\n".encode()
 
+def cmd_move():
+    return f"~You are at coordinates ({userdata[addr[1]]['move']['x']}, {userdata[addr[1]]['move']['y']})\r\n".encode()
+
+
 def handle_client(conn, addr):
     clients.append(addr)
     conn.sendall(b"~Welcome to Ishir's Telnet Server!\r\n")
@@ -214,7 +218,7 @@ def handle_client(conn, addr):
     conn.sendall(b"~Login to have your data saved for the next time you connect.\r\n")
 
     buf = ""
-    userdata[addr[1]] = {"addnum": 0, "notes": [], "username": "", "save": False, "messages": []} # initialize userdata for this client
+    userdata[addr[1]] = {"addnum": 0, "notes": [], "username": "", "save": False, "messages": [], "move": {"move": False, "x": 0, "y": 0}} # initialize userdata for this client
 
 
 
@@ -229,58 +233,78 @@ def handle_client(conn, addr):
                 msg = buf.strip()
                 buf = ""
 
+
                 parts = msg.split()
                 command = parts[0] if parts else ""
                 argument = parts[1] if len(parts) > 1 else ""
-
 
                 echo = " ".join(parts[1:])
                 note = " ".join(parts[1:])
                 message = " ".join(parts[2:])
 
                 resp = b""
-
                 with lock:
-                    if command == "exit":
-                        resp = cmd_exit(conn, addr, argument)
-                        if resp is None:
-                            return
-                    elif command == "login":
-                        resp = cmd_login(addr, argument)
-                    elif command == "logout":
-                        resp = cmd_logout(addr, argument)
-                    elif command == "levi":
-                        resp = cmd_levi(argument)
-                    elif command == "ascii":
-                        resp = cmd_ascii(argument)
-                    elif command == "help":
-                        resp = cmd_help(argument)
-                    elif command == "echo":
-                        resp = cmd_echo(argument, echo)
-                    elif command == "message":
-                        resp = cmd_message(addr, argument, message)
-                    elif command == "inbox":
-                        resp = cmd_inbox(addr, argument)
-                    elif command == "clrinbox":
-                        resp = cmd_clrinbox(addr, argument)
-                    elif command == "whoami":
-                        resp = cmd_whoami(addr, argument)
-                    elif command == "who":
-                        resp = cmd_who(argument)
-                    elif command == "prime":
-                        resp = cmd_prime(argument)
-                    elif command == "add":
-                        resp = cmd_add(addr, argument)
-                    elif command == "clradd":
-                        resp = cmd_clradd(addr, argument)
-                    elif command == "note":
-                        resp = cmd_note(addr, note)
-                    elif command == "clrnote":
-                        resp = cmd_clrnote(addr, argument)
-                    elif command == "notes":
-                        resp = cmd_notes(addr, argument)
-                    elif command:
-                        resp = b"~Unknown command\r\n"
+                    if userdata[addr[1]]["move"]["move"] == False:
+                        if command == "exit":
+                            resp = cmd_exit(conn, addr, argument)
+                            if resp is None:
+                                return
+                        elif command == "login":
+                            resp = cmd_login(addr, argument)
+                        elif command == "logout":
+                            resp = cmd_logout(addr, argument)
+                        elif command == "levi":
+                            resp = cmd_levi(argument)
+                        elif command == "ascii":
+                            resp = cmd_ascii(argument)
+                        elif command == "help":
+                            resp = cmd_help(argument)
+                        elif command == "echo":
+                            resp = cmd_echo(argument, echo)
+                        elif command == "message":
+                            resp = cmd_message(addr, argument, message)
+                        elif command == "inbox":
+                            resp = cmd_inbox(addr, argument)
+                        elif command == "clrinbox":
+                            resp = cmd_clrinbox(addr, argument)
+                        elif command == "whoami":
+                            resp = cmd_whoami(addr, argument)
+                        elif command == "who":
+                            resp = cmd_who(argument)
+                        elif command == "prime":
+                            resp = cmd_prime(argument)
+                        elif command == "add":
+                            resp = cmd_add(addr, argument)
+                        elif command == "clradd":
+                            resp = cmd_clradd(addr, argument)
+                        elif command == "note":
+                            resp = cmd_note(addr, note)
+                        elif command == "clrnote":
+                            resp = cmd_clrnote(addr, argument)
+                        elif command == "notes":
+                            resp = cmd_notes(addr, argument)
+                        elif command == "move":
+                            userdata[addr[1]]["move"]["move"] = True  
+                        elif command:
+                            resp = b"~Unknown command\r\n"
+
+                    elif userdata[addr[1]]["move"]["move"] == True:
+                        if ch == "d":
+                            userdata[addr[1]]["move"]["x"] += 1
+                        elif ch == "a":
+                            userdata[addr[1]]["move"]["x"] -= 1
+                        elif ch == "w":
+                            userdata[addr[1]]["move"]["y"] -= 1
+                        elif ch == "s":
+                            userdata[addr[1]]["move"]["y"] += 1
+                        elif ch == "q":
+                            userdata[addr[1]]["move"]["move"] = False
+                            conn.sendall(b"~Exited move mode\r\n")
+                            continue
+                        conn.sendall(b"\x1b[2J\x1b[H")
+                        conn.sendall(f"~Position: ({userdata[addr[1]]['move']['x']}, {userdata[addr[1]]['move']['y']})\r\n".encode())
+                        conn.sendall(f"{buf}\r\n".encode())
+                        continue
 
                 if userdata[addr[1]].get('save') == True:
                     saveddata[userdata[addr[1]]['username']] = userdata[addr[1]]
