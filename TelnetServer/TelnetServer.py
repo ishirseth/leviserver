@@ -100,7 +100,7 @@ def cmd_message(addr, argument, message):
         target_port = find_port_by_username(argument)
         sender = userdata[addr[1]]["username"]
 
-        if argument in saveddata and target_port is None:
+        if argument in saveddata:
             if userdata[addr[1]]["save"] == True:
                 saveddata[argument]["messages"].append(f"From {sender}: {message}")
             elif userdata[addr[1]]["save"] == False:
@@ -110,18 +110,13 @@ def cmd_message(addr, argument, message):
             return f"~Message sent to {argument}\r\n".encode()
         elif target_port is None:
             return b"~User not found\r\n"
-        else:
-            if userdata[addr[1]]["save"] == True:
-                userdata[target_port]["messages"].append(f"From {sender}: {message}")
-            elif userdata[addr[1]]["save"] == False:
-                userdata[target_port]["messages"].append(f"From {addr[1]}: {message}")
-            return f"~Message sent to {argument}\r\n".encode()
+
 
 def cmd_inbox(addr, argument):
     if argument:
         return b"~Unwanted argument\r\n"
     else:
-        messages = userdata[addr[1]]["messages"]
+        messages = saveddata[addr[1]['username']]["messages"]
         if not messages:
             return b"~No messages\r\n"
         else:
