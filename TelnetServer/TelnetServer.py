@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from email import message
 import socket
 import threading
 import json
@@ -9,8 +10,6 @@ PORT = 1437
 clients = []
 
 jsonpath = "saveddata.json"
-with open(jsonpath, "r") as f:
-    saveddata = json.load(f)
 userdata = {}
 
 lock = threading.Lock()
@@ -40,6 +39,7 @@ def cmd_exit(conn, addr, argument):
         return None  # signals to break
 
 def cmd_login(addr, argument):
+    global saveddata
     if userdata[addr[1]]['save'] == True:
         return f"~Already logged in under: {userdata[addr[1]]['username']}\r\n".encode()
     elif argument:
@@ -53,6 +53,10 @@ def cmd_login(addr, argument):
             userdata[addr[1]] = saveddata[argument]
             userdata[addr[1]]['username'] = argument
             userdata[addr[1]]['save'] = True
+
+            with open(jsonpath, "r") as f: # reload saved data from json to get any updates since last load
+                saveddata = json.load(f)
+
             return f"~Welcome back, {argument}!\r\n".encode()
     else:
         return b"~Missing username\r\n"
@@ -95,11 +99,14 @@ def cmd_echo(argument, echo):
 
 def cmd_message(addr, argument, message):
     if not argument:
-        return b"~Missing user\r\n"
-    else:
-        target_port = find_port_by_username(argument)
-        sender = userdata[addr[1]]["username"]
+        return b"~Missing user\r\n" 
+    if not message:
+        return b"~Missing message\r\n"
+    
+    sender = userdata[addr[1]]["username"] if userdata[addr[1]]["save"] else str(addr[1])
+    target_port = find_port_by_username(argument)
 
+<<<<<<< HEAD
         if argument in saveddata:
             if userdata[addr[1]]["save"] == True:
                 saveddata[argument]["messages"].append(f"From {sender}: {message}")
@@ -111,10 +118,21 @@ def cmd_message(addr, argument, message):
         elif target_port is None:
             return b"~User not found\r\n"
 
+=======
+    if argument not in saveddata:
+        return b"~User not found\r\n"
+
+    if target_port:
+        userdata[target_port]["messages"].append(f"From {sender}: {message}")
+    else:
+        saveddata[argument]["messages"].append(f"From {sender}: {message}")
+    return f"~Message sent to {argument}\r\n".encode()
+>>>>>>> 5e278b691e2c8681cbe0740a99332f96815d7f9a
 
 def cmd_inbox(addr, argument):
     if argument:
         return b"~Unwanted argument\r\n"
+<<<<<<< HEAD
     else:
         messages = saveddata[addr[1]['username']]["messages"]
         if not messages:
@@ -122,6 +140,16 @@ def cmd_inbox(addr, argument):
         else:
             response = ("~Inbox:\r\n" + "".join(f"~  {i+1}. {msg}\r\n" for i, msg in enumerate(userdata[addr[1]]["messages"])))
             return response.encode()
+=======
+    if not userdata[addr[1]]["save"]:
+        return b"~You must be logged in to view inbox\r\n"
+    
+    messages = userdata[addr[1]]["messages"]
+    if not messages:
+        return b"~No messages\r\n"
+    
+    return ("~Inbox:\r\n" + "".join(f"~  {i+1}. {msg}\r\n" for i, msg in enumerate(messages))).encode()
+>>>>>>> 5e278b691e2c8681cbe0740a99332f96815d7f9a
         
 def cmd_clrinbox(addr, argument):
     if argument:
