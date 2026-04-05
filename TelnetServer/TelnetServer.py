@@ -112,8 +112,7 @@ def cmd_message(addr, argument, message):
     sender = userdata[addr[1]]["username"] if userdata[addr[1]]["save"] else str(addr[1])
     target_port = find_port_by_username(argument)
 
-<<<<<<< HEAD
-        if argument in saveddata:
+    if argument in saveddata:
             if userdata[addr[1]]["save"] == True:
                 saveddata[argument]["messages"].append(f"From {sender}: {message}")
             elif userdata[addr[1]]["save"] == False:
@@ -121,24 +120,13 @@ def cmd_message(addr, argument, message):
             with open(jsonpath, "w") as f: #save data to json
                 json.dump(saveddata, f)
             return f"~Message sent to {argument}\r\n".encode()
-        elif target_port is None:
-            return b"~User not found\r\n"
-
-=======
-    if argument not in saveddata:
+    elif target_port is None:
         return b"~User not found\r\n"
 
-    if target_port:
-        userdata[target_port]["messages"].append(f"From {sender}: {message}")
-    else:
-        saveddata[argument]["messages"].append(f"From {sender}: {message}")
-    return f"~Message sent to {argument}\r\n".encode()
->>>>>>> 5e278b691e2c8681cbe0740a99332f96815d7f9a
 
 def cmd_inbox(addr, argument):
     if argument:
         return b"~Unwanted argument\r\n"
-<<<<<<< HEAD
     else:
         messages = saveddata[addr[1]['username']]["messages"]
         if not messages:
@@ -146,16 +134,6 @@ def cmd_inbox(addr, argument):
         else:
             response = ("~Inbox:\r\n" + "".join(f"~  {i+1}. {msg}\r\n" for i, msg in enumerate(userdata[addr[1]]["messages"])))
             return response.encode()
-=======
-    if not userdata[addr[1]]["save"]:
-        return b"~You must be logged in to view inbox\r\n"
-    
-    messages = userdata[addr[1]]["messages"]
-    if not messages:
-        return b"~No messages\r\n"
-    
-    return ("~Inbox:\r\n" + "".join(f"~  {i+1}. {msg}\r\n" for i, msg in enumerate(messages))).encode()
->>>>>>> 5e278b691e2c8681cbe0740a99332f96815d7f9a
         
 def cmd_clrinbox(addr, argument):
     if argument:
