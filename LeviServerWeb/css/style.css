@@ -131,6 +131,16 @@ p {
   margin-right: 20px;
 }
 
+.project-div--center {
+  justify-content: center;
+}
+
+.project-video {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
 .levi {
   border-radius: 5px;
   width: 250px;
@@ -191,6 +201,12 @@ p {
   .project-img--big {
     width: 100%;
     margin: 0 0 12px 0;
+  }
+
+  .video-frame {
+  border-radius: 12px;
+  overflow: hidden;
+  display: inline-block;
   }
 
   .levi {
