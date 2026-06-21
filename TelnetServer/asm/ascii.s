@@ -1,10 +1,10 @@
-.intel_syntax noprefix
-.global _start
+global _start
 
-.section .text
+section .text
+
 _start:
-    mov rbx, [rsp + 16]        # rbx = pointer to argv[1]
-    movzx rdi, byte ptr [rbx]  # rdi = first byte
+    mov rbx, [rsp + 16]     ; argv[1]
+    movzx rdi, byte [rbx]   ; first character
 
-    mov rax, 60                # sys_exit
+    mov rax, 60             ; sys_exit
     syscall

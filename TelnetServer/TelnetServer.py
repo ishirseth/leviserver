@@ -128,7 +128,7 @@ def cmd_inbox(addr, argument):
     if argument:
         return b"~Unwanted argument\r\n"
     else:
-        messages = saveddata[addr[1]['username']]["messages"]
+        messages = saveddata[userdata[addr[1]]["username"]]["messages"]
         if not messages:
             return b"~No messages\r\n"
         else:
