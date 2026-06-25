@@ -12,8 +12,6 @@ start:
 
 main:
     call read_key       ; AL now holds the typed character
-    cmp al, 0x0D        ; is it Enter (carriage return)?
-    je enter_pressed
 
     call print_char
     jmp main
@@ -29,6 +27,10 @@ print:
     jmp print
 .done:
     ret
+print_char:
+    mov ah, 0x0E
+    int 0x10
+    ret
 
 new_line:
     mov ah, 0x03        ; get current cursor position
@@ -43,14 +45,14 @@ new_line:
     int 0x10
     ret
 
-print_char:
-    mov ah, 0x0E
-    int 0x10
-    ret
-
 read_key:
     mov ah, 0x00
     int 0x16
+
+    cmp al, 0x0D        ; is it Enter (carriage return)?
+    je enter_pressed
+    cmp al, 0x08        ; is it Backspace
+    je backspace
     cmp al, 0x0D
     je .no_store
     call store_char
@@ -68,6 +70,14 @@ enter_pressed:
     call clear_command
     call new_line
     jmp main
+backspace:
+    mov al, ' '
+    call print_char
+    mov al, 0x08
+    call print_char
+
+
+
 
 clear_command:
     mov di, command
@@ -98,13 +108,11 @@ check_test:
     inc si
     inc di
     jmp .compare_loop
-
 .equal:
     mov si, test_str
     call new_line
     call print
     ret
-
 .not_equal:
     mov si, command
     mov al, "-"
