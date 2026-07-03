@@ -141,6 +141,26 @@ p {
     display: block;
 }
 
+.audio-container {
+  display: flex;
+  justify-content: center; 
+  align-items: center;    
+  gap: 30px;              
+  flex-wrap: wrap;
+  margin: 20px auto;  
+}
+
+.audio-item {
+  text-align: center;
+  font-family: sans-serif;
+}
+  
+.audio-item p {
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: var(--text-color);
+}
+
 .levi {
   border-radius: 5px;
   width: 250px;
