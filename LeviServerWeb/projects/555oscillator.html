@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project 1</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<div id="navbar"></div>
+<script src="/js/nav.js"></script>
+
+
+<section>
+<h2>555 Audio Oscillator</h2>
+
+<div class="project-div project-div--right">
+  <img src="../images/555Oscillator.jpeg" alt="555 Oscillator" class="project-img project-img--right project-img">
+  <div>
+    <p>
+      This project uses an NE555 timer chip configured in astable mode to create an audible sound with a variable frequency. 
+      By turning the potentiometer, you can sweep the output from a low-pitch square wave to a high-pitch square wave. 
+      The output is connected to a passive piezo speaker and the circuit is powered by 5V and the circuit is controlled with a button.
+    </p>
+  </div>
+  </div>
+
+<div class="audio-container">
+  <div class="audio-item">
+    <p>Low Frequency (min)</p>
+    <audio controls src="../audio/555OscillatorLow.mp4"></audio>
+  </div>
+  
+  <div class="audio-item">
+    <p>High Frequency (max)</p>
+    <audio controls src="../audio/555OscillatorHigh.mp4"></audio>
+  </div>
+</div>
+
+<div class="project-div">
+  <img src="../images/555OscillatorSchematic.png" alt="Schematic" class="project-img project-img--left project-img">
+  <div>
+    <p>
+      This is the diagram for the NE555 Oscillator circuit. 
+      At its core, the chip acts like a voltage-controlled seesaw, constantly monitoring the external capacitor (0.22µF) as it charges through the resistors 
+      (the 120-ohm resistor which limits the minimum resistance of the potentiometer and 10k potentiometer for controlling it) and discharges through the 555's discharge pin. 
+      When the capacitor's voltage climbs to two-thirds of the 5V supply, the 555's internal comparators flip the output pin HIGH and the discharge pin gets connected to ground discharging the capacitor; 
+      as soon as the capacitor drains down to one-third, the chip flips the output LOW and disconnects the discharge pin from ground which charges the capacitor again, resetting the cycle. 
+      This creates an electrical square wave which goes through the button, then through a capacitor (100µF) which removes any DC component keeping only the alternating signal
+      and then this goes to the piezo buzzer which draws little current because of its high impedance. 
+  </div>
+  </div>
+
+
+</section>
+</body>
+</html>
