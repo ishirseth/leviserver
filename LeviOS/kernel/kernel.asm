@@ -12,7 +12,6 @@ start:
 
 main:
     call read_key       ; AL now holds the typed character
-
     call print_char
     jmp main
 
@@ -49,80 +48,116 @@ read_key:
     mov ah, 0x00
     int 0x16
 
-    cmp al, 0x0D        ; is it Enter (carriage return)?
-    je enter_pressed
-    cmp al, 0x08        ; is it Backspace
-    je backspace
-    cmp al, 0x0D
-    je .no_store
-    call store_char
+    cmp al, 0x0D          ; Enter?
+    je .enter_pressed
+    cmp al, 0x08          ; Backspace?
+    je .backspace
+    cmp al, 0x20          ; Space?
+    je .space_pressed
+    
+    ; Otherwise, store the char
+    call .store_char
+    ret
+
+.space_pressed:
+    cmp byte [space_pressed_flag], 1 ; Check if already switched
+    je .done                         ; If 1, ignore the space
+    
+    mov byte [space_pressed_flag], 1 ; Set flag to "switched"
+    mov word [active_ptr], value     ; Switch to value buffer
+    mov word [current_offset], 0     ; Reset offset
+.done:
+    call .store_char
+    ret
+.enter_pressed:
+    call parse_input
+    call clear_input
+    call new_line
+    jmp main
+.backspace:
+    ret
+
 .no_store:
     ret
 
-store_char:
-    mov [di], al
-    inc di
-    mov byte [di], 0
+.store_char:
+    mov di, [active_ptr]      ; Load the address of the active buffer
+    
+    mov bx, [current_offset]
+    mov [di + bx], al         ; Store character
+    inc bx
+    mov [current_offset], bx
+    mov byte [di + bx], 0     ; Null terminate
     ret
 
-enter_pressed:
-    call check_test
-    call clear_command
-    call new_line
-    jmp main
-backspace:
-    mov al, ' '
-    call print_char
-    mov al, 0x08
-    call print_char
 
 
 
 
-clear_command:
-    mov di, command
-    mov cx, 64
+clear_input:
+    mov di, command        ; Start at the beginning of the command buffer
+    mov cx, 64             ; Total size of both buffers (32+32)
     xor al, al
-.clear_loop:
-    mov [di], al
-    inc di
-    loop .clear_loop
+    rep stosb              ; Efficiently clears the memory in one go
+    
+    ; Reset the state variables so we are ready for the next command
+    mov word [active_ptr], command
+    mov word [current_offset], 0
+    mov byte [space_pressed_flag], 0
+    
+    ret                    ; Now it correctly returns here
 
-    mov di, command
-    ret
 
-check_test:
+parse_input:
     mov si, command
-    mov di, test_command
+    mov di, levi_command
+    call .compare_loop
+    je .levi_function          ; Jump if the strings matched
 
+    mov si, command
+    mov di, echo_command
+    call .compare_loop
+    je .echo_function          ; Jump if the strings matched
+
+    ret              ; Return if no match found (not_equal)
 .compare_loop:
     mov al, [si]
     mov bl, [di]
-
     cmp al, bl
-    jne .not_equal
-
-    cmp al, 0          ; if both are 0, we've reached the end of both strings - match!
-    je .equal
-
+    jne .done        ; Mismatch: ZF=0
+    cmp al, 0        ; End of string: ZF=1
+    je .done
     inc si
     inc di
     jmp .compare_loop
-.equal:
-    mov si, test_str
+.done:
+    ret
+
+.levi_function:
+    mov si, levi_str
+    call new_line
+    call print
+    ret
+.echo_function:
+    mov si, value
     call new_line
     call print
     ret
 .not_equal:
-    mov si, command
-    mov al, "-"
-    call new_line
-    call print_char
-    call print
     ret
 
-test_command: db "levi", 0
-test_str: db "-Levi says hi!", 0
+levi_command: db "levi", 0
+echo_command: db "echo", 0
+
+levi_str: db " Levi says hi!", 0
 msg db "LeviOS is alive and doing stuff"
     db " ", 0x0D,0x0A, 0
-command: times 64 db 0
+
+; --- State Variables ---
+active_ptr:     dw command
+current_offset: dw 0
+space_pressed_flag: db 0
+
+; --- Buffers ---
+command:        times 32 db 0
+value:          times 32 db 0

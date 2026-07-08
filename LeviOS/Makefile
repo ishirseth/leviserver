@@ -1,7 +1,7 @@
 # LeviOS Makefile
-
+# qemu-system-i386 -drive format=raw,file=disk.img -display gtk
 ASM = nasm
-QEMU = qemu-system-x86_64
+QEMU = qemu-system-i386
 
 BOOT = boot/boot.asm
 KERNEL = kernel/kernel.asm
@@ -27,7 +27,7 @@ $(DISK): $(BOOT_BIN) $(KERNEL_BIN)
 	dd if=$(KERNEL_BIN) of=$(DISK) bs=512 seek=1 count=1 conv=notrunc 2>/dev/null
 
 run: $(DISK)
-	$(QEMU) -drive format=raw,file=$(DISK)
+	$(QEMU) -drive format=raw,file=$(DISK) -display gtk
 
 clean:
 	rm -f $(BOOT_BIN) $(KERNEL_BIN) $(DISK)
