@@ -1,5 +1,6 @@
 [org 0x0000]
 
+
 start:
     mov ax, cs
     mov ds, ax
@@ -65,13 +66,20 @@ read_key:
     ret
 
 .space_pressed:
-    cmp byte [space_pressed_flag], 1 ; Check if already switched
-    je .return_from_space            ; If 1, ignore the space
+    cmp byte [space_pressed_flag], 1
+    je .already_switched
     
-    mov byte [space_pressed_flag], 1 ; Set flag to "switched"
-    mov word [active_ptr], value     ; Switch to value buffer
-    mov word [current_offset], 0     ; Reset offset
-.return_from_space:
+    mov byte [space_pressed_flag], 1
+    mov word [current_offset], 0
+.already_switched:
+    cmp [ignore_space_flag], 1
+    je .ignore
+    mov al, 0x20             ; Load space character
+    call .store_char         ; Save it to the buffer
+    .ignore:
+
+    mov byte [ignore_space_flag], 0
+    mov word [active_ptr], value
     ret
 .enter_pressed:
     call parse_input
@@ -85,13 +93,30 @@ read_key:
     ret
 
 .store_char:
-    mov di, [active_ptr]      ; Load the address of the active buffer
+    mov di, [active_ptr]      ; di = current buffer address
+    mov bx, [current_offset]  ; bx = current offset
+
+    ; Check which buffer is active
+    cmp di, command           ; Is this the command buffer?
+    je .check_command
     
-    mov bx, [current_offset]
+    cmp di, value             ; Is this the value buffer?
+    je .check_value
+    
+    jmp .store                ; Fallback/Error handling
+.check_command:               ; Check if input is too long
+    cmp bx, 31                ; Max 31 chars + 1 null = 32
+    jae .done                 ; If 31 or higher, don't store
+    jmp .store
+.check_value:
+    cmp bx, 127               ; Max 127 chars + 1 null = 128
+    jae .done                 ; If 127 or higher, don't store
+.store:
     mov [di + bx], al         ; Store character
     inc bx
     mov [current_offset], bx
     mov byte [di + bx], 0     ; Null terminate
+.done:
     ret
 
 ; ------ CONVERT VALUE STRING TO NUMBER ------
@@ -126,7 +151,7 @@ str_to_num:
 
 clear_input:
     mov di, command        ; Start at the beginning of the command buffer
-    mov cx, 64             ; Total size of both buffers (32+32)
+    mov cx, 160             ; Total size of both buffers (32+128)
     xor al, al
     rep stosb              ; Efficiently clears the memory in one go
     
@@ -134,9 +159,8 @@ clear_input:
     mov word [active_ptr], command
     mov word [current_offset], 0
     mov byte [space_pressed_flag], 0
-    
-    ret                    ; Now it correctly returns here
-
+    mov byte [ignore_space_flag], 1
+    ret
 
 parse_input:
     mov si, command
@@ -279,9 +303,10 @@ err_msg:     db "Error!", 0
 active_ptr:     dw command
 current_offset: dw 0
 space_pressed_flag: db 0
+ignore_space_flag: db 1
 
 ; --- Buffers ---
 command:        times 32 db 0
-value:          times 32 db 0
+value:          times 128 db 0
 txt_buffer: times 512 db 0
 file_table_buffer: times 512 db 0
