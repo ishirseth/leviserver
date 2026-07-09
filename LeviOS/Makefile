@@ -9,6 +9,10 @@ KERNEL = kernel/kernel.asm
 BOOT_BIN = boot/boot.bin
 KERNEL_BIN = kernel/kernel.bin
 DISK = disk.img
+TEST_TXT = files/test.txt
+TEST1_TXT = files/test1.txt
+TEST2_TXT = files/test2.txt
+TEST3_TXT = files/test3.txt
 
 all: $(DISK)
 
@@ -26,8 +30,15 @@ $(DISK): $(BOOT_BIN) $(KERNEL_BIN)
 	dd if=$(BOOT_BIN) of=$(DISK) bs=512 count=1 conv=notrunc 2>/dev/null
 	dd if=$(KERNEL_BIN) of=$(DISK) bs=512 seek=1 count=1 conv=notrunc 2>/dev/null
 
+	dd if=$(TEST_TXT) of=$(DISK) bs=512 seek=11 conv=notrunc 2>/dev/null
+	dd if=$(TEST1_TXT) of=$(DISK) bs=512 seek=12 conv=notrunc 2>/dev/null
+	dd if=$(TEST2_TXT) of=$(DISK) bs=512 seek=13 conv=notrunc 2>/dev/null
+	dd if=$(TEST3_TXT) of=$(DISK) bs=512 seek=14 conv=notrunc 2>/dev/null
+
 run: $(DISK)
 	$(QEMU) -drive format=raw,file=$(DISK) -display gtk
 
 clean:
 	rm -f $(BOOT_BIN) $(KERNEL_BIN) $(DISK)
+
+

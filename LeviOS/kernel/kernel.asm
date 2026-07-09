@@ -3,6 +3,7 @@
 start:
     mov ax, cs
     mov ds, ax
+    mov es, ax
 
     mov di, command
 
@@ -14,6 +15,8 @@ main:
     call read_key       ; AL now holds the typed character
     call print_char
     jmp main
+
+; ----- PRINT -----
 
 print:
     lodsb
@@ -44,6 +47,8 @@ new_line:
     int 0x10
     ret
 
+; ----- INPUT -----
+
 read_key:
     mov ah, 0x00
     int 0x16
@@ -61,13 +66,12 @@ read_key:
 
 .space_pressed:
     cmp byte [space_pressed_flag], 1 ; Check if already switched
-    je .done                         ; If 1, ignore the space
+    je .return_from_space            ; If 1, ignore the space
     
     mov byte [space_pressed_flag], 1 ; Set flag to "switched"
     mov word [active_ptr], value     ; Switch to value buffer
     mov word [current_offset], 0     ; Reset offset
-.done:
-    call .store_char
+.return_from_space:
     ret
 .enter_pressed:
     call parse_input
@@ -90,9 +94,35 @@ read_key:
     mov byte [di + bx], 0     ; Null terminate
     ret
 
+; ------ CONVERT VALUE STRING TO NUMBER ------
+str_to_num:
+    mov si, value
+    xor bx, bx
+
+.loop:
+    mov al, [si]
+    cmp al, 0
+    je .done
+
+    sub al, '0'
+    xor ah, ah
+
+    push ax              ; save digit
+    mov ax, bx           ; AX = current total
+    mov cx, 10           ; use CX as multiplier, not BX
+    mul cx               ; AX = AX * 10 (DX:AX, but DX=0 for small numbers)
+    mov bx, ax           ; BX = new total
+    pop ax               ; restore digit
+
+    add bx, ax
+    inc si
+    jmp .loop
+
+.done:
+    ret
 
 
-
+; ----- PROCESS INPUT -----
 
 clear_input:
     mov di, command        ; Start at the beginning of the command buffer
@@ -112,12 +142,17 @@ parse_input:
     mov si, command
     mov di, levi_command
     call .compare_loop
-    je .levi_function          ; Jump if the strings matched
+    je .levi_function
 
     mov si, command
     mov di, echo_command
     call .compare_loop
-    je .echo_function          ; Jump if the strings matched
+    je .echo_function
+
+    mov si, command
+    mov di, readtxt_command
+    call .compare_loop
+    je .readtxt_function
 
     ret              ; Return if no match found (not_equal)
 .compare_loop:
@@ -139,7 +174,46 @@ parse_input:
     call print
     ret
 .echo_function:
+    call new_line
+    mov al, '-'
+    call print_char
     mov si, value
+    call print
+    ret
+
+.readtxt_function:
+    call str_to_num      ; convert to number
+    add bx, 1           ; convert 0-indexed to BIOS 1-indexed
+
+    ; print message stuff
+    call new_line
+    mov si, read_txt_str
+    call print
+    mov si, value
+    call print
+    mov al, ':'
+    call print_char
+
+    mov ax, ds           ; set ES = DS first, before touching AX for int 0x13
+    mov es, ax
+
+    mov ah, 0x02
+    mov al, 1
+    mov ch, 0
+    mov cl, bl           ; sector number
+    mov dh, 0
+    mov dl, 0x80
+    mov bx, txt_buffer
+    int 0x13
+
+    jc .txt_error
+
+    mov si, txt_buffer
+    call new_line
+    call print
+    ret
+.txt_error:
+    mov si, err_msg
     call new_line
     call print
     ret
@@ -148,10 +222,13 @@ parse_input:
 
 levi_command: db "levi", 0
 echo_command: db "echo", 0
+readtxt_command: db "readtxt", 0
 
-levi_str: db " Levi says hi!", 0
+levi_str: db "-Levi says hi!", 0
+read_txt_str: db "-Reading ", 0
 msg db "LeviOS is alive and doing stuff"
     db " ", 0x0D,0x0A, 0
+err_msg:     db "Error!", 0
 
 ; --- State Variables ---
 active_ptr:     dw command
@@ -161,3 +238,4 @@ space_pressed_flag: db 0
 ; --- Buffers ---
 command:        times 32 db 0
 value:          times 32 db 0
+txt_buffer: times 512 db 0
