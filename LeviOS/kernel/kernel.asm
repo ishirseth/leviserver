@@ -6,7 +6,7 @@ start:
     mov ds, ax
     mov es, ax
 
-    mov di, command
+    call clear_input        ; initialize command/value buffers and input state
 
     mov si, msg
     call print
