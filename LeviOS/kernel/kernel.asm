@@ -181,9 +181,26 @@ parse_input:
     call print
     ret
 
+
 .readtxt_function:
-    call str_to_num      ; convert to number
-    add bx, 1           ; convert 0-indexed to BIOS 1-indexed
+    ; Load the file table (Sector 10) into memory
+    mov ah, 0x02
+    mov al, 1
+    mov ch, 0
+    mov cl, 11                ; File table is at sector 10 (offset of 1)
+    mov dh, 0
+    mov dl, 0x80
+    mov bx, file_table_buffer
+    int 0x13
+
+    ; Search for the filename (which is in 'value' buffer)
+    mov si, value             ; The filename the user typed
+    call find_file_sector
+    cmp al, 0                 ; Did we find it?
+    je .txt_error             ; If AL=0, not found
+
+    mov bl, al
+    add bl, 1           ; convert 0-indexed to BIOS 1-indexed
 
     ; print message stuff
     call new_line
@@ -200,7 +217,7 @@ parse_input:
     mov ah, 0x02
     mov al, 1
     mov ch, 0
-    mov cl, bl           ; sector number
+    mov cl, bl           ; sector number 
     mov dh, 0
     mov dl, 0x80
     mov bx, txt_buffer
@@ -212,6 +229,7 @@ parse_input:
     call new_line
     call print
     ret
+
 .txt_error:
     mov si, err_msg
     call new_line
@@ -220,13 +238,40 @@ parse_input:
 .not_equal:
     ret
 
+
+; --- FIND FILE SECTOR ---
+; INPUT: SI = address of filename string (e.g., "levi.txt")
+; OUTPUT: AL = sector number, or 0 if not found
+find_file_sector:
+    mov bx, file_table_buffer ; Buffer where we loaded sector 10
+.next_entry:
+    cmp byte [bx], 0
+    je .not_found
+    
+    push si
+    mov di, bx        ; DI = current table entry
+    mov cx, 8
+    repe cmpsb
+    pop si
+    je .found
+    
+    add bx, 10
+    jmp .next_entry
+
+.found:
+    mov al, [bx + 8]          ; The sector byte is at offset 8
+    ret
+.not_found:
+    xor al, al                ; Return 0
+    ret
+
 levi_command: db "levi", 0
 echo_command: db "echo", 0
 readtxt_command: db "readtxt", 0
 
 levi_str: db "-Levi says hi!", 0
 read_txt_str: db "-Reading ", 0
-msg db "LeviOS is alive and doing stuff"
+msg db "LeviOS is running"
     db " ", 0x0D,0x0A, 0
 err_msg:     db "Error!", 0
 
@@ -239,3 +284,4 @@ space_pressed_flag: db 0
 command:        times 32 db 0
 value:          times 32 db 0
 txt_buffer: times 512 db 0
+file_table_buffer: times 512 db 0
