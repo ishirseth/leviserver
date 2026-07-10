@@ -26,12 +26,16 @@ $(KERNEL_BIN): $(KERNEL) | $(BUILD_DIR)
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-# Generate File Table (10 bytes per entry)
-# Entry: "levi.txt" (8 chars) + Sector (1 byte) + Reserved (1 byte)
 # Total size: 512 bytes (padded with 0s)
+# NOTE: 32 entries × 16 bytes (FILE_ENTRY_SIZE) = 512 bytes, exactly 1 sector
 $(FILETABLE): | $(BUILD_DIR)
-	printf "levimycat.txt\x0B\x00\x00" > $(FILETABLE)
-	dd if=/dev/zero bs=1 count=496 >> $(FILETABLE)
+	@rm -f $(FILETABLE)
+	@printf "levi.txt\x00\x00\x00\x00\x00\x0B\x00\x00" > $(FILETABLE)
+	@for i in $$(seq 12 42); do \
+		printf '\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00' >> $(FILETABLE); \
+		printf "$$(printf '\\x%02x' $$i)" >> $(FILETABLE); \
+		printf '\x00\x00' >> $(FILETABLE); \
+	done
 
 # Assemble Disk Image
 $(DISK): $(BOOT_BIN) $(KERNEL_BIN) $(FILETABLE)
