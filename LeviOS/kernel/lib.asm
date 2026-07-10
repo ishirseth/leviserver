@@ -56,11 +56,24 @@ str_to_num:
 .done:
     ret
 
-; --- FIND FILE SECTOR ---
+; --- FILE SYS ---
+
+load_file_table_s1:
+    ; Load the 1st file table (Sector 10) into memory
+    mov ah, 0x02
+    mov al, 1
+    mov ch, 0
+    mov cl, 11                ; File table is at sector 10 (offset of 1)
+    mov dh, 0
+    mov dl, 0x80
+    mov bx, file_table_buffer_s1
+    int 0x13
+    ret
+
 ; INPUT: SI = address of filename string (e.g., "levi.txt")
 ; OUTPUT: AL = sector number, or 0 if not found
 find_file_sector:
-    mov bx, file_table_buffer ; Buffer where we loaded sector 10
+    mov bx, file_table_buffer_s1 ; Buffer where we loaded sector 10
 .next_entry:
     cmp byte [bx], 0
     je .not_found
@@ -80,4 +93,26 @@ find_file_sector:
     ret
 .not_found:
     xor al, al                ; Return 0 (no I/O here)
+    ret
+
+; finds first empty sector in the filetable 
+find_free_sector:
+    mov bx, file_table_buffer_s1
+    mov cx, 32                    ; scan all 32 entries
+.check_entry:
+    cmp byte [bx], 0               ; empty entry = name field starts with 0
+    je .found
+    add bx, FILE_ENTRY_SIZE
+    loop .check_entry
+    xor al, al                    ; no free entry found
+    ret
+.found:
+    mov al, [bx + FILE_ENTRY_SIZE - 3]   ; sector byte, pre-filled by the Makefile
+    ret
+
+; ----- ERROR -----
+error:
+    mov si, err_msg
+    call new_line
+    call print
     ret

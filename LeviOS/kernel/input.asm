@@ -103,6 +103,11 @@ parse_input:
     call .compare_loop
     je readtxt_function
 
+    mov si, command
+    mov di, writetxt_command
+    call .compare_loop
+    je writetxt_function
+
     ret              ; Return if no match found (not_equal)
 .compare_loop:
     mov al, [si]
