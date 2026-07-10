@@ -5,7 +5,7 @@ BOOT = boot/boot.asm
 KERNEL = kernel/kernel.asm
 FILES_DIR = files
 BUILD_DIR = build
-DISK = disk.img
+DISK = $(BUILD_DIR)/disk.img
 
 BOOT_BIN = $(BUILD_DIR)/boot.bin
 KERNEL_BIN = $(BUILD_DIR)/kernel.bin
@@ -20,7 +20,7 @@ $(BOOT_BIN): $(BOOT) | $(BUILD_DIR)
 
 # Build Kernel
 $(KERNEL_BIN): $(KERNEL) | $(BUILD_DIR)
-	$(ASM) -f bin $(KERNEL) -o $(KERNEL_BIN)
+	$(ASM) -f bin $(KERNEL) -i kernel/ -o $(KERNEL_BIN)
 
 # Create directory for build artifacts
 $(BUILD_DIR):
@@ -30,8 +30,8 @@ $(BUILD_DIR):
 # Entry: "levi.txt" (8 chars) + Sector (1 byte) + Reserved (1 byte)
 # Total size: 512 bytes (padded with 0s)
 $(FILETABLE): | $(BUILD_DIR)
-	printf "levi.txt\x0B\x00" > $(FILETABLE)
-	dd if=/dev/zero bs=1 count=502 >> $(FILETABLE)
+	printf "levimycat.txt\x0B\x00\x00" > $(FILETABLE)
+	dd if=/dev/zero bs=1 count=496 >> $(FILETABLE)
 
 # Assemble Disk Image
 $(DISK): $(BOOT_BIN) $(KERNEL_BIN) $(FILETABLE)
@@ -42,7 +42,7 @@ $(DISK): $(BOOT_BIN) $(KERNEL_BIN) $(FILETABLE)
 	dd if=$(BOOT_BIN) of=$(DISK) bs=512 count=1 conv=notrunc 2>/dev/null
 	
 	# 3. Write Kernel to Sector 1
-	dd if=$(KERNEL_BIN) of=$(DISK) bs=512 seek=1 count=1 conv=notrunc 2>/dev/null
+	dd if=$(KERNEL_BIN) of=$(DISK) bs=512 seek=1 count=9 conv=notrunc 2>/dev/null
 	
 	# 4. Write File Table to Sector 10
 	dd if=$(FILETABLE) of=$(DISK) bs=512 seek=10 count=1 conv=notrunc 2>/dev/null

@@ -20,7 +20,7 @@ load_kernel:
      call delay_3sec
 
     mov ah, 0x02
-    mov al, 1
+    mov al, 9        ; read 9 sectors
     mov ch, 0
     mov cl, 2
     mov dh, 0
