@@ -4,6 +4,10 @@ import socket
 import threading
 import json
 import subprocess
+import os
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+ASCII_BIN = os.path.join(SCRIPT_DIR, "asm", "ascii")
 
 HOST = "0.0.0.0"
 PORT = 1437
@@ -87,9 +91,11 @@ def cmd_ascii(argument):
     if argument:
         if len(argument) != 1:
             return b"~Argument must be a single character\r\n"
-        else: 
-            result = subprocess.run(['./asm/ascii', argument])
-        return f"~ASCII assembly program exited with code: {result.returncode}\r\n".encode()
+        try:
+            result = subprocess.run([ASCII_BIN, argument])
+            return f"~ASCII assembly program exited with code: {result.returncode}\r\n".encode()
+        except Exception as e:
+            return f"~Error running ascii program: {e}\r\n".encode()
     else:
         return b"~Missing argument\r\n"
 
@@ -159,20 +165,17 @@ def cmd_who(argument):
 def cmd_prime(argument):
     if not argument:
         return b"~Missing argument\r\n"
-    elif int(argument) < 0:
-        return b"~Argument is negative\r\n"
-    elif not int(argument).isdigit():
+    if not argument.isdigit():
         return b"~Argument is not a number\r\n"
-    elif int(argument) > 1000000000000:
+    n = int(argument)
+    if n > 1000000000000:
         return b"~Argument is too large\r\n"
-    elif int(argument) < 2:
+    if n < 2:
         return b"~Not prime\r\n"
-    else:
-        n = int(argument)
-        for i in range(2, int(n**0.5) + 1):
-            if n % i == 0:
-                return b"~Not prime\r\n"
-        return b"~Prime\r\n"
+    for i in range(2, int(n**0.5) + 1):
+        if n % i == 0:
+            return b"~Not prime\r\n"
+    return b"~Prime\r\n"
 
 def cmd_add(addr, argument):
     if not argument:
