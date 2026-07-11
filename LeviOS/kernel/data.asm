@@ -3,6 +3,7 @@ levi_command: db "levi", 0
 echo_command: db "echo", 0
 readtxt_command: db "read", 0
 writetxt_command: db "write", 0
+ls_command: db "ls", 0
 
 levi_str: db "-Levi says hi!", 0
 read_txt_str1: db "-Reading ", 0
