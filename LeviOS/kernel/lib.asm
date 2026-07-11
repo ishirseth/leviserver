@@ -110,9 +110,34 @@ find_free_sector:
     mov al, [bx + FILE_ENTRY_SIZE - 3]   ; sector byte, pre-filled by the Makefile
     ret
 
+; check if value is not too long and exists
+; ax = max length
+check_value:
+    ; check if it exists
+    cmp byte [value], 0
+    je error
+    cmp byte [value], 0x20 ; space
+    je error
+
+    ; check length
+    mov si, value
+    xor cx, cx
+    .count_loop:
+        cmp byte [si], 0
+        je .count_done
+        inc cx
+        inc si
+        cmp cx, ax ; check length ax = max
+        ja error
+        jmp .count_loop
+    .count_done:
+    mov al, 1 ; pass flag
+    ret
+
 ; ----- ERROR -----
 error:
     mov si, err_msg
     call new_line
     call print
+    mov al, 0 ; error flag
     ret

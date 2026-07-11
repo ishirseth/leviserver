@@ -66,22 +66,19 @@ readtxt_function:
     ret
 
 writetxt_function:
-    cmp byte [value], 0
-    je error
-
-    mov si, value
-    xor cx, cx
-    .count_loop:
-        cmp byte [si], 0
-        je .count_done
-        inc cx
-        inc si
-        cmp cx, FILE_ENTRY_SIZE - 3
-        ja error
-        jmp .count_loop
-    .count_done:
-
     call load_file_table_s1
+
+    mov ax, FILE_ENTRY_SIZE - 3
+    call check_value
+    cmp al, 0                 ; check_value returns 0 = fail, 1 = ok
+    je .done
+
+    ; --- Check filename doesn't already exist ---
+    mov si, value
+    call find_file_sector
+    cmp al, 0
+    jne error              ; if a sector was returned file already exists
+
     call find_free_sector       ; AL = sector number, BX = entry address
 
     ; write new entry into the buffer 
@@ -117,4 +114,11 @@ writetxt_function:
     call print_char
     mov al, ':'
     call print_char
+    ret
+.done:
+    ret
+
+
+ls_function:
+    
     ret

@@ -10,6 +10,8 @@ files:
 -max 13 char long file name (with .txt)
 -little endian
 
+16 byte entries
+
         e l  i v  t .  t x            11  
 0000000 656c 6976 742e 7478 0000 0000 0b00 0000
         ----------file name---------- scuu uuuu
@@ -18,14 +20,16 @@ files:
 # fl = flag
 # uu = unused
 
+# ✔ = done
+
 Filesys tasks (for when i want to have a bad day):
--check that filename dosent exist on write
--finish writetxt to also write content
--add file deletion
+-check that filename dosent exist on write ✔
 -add ls
+-finish writetxt to also write content
+-add multi sc files to increase max file size
+-add file deletion
 -add second filetable sc to have max 63 entries for sc (limit: 64 - 11 = 52 file sc)
 -add exectuable programs which can be ran
--add multi sc files to increase max file size
 -make a text and program editor instead of rewriting the entire file
 
 Sector task (for when i want to have a really really bad day):
