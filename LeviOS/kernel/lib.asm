@@ -89,27 +89,26 @@ num_to_str:
 
 ; --- FILE SYS ---
 
-load_file_table_s1:
-    ; Load the 1st file table (Sector 10) into memory
+load_file_table:
     mov ah, 0x02
-    mov al, 1
+    mov al, 2              ; load 2 sectors (1024 bytes) instead of 1
     mov ch, 0
-    mov cl, 11                ; File table is at sector 10 (offset of 1)
+    mov cl, 11             ; start at sector 10 (BIOS 1-indexed = 11)
     mov dh, 0
     mov dl, 0x80
-    mov bx, file_table_buffer_s1
+    mov bx, file_table_buffer
     int 0x13
     ret
 write_file_table:
-    ; write updated table back to disk (sector 10)
+    ; write both tables back to disk (sectors 10-11)
     push ax
     mov ah, 0x03
-    mov al, 1
+    mov al, 2              ; write 2 sectors (both tables)
     mov ch, 0
-    mov cl, 11
+    mov cl, 11             ; start at sector 10 (BIOS 1-indexed = 11)
     mov dh, 0
     mov dl, 0x80
-    mov bx, file_table_buffer_s1
+    mov bx, file_table_buffer
     int 0x13
     pop ax
     ret
@@ -153,10 +152,11 @@ read_sector:
 ; INPUT: SI = address of filename string
 ; OUTPUT: AX = sector number, or 0 if not found
 find_file_sector:
-    mov bx, file_table_buffer_s1
+    mov bx, file_table_buffer
+    mov dx, 64                    ; scan all 64 entries
 .next_entry:
     cmp byte [bx], 0
-    je .not_found
+    je .skip                      ; empty entry? skip it, don't stop
     
     push si
     mov di, bx
@@ -164,20 +164,20 @@ find_file_sector:
     repe cmpsb
     pop si
     je .found
-    
+.skip:
     add bx, FILE_ENTRY_SIZE
-    jmp .next_entry
-.found:
-    mov ax, [bx + FILE_ENTRY_SIZE - 3]   ; read full 2-byte sector value
+    dec dx
+    jnz .next_entry
+    xor ax, ax                    ; scanned everything, not found
     ret
-.not_found:
-    xor ax, ax                            ; clear the FULL register, not just al
+.found:
+    mov ax, [bx + FILE_ENTRY_SIZE - 3]
     ret
 
 ; finds first empty sector in the filetable 
 find_free_sector:
-    mov bx, file_table_buffer_s1
-    mov cx, 32                    ; scan all 32 entries
+    mov bx, file_table_buffer
+    mov cx, 64                    ; scan all 64 entries
 .check_entry:
     cmp byte [bx], 0               ; empty entry = name field starts with 0
     je .found
