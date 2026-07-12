@@ -20,11 +20,10 @@ readtxt_function:
     ; Search for the filename (which is in 'value' buffer)
     mov si, value             ; The filename the user typed
     call find_file_sector
-    cmp al, 0                 ; Did we find it?
+    cmp ax, 0                 ; Did we find it?
     je error             ; If AL=0, not found
 
-    mov bl, al
-    add bl, 1           ; convert 0-indexed to BIOS 1-indexed
+    mov bx, ax
 
     ; print message stuff
     call new_line
@@ -35,16 +34,16 @@ readtxt_function:
     mov si, read_txt_str2
     call print
 
-    mov cl, bl
-    sub cl, 1
-    mov al, cl
-
-    call print_char
+    mov si, num_buffer
+    call num_to_str
+    call print
     mov al, ':'
     call print_char
 
     mov ax, ds           ; set ES = DS first, before touching AX for int 0x13
     mov es, ax
+
+    add bx, 1           ; convert 0-indexed to BIOS 1-indexed
 
     mov ah, 0x02
     mov al, 1
@@ -76,7 +75,7 @@ writetxt_function:
     ; --- Check filename doesn't already exist ---
     mov si, value
     call find_file_sector
-    cmp al, 0
+    cmp ax, 0
     jne error              ; if a sector was returned file already exists
 
     call find_free_sector       ; AL = sector number, BX = entry address
@@ -88,7 +87,7 @@ writetxt_function:
     mov cx, FILE_ENTRY_SIZE - 3
     rep movsb
     pop ax
-    mov [bx + FILE_ENTRY_SIZE - 3], al
+    mov [bx + FILE_ENTRY_SIZE - 3], ax
 
     ; write updated table back to disk (sector 10)
     push ax
@@ -111,14 +110,31 @@ writetxt_function:
     mov si, read_txt_str2
     call print
     pop ax
-    call print_char
+    mov bx, ax
+    mov si, num_buffer
+    call num_to_str
+    call print
     mov al, ':'
     call print_char
     ret
 .done:
     ret
 
-
 ls_function:
-    
+    call load_file_table_s1
+    mov bx, file_table_buffer_s1
+    mov cx, 32                  ; scan all 32 entries
+.next_entry:
+    cmp byte [bx], 0            ; empty entry?
+    je .skip                    ; skip it (don't print blank entries)
+    push cx
+    push bx
+    mov si, bx
+    call new_line
+    call print
+    pop bx
+    pop cx
+.skip:
+    add bx, FILE_ENTRY_SIZE
+    loop .next_entry
     ret

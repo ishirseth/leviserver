@@ -35,4 +35,5 @@ Filesys tasks (for when i want to have a bad day):
 Sector task (for when i want to have a really really bad day):
 -switch from CHS to LBA to increase max sectors from 63 to 2^64 (a whole lot of sectors)
  ⤷ add more filetables
+ ⤷ chage write and read to use cx 
 
