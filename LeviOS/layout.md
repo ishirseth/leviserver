@@ -25,7 +25,7 @@ files:
 Filesys tasks (for when i want to have a bad day):
 -check that filename dosent exist on write ✔
 -add ls ✔
--finish writetxt to also write content
+-finish writetxt to also write content ✔
 -add second filetable sc to have max 63 entries for sc (limit: 64 - 11 = 52 file sc)
 -add multi sc files to increase max file size
 -add file deletion
@@ -38,4 +38,12 @@ Sector task (for when i want to have a really really bad day):
  ⤷ add more filetables
  ⤷ chage write and read to use cx 
  ⤷ yeah i dont wanna do this task
+
+Commands:
+levi (levi)
+echo (repeat what is written for value)
+read (to read data from a file)
+write (to create and select a file)
+writedata (to write data to the selected file)
+ls (list all files with sectors)
 

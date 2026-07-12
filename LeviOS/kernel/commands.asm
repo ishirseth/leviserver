@@ -22,18 +22,16 @@ readtxt_function:
     call find_file_sector
     cmp ax, 0                 ; Did we find it?
     je error             ; If AL=0, not found
-
     mov bx, ax
 
     ; print message stuff
     call new_line
-    mov si, read_txt_str1
+    mov si, read_str1
     call print
     mov si, value
     call print
-    mov si, read_txt_str2
+    mov si, read_str2
     call print
-
     mov si, num_buffer
     call num_to_str
     call print
@@ -43,28 +41,16 @@ readtxt_function:
     mov ax, ds           ; set ES = DS first, before touching AX for int 0x13
     mov es, ax
 
-    add bx, 1           ; convert 0-indexed to BIOS 1-indexed
-
-    mov ah, 0x02
-    mov al, 1
-    mov ch, 0
-    mov cl, bl           ; sector number 
-    mov dh, 0
-    mov dl, 0x80
-    mov bx, txt_buffer
-    int 0x13
-
-    jc error
+    call read_sector
 
     mov si, txt_buffer
     call new_line
     call print
     ret
-
 .not_equal:
     ret
 
-writetxt_function:
+write_function:
     call load_file_table_s1
 
     mov ax, FILE_ENTRY_SIZE - 3
@@ -76,10 +62,9 @@ writetxt_function:
     mov si, value
     call find_file_sector
     cmp ax, 0
-    jne error              ; if a sector was returned file already exists
+    jne .skip_entry              ; if a sector was returned file already exists
 
     call find_free_sector       ; AL = sector number, BX = entry address
-
     ; write new entry into the buffer 
     push ax
     mov si, value
@@ -88,36 +73,55 @@ writetxt_function:
     rep movsb
     pop ax
     mov [bx + FILE_ENTRY_SIZE - 3], ax
+    call write_file_table
 
-    ; write updated table back to disk (sector 10)
+    .skip_entry:  ; entry already created
+
     push ax
-    mov ah, 0x03
-    mov al, 1
-    mov ch, 0
-    mov cl, 11
-    mov dh, 0
-    mov dl, 0x80
-    mov bx, file_table_buffer_s1
-    int 0x13
+    mov word [write_sector_buffer], ax
+    mov di, write_file_buffer ; destination
+    mov si, value      ; source
+    call mov_index_data
     pop ax
 
     push ax
     call new_line
-    mov si, write_txt_str
+    mov si, write_str
     call print
     mov si, value
     call print
-    mov si, read_txt_str2
+    mov si, read_str2
     call print
     pop ax
     mov bx, ax
     mov si, num_buffer
     call num_to_str
     call print
-    mov al, ':'
-    call print_char
     ret
 .done:
+    ret
+
+write_data_function:
+    mov ax, [write_sector_buffer]
+    mov bx, ax
+
+    call new_line
+    mov si, write_data_str
+    call print
+    mov si, write_file_buffer
+    call print
+    mov si, read_str2
+    call print
+
+    mov si, num_buffer
+    call num_to_str
+    call print
+
+    mov di, txt_buffer ; destination
+    mov si, value      ; source
+    call mov_index_data
+    
+    call write_sector
     ret
 
 ls_function:

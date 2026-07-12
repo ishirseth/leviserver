@@ -18,11 +18,11 @@ read_key:
 
 .space_pressed:
     cmp byte [space_pressed_flag], 1
-    je .already_switched
+    je .value
     
     mov byte [space_pressed_flag], 1
     mov word [current_offset], 0
-.already_switched:
+.value:
     cmp [ignore_space_flag], 1
     je .ignore
     mov al, 0x20             ; Load space character
@@ -57,11 +57,11 @@ read_key:
     jmp .store                ; Fallback/Error handling
 .check_command:               ; Check if input is too long
     cmp bx, 31                ; Max 31 chars + 1 null = 32
-    jae .done                 ; If 31 or higher, don't store
+    jae .done                 
     jmp .store
 .check_value:
-    cmp bx, 127               ; Max 127 chars + 1 null = 128
-    jae .done                 ; If 127 or higher, don't store
+    cmp bx, 511               ; Max 511 chars
+    jae .done                 
 .store:
     mov [di + bx], al         ; Store character
     inc bx
@@ -104,9 +104,14 @@ parse_input:
     je readtxt_function
 
     mov si, command
-    mov di, writetxt_command
+    mov di, write_command
     call .compare_loop
-    je writetxt_function
+    je write_function
+
+    mov si, command
+    mov di, write_data_command
+    call .compare_loop
+    je write_data_function
 
     mov si, command
     mov di, ls_command
