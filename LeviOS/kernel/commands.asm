@@ -15,7 +15,7 @@ echo_function:
     ret
 
 readtxt_function:
-    call load_file_table_s1
+    call load_file_table
 
     ; Search for the filename (which is in 'value' buffer)
     mov si, value             ; The filename the user typed
@@ -51,7 +51,7 @@ readtxt_function:
     ret
 
 write_function:
-    call load_file_table_s1
+    call load_file_table
 
     mov ax, FILE_ENTRY_SIZE - 3
     call check_value
@@ -125,9 +125,9 @@ write_data_function:
     ret
 
 ls_function:
-    call load_file_table_s1
-    mov bx, file_table_buffer_s1
-    mov cx, 32                  ; scan all 32 entries
+    call load_file_table
+    mov bx, file_table_buffer
+    mov cx, 64                  ; scan all 64 entries
 .next_entry:
     cmp byte [bx], 0            ; empty entry?
     je .skip                    ; skip it (don't print blank entries)

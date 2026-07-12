@@ -25,7 +25,7 @@ write_file_buffer: times FILE_ENTRY_SIZE db 0
 command:        times 32 db 0
 value:          times 512 db 0
 txt_buffer: times 512 db 0
-file_table_buffer_s1: times 512 db 0
+file_table_buffer: times 1024 db 0
 
 ; --- Messages (moved after buffers to avoid being overwritten) ---
 msg: db "LeviOS is running"

@@ -9,7 +9,8 @@ DISK = $(BUILD_DIR)/disk.img
 
 BOOT_BIN = $(BUILD_DIR)/boot.bin
 KERNEL_BIN = $(BUILD_DIR)/kernel.bin
-FILETABLE = $(BUILD_DIR)/filetable.bin
+FILETABLE1 = $(BUILD_DIR)/filetable1.bin
+FILETABLE2 = $(BUILD_DIR)/filetable2.bin
 
 # --- Targets ---
 all: $(DISK)
@@ -26,22 +27,27 @@ $(KERNEL_BIN): $(KERNEL) | $(BUILD_DIR)
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-# Total size: 512 bytes (padded with 0s)
-# NOTE: 32 entries × 16 bytes (FILE_ENTRY_SIZE) = 512 bytes, exactly 1 sector
-$(FILETABLE): | $(BUILD_DIR)
-	@rm -f $(FILETABLE)
-	@printf "levi.txt\x00\x00\x00\x00\x00\x0B\x00\x00" >> $(FILETABLE)
-	@printf "leska.txt\x00\x00\x00\x00\x0C\x00\x00" >> $(FILETABLE)
-	@printf "lexi.txt\x00\x00\x00\x00\x00\x0D\x00\x00" >> $(FILETABLE)
-	@for i in $$(seq 14 42); do \
-		printf '\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00' >> $(FILETABLE); \
-		printf "$$(printf '\\x%02x' $$i)" >> $(FILETABLE); \
-		printf '\x00\x00' >> $(FILETABLE); \
+
+$(FILETABLE1): | $(BUILD_DIR)
+	@rm -f $(FILETABLE1)
+	@printf "levi.txt\x00\x00\x00\x00\x00\x0C\x00\x00" >> $(FILETABLE1)
+	@printf "leska.txt\x00\x00\x00\x00\x0D\x00\x00" >> $(FILETABLE1)
+	@for i in $$(seq 14 43); do \
+		printf '\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00' >> $(FILETABLE1); \
+		printf "$$(printf '\\x%02x' $$i)" >> $(FILETABLE1); \
+		printf '\x00\x00' >> $(FILETABLE1); \
+	done
+$(FILETABLE2): | $(BUILD_DIR)
+	@rm -f $(FILETABLE2)
+	@printf "lexi.txt\x00\x00\x00\x00\x00\x2C\x00\x00" >> $(FILETABLE2)
+	@for i in $$(seq 45 63); do \
+		printf '\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00' >> $(FILETABLE2); \
+		printf "$$(printf '\\x%02x' $$i)" >> $(FILETABLE2); \
+		printf '\x00\x00' >> $(FILETABLE2); \
 	done
 
 # Assemble Disk Image
-$(DISK): $(BOOT_BIN) $(KERNEL_BIN) $(FILETABLE)
-	# 1. Create empty 51200 byte disk (100 sectors)
+$(DISK): $(BOOT_BIN) $(KERNEL_BIN) $(FILETABLE1) $(FILETABLE2)
 	dd if=/dev/zero of=$(DISK) bs=512 count=64 2>/dev/null
 	
 	# 2. Write Bootloader to Sector 0
@@ -51,12 +57,13 @@ $(DISK): $(BOOT_BIN) $(KERNEL_BIN) $(FILETABLE)
 	dd if=$(KERNEL_BIN) of=$(DISK) bs=512 seek=1 count=9 conv=notrunc 2>/dev/null
 	
 	# 4. Write File Table to Sector 10
-	dd if=$(FILETABLE) of=$(DISK) bs=512 seek=10 count=1 conv=notrunc 2>/dev/null
+	dd if=$(FILETABLE1) of=$(DISK) bs=512 seek=10 count=1 conv=notrunc 2>/dev/null
+	dd if=$(FILETABLE2) of=$(DISK) bs=512 seek=11 count=1 conv=notrunc 2>/dev/null
 	
 	# 5. Write files
-	dd if=$(FILES_DIR)/cats.txt of=$(DISK) bs=512 seek=11 count=1 conv=notrunc 2>/dev/null
 	dd if=$(FILES_DIR)/cats.txt of=$(DISK) bs=512 seek=12 count=1 conv=notrunc 2>/dev/null
-	dd if=$(FILES_DIR)/cats.txt of=$(DISK) bs=512 seek=13 count=1 conv=notrunc 2>/dev/null
+	dd if=$(FILES_DIR)/cats1.txt of=$(DISK) bs=512 seek=13 count=1 conv=notrunc 2>/dev/null
+	dd if=$(FILES_DIR)/cats2.txt of=$(DISK) bs=512 seek=44 count=1 conv=notrunc 2>/dev/null
 
 # Execution
 run: $(DISK)
