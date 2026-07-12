@@ -19,14 +19,13 @@ files:
 # sc = sector
 # fl = flag
 # uu = unused
-
 # ✔ = done
 
-Filesys tasks (for when i want to have a bad day):
+Filesys tasks:
 -check that filename dosent exist on write ✔
 -add ls ✔
 -finish writetxt to also write content ✔
--add second filetable sc to have max 63 entries for sc (limit: 64 - 11 = 52 file sc)
+-add second filetable sc to have max 63 entries for sc (limit: 64 - 11 = 52 file sc) ✔
 -add multi sc files to increase max file size
 -add file deletion
 -add backspace
