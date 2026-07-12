@@ -34,7 +34,6 @@ new_line:
 ; max: 65,535
 str_to_num:
     xor bx, bx
-
 .loop:
     mov al, [si]
     cmp al, 0
@@ -53,7 +52,6 @@ str_to_num:
     add bx, ax
     inc si
     jmp .loop
-
 .done:
     ret
 
@@ -101,6 +99,55 @@ load_file_table_s1:
     mov dl, 0x80
     mov bx, file_table_buffer_s1
     int 0x13
+    ret
+write_file_table:
+    ; write updated table back to disk (sector 10)
+    push ax
+    mov ah, 0x03
+    mov al, 1
+    mov ch, 0
+    mov cl, 11
+    mov dh, 0
+    mov dl, 0x80
+    mov bx, file_table_buffer_s1
+    int 0x13
+    pop ax
+    ret
+
+; txt_buffer = text and bl = sector
+write_sector:
+    add bx, 1
+    mov ah, 0x00     ; reset disk
+    mov dl, 0x80
+    int 0x13
+
+    mov ax, 0x0301          ; AH=03h (Write), AL=01h (1 sector)
+    mov ch, 0               ; Cylinder 0
+    mov cl, bl              ; Sector 
+    mov dh, 0               ; Head 0
+    mov dl, 0x80            ; Drive 0x80
+    push ds
+    pop es
+    mov bx, txt_buffer      ; Buffer offset
+    int 0x13                ; Call BIOS
+    jnc .done            ; If no carry, success!
+
+    call error     ; error
+    ret
+.done:
+    ret
+; txt_buffer = text and bl = sector
+read_sector:
+    add bx, 1
+    mov ah, 0x02
+    mov al, 1
+    mov ch, 0
+    mov cl, bl           ; sector number 
+    mov dh, 0
+    mov dl, 0x80
+    mov bx, txt_buffer
+    int 0x13
+    jc error
     ret
 
 ; INPUT: SI = address of filename string
@@ -164,6 +211,16 @@ check_value:
         jmp .count_loop
     .count_done:
     mov ax, 1 ; pass flag
+    ret
+
+; ----- MEMORY -----
+; di = destination
+; si = source
+mov_index_data:
+    lodsb           ; Load [SI] into AL, inc SI
+    stosb           ; Store AL into [DI], inc DI
+    test al, al     ; Check if 0 (null terminator)
+    jnz mov_index_data       ; Continue until 0 is copied
     ret
 
 ; ----- ERROR -----
