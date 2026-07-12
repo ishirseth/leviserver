@@ -17,6 +17,7 @@ space_pressed_flag: db 0
 ignore_space_flag: db 1
 
 ; --- Buffers ---
+num_buffer: times 8 db 0
 command:        times 32 db 0
 value:          times 128 db 0
 txt_buffer: times 512 db 0

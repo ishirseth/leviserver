@@ -30,8 +30,10 @@ $(BUILD_DIR):
 # NOTE: 32 entries × 16 bytes (FILE_ENTRY_SIZE) = 512 bytes, exactly 1 sector
 $(FILETABLE): | $(BUILD_DIR)
 	@rm -f $(FILETABLE)
-	@printf "levi.txt\x00\x00\x00\x00\x00\x0B\x00\x00" > $(FILETABLE)
-	@for i in $$(seq 12 42); do \
+	@printf "levi.txt\x00\x00\x00\x00\x00\x0B\x00\x00" >> $(FILETABLE)
+	@printf "leska.txt\x00\x00\x00\x00\x0C\x00\x00" >> $(FILETABLE)
+	@printf "lexi.txt\x00\x00\x00\x00\x00\x0D\x00\x00" >> $(FILETABLE)
+	@for i in $$(seq 14 42); do \
 		printf '\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00' >> $(FILETABLE); \
 		printf "$$(printf '\\x%02x' $$i)" >> $(FILETABLE); \
 		printf '\x00\x00' >> $(FILETABLE); \
@@ -51,8 +53,10 @@ $(DISK): $(BOOT_BIN) $(KERNEL_BIN) $(FILETABLE)
 	# 4. Write File Table to Sector 10
 	dd if=$(FILETABLE) of=$(DISK) bs=512 seek=10 count=1 conv=notrunc 2>/dev/null
 	
-	# 5. Write levi.txt to Sector 11
-	dd if=$(FILES_DIR)/levi.txt of=$(DISK) bs=512 seek=11 count=1 conv=notrunc 2>/dev/null
+	# 5. Write files
+	dd if=$(FILES_DIR)/cats.txt of=$(DISK) bs=512 seek=11 count=1 conv=notrunc 2>/dev/null
+	dd if=$(FILES_DIR)/cats.txt of=$(DISK) bs=512 seek=12 count=1 conv=notrunc 2>/dev/null
+	dd if=$(FILES_DIR)/cats.txt of=$(DISK) bs=512 seek=13 count=1 conv=notrunc 2>/dev/null
 
 # Execution
 run: $(DISK)

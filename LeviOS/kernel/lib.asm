@@ -29,9 +29,10 @@ new_line:
     int 0x10
     ret
 
-; ------ CONVERT VALUE STRING TO NUMBER ------
+; ------ CONVERT INT AND STR ------
+; si = input string - bx = int 
+; max: 65,535
 str_to_num:
-    mov si, value
     xor bx, bx
 
 .loop:
@@ -56,6 +57,38 @@ str_to_num:
 .done:
     ret
 
+; bx = int si = string
+; max: 65,535
+num_to_str:
+    push bx
+    push si
+    mov ax, bx ; divisor
+    xor bx, bx
+    xor dx, dx
+.loop:
+    cmp ax, 0 ; finish when quotient is 0
+    je .reverse
+    mov cx, 10 ; divides to get remainder 
+    div cx
+    add dx, '0' ; makes remainder a char
+    push dx
+    xor dx, dx ; clear remainder
+    inc bl
+    jmp .loop
+.reverse:
+    cmp bl, 0
+    je .done
+    pop dx
+    mov [si], dl
+    inc si
+    dec bl
+    jmp .reverse
+.done:
+    mov byte [si], 0  ; add the null termiantor at the end
+    pop si
+    pop bx
+    ret
+
 ; --- FILE SYS ---
 
 load_file_table_s1:
@@ -70,29 +103,28 @@ load_file_table_s1:
     int 0x13
     ret
 
-; INPUT: SI = address of filename string (e.g., "levi.txt")
-; OUTPUT: AL = sector number, or 0 if not found
+; INPUT: SI = address of filename string
+; OUTPUT: AX = sector number, or 0 if not found
 find_file_sector:
-    mov bx, file_table_buffer_s1 ; Buffer where we loaded sector 10
+    mov bx, file_table_buffer_s1
 .next_entry:
     cmp byte [bx], 0
     je .not_found
     
     push si
-    mov di, bx        ; DI = current table entry
-    mov cx, FILE_ENTRY_SIZE - 3   ; name field size
+    mov di, bx
+    mov cx, FILE_ENTRY_SIZE - 3
     repe cmpsb
     pop si
     je .found
     
     add bx, FILE_ENTRY_SIZE
     jmp .next_entry
-
 .found:
-    mov al, [bx + FILE_ENTRY_SIZE - 3]   ; sector byte right after name
+    mov ax, [bx + FILE_ENTRY_SIZE - 3]   ; read full 2-byte sector value
     ret
 .not_found:
-    xor al, al                ; Return 0 (no I/O here)
+    xor ax, ax                            ; clear the FULL register, not just al
     ret
 
 ; finds first empty sector in the filetable 
@@ -104,10 +136,10 @@ find_free_sector:
     je .found
     add bx, FILE_ENTRY_SIZE
     loop .check_entry
-    xor al, al                    ; no free entry found
+    xor ax, ax                    ; no free entry found
     ret
 .found:
-    mov al, [bx + FILE_ENTRY_SIZE - 3]   ; sector byte, pre-filled by the Makefile
+    mov ax, [bx + FILE_ENTRY_SIZE - 3]   ; sector byte, pre-filled by the Makefile
     ret
 
 ; check if value is not too long and exists
@@ -131,7 +163,7 @@ check_value:
         ja error
         jmp .count_loop
     .count_done:
-    mov al, 1 ; pass flag
+    mov ax, 1 ; pass flag
     ret
 
 ; ----- ERROR -----
