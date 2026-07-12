@@ -128,11 +128,20 @@ ls_function:
     cmp byte [bx], 0            ; empty entry?
     je .skip                    ; skip it (don't print blank entries)
     push cx
+
     push bx
     mov si, bx
     call new_line
     call print
     pop bx
+    push bx
+    mov word bx, [bx + FILE_ENTRY_SIZE - 3]
+    call num_to_str
+    mov al, ' '
+    call print_char
+    call print
+    pop bx
+
     pop cx
 .skip:
     add bx, FILE_ENTRY_SIZE

@@ -2,7 +2,7 @@
 # 0: bootloader (512 bytes)
 # 1-9: kernel (512 bytes)
 # 10: filetable1 (512 bytes starting 0x1400)
-# 11...: files (MAX 512 bytes each)
+# 11 - 63: files (MAX 512 bytes each)
 
 files:
 -max 32 (because file table)
@@ -14,7 +14,7 @@ files:
 
         e l  i v  t .  t x            11  
 0000000 656c 6976 742e 7478 0000 0000 0b00 0000
-        ----------file name---------- scuu uuuu
+        ----------file name---------- scsc uuuu
 
 # sc = sector
 # fl = flag
@@ -24,11 +24,12 @@ files:
 
 Filesys tasks (for when i want to have a bad day):
 -check that filename dosent exist on write ✔
--add ls
+-add ls ✔
 -finish writetxt to also write content
+-add second filetable sc to have max 63 entries for sc (limit: 64 - 11 = 52 file sc)
 -add multi sc files to increase max file size
 -add file deletion
--add second filetable sc to have max 63 entries for sc (limit: 64 - 11 = 52 file sc)
+-add backspace
 -add exectuable programs which can be ran
 -make a text and program editor instead of rewriting the entire file
 
@@ -36,4 +37,5 @@ Sector task (for when i want to have a really really bad day):
 -switch from CHS to LBA to increase max sectors from 63 to 2^64 (a whole lot of sectors)
  ⤷ add more filetables
  ⤷ chage write and read to use cx 
+ ⤷ yeah i dont wanna do this task
 

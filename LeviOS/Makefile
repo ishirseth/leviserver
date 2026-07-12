@@ -42,7 +42,7 @@ $(FILETABLE): | $(BUILD_DIR)
 # Assemble Disk Image
 $(DISK): $(BOOT_BIN) $(KERNEL_BIN) $(FILETABLE)
 	# 1. Create empty 51200 byte disk (100 sectors)
-	dd if=/dev/zero of=$(DISK) bs=512 count=100 2>/dev/null
+	dd if=/dev/zero of=$(DISK) bs=512 count=64 2>/dev/null
 	
 	# 2. Write Bootloader to Sector 0
 	dd if=$(BOOT_BIN) of=$(DISK) bs=512 count=1 conv=notrunc 2>/dev/null
