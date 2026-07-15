@@ -202,7 +202,7 @@ sl_function:
         mov si, sl_line5
         call .print_train
 
-        mov ax, 50
+        mov ax, 100
         call delay
         call clear_screen
 

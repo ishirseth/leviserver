@@ -19,6 +19,7 @@ delete_str: db "-Deleting ", 0
 ; --- State Variables ---
 active_ptr:     dw command
 current_offset: dw 0
+command_offset: dw 0
 space_pressed_flag: db 0
 ignore_space_flag: db 1
 

@@ -31,7 +31,7 @@ Filesys tasks:
 -fix first char missing ✔
 -add sl ✔
 -add clear ✔
--add backspace
+-add backspace ✔
 -add exectuable programs which can be ran
 -add some programs and games
 -make a text and program editor instead of rewriting the entire file
@@ -50,4 +50,7 @@ read (to read data from a file)
 write (to create and select a file)
 writedata (to write data to the selected file)
 ls (list all files with sectors)
+sl (steam locomotive)
+delete (delete a file)
+
 
