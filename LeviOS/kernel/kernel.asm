@@ -7,6 +7,11 @@ start:
     mov ds, ax
     mov es, ax
 
+    mov word [write_sector_buffer], 12
+    mov di, write_file_buffer
+    mov si, init_file_name
+    call mov_index_data
+
     call clear_input        ; initialize command/value buffers and input state
 
     mov si, msg
