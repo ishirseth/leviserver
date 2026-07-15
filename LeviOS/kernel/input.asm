@@ -114,23 +114,38 @@ parse_input:
     je write_data_function
 
     mov si, command
+    mov di, delete_command
+    call .compare_loop
+    je delete_function
+
+    mov si, command
     mov di, ls_command
     call .compare_loop
     je ls_function
 
+    mov si, command
+    mov di, sl_command
+    call .compare_loop
+    je sl_function
+
+    mov si, command
+    mov di, clear_command
+    call .compare_loop
+    je clear_function
+
     ret              ; Return if no match found (not_equal)
-.compare_loop:
-    mov al, [si]
-    mov bl, [di]
-    cmp al, bl
-    jne .done        ; Mismatch: ZF=0
-    cmp al, 0        ; End of string: ZF=1
-    je .done
-    inc si
-    inc di
-    jmp .compare_loop
-.done:
-    ret
+    .compare_loop:
+        mov al, [si]
+        mov bl, [di]
+        cmp al, bl
+        jne .done        ; Mismatch: ZF=0
+        cmp al, 0        ; End of string: ZF=1
+        je .done
+        inc si
+        inc di
+        jmp .compare_loop
+    .done:
+        ret
 
 
 

@@ -26,14 +26,19 @@ Filesys tasks:
 -add ls ✔
 -finish writetxt to also write content ✔
 -add second filetable sc to have max 63 entries for sc (limit: 64 - 11 = 52 file sc) ✔
--add multi sc files to increase max file size
--add file deletion
+-add multi sc files to increase max file size X
+-add file deletion ✔
+-fix first char missing ✔
+-add sl ✔
+-add clear ✔
 -add backspace
 -add exectuable programs which can be ran
+-add some programs and games
 -make a text and program editor instead of rewriting the entire file
+-add serial communication
 
-Sector task (for when i want to have a really really bad day):
--switch from CHS to LBA to increase max sectors from 63 to 2^64 (a whole lot of sectors)
+Sector task:
+-switch from CHS to LBA to increase max sectors from 63 to 2^64
  ⤷ add more filetables
  ⤷ chage write and read to use cx 
  ⤷ yeah i dont wanna do this task
