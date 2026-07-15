@@ -13,7 +13,7 @@ read_key:
     je .space_pressed
     
     ; Otherwise, store the char
-    call .store_char
+    call store_char
     ret
 
 .space_pressed:
@@ -21,12 +21,14 @@ read_key:
     je .value
     
     mov byte [space_pressed_flag], 1
+    mov bx, [current_offset]
+    mov [command_offset], bx ; save command length
     mov word [current_offset], 0
 .value:
     cmp [ignore_space_flag], 1
     je .ignore
     mov al, 0x20             ; Load space character
-    call .store_char         ; Save it to the buffer
+    call store_char         ; Save it to the buffer
     .ignore:
 
     mov byte [ignore_space_flag], 0
@@ -38,12 +40,52 @@ read_key:
     call new_line
     jmp main
 .backspace:
+    mov bx, [current_offset]
+    cmp bx, 0
+    jne .do_backspace
+    ; offset is 0 -- check if we're in value and can cross back to command
+    cmp word [active_ptr], value
+    jne .done                    ; already in command with offset 0, nothing to do
+
+    mov word [active_ptr], command
+    mov byte [space_pressed_flag], 0
+    mov byte [ignore_space_flag], 1
+    mov bx, [command_offset]
+    mov [current_offset], bx
     ret
+
+    .do_backspace:
+        ; visual erase
+        mov al, 0x08
+        call print_char
+        mov al, ' '
+        call print_char
+        mov al, 0x08
+        call print_char
+        call cursor_right
+
+        dec bx
+        mov [current_offset], bx
+        mov di, [active_ptr]
+        mov byte [di + bx], 0
+    .done:
+        ret
 
 .no_store:
     ret
 
-.store_char:
+cursor_right:
+    mov ah, 0x03
+    mov bh, 0x00
+    int 0x10          ; dh = row, dl = column
+
+    inc dl
+    mov ah, 0x02
+    mov bh, 0x00
+    int 0x10          ; set cursor to same row, column+1
+    ret
+
+store_char:
     mov di, [active_ptr]      ; di = current buffer address
     mov bx, [current_offset]  ; bx = current offset
 
@@ -55,20 +97,20 @@ read_key:
     je .check_value
     
     jmp .store                ; Fallback/Error handling
-.check_command:               ; Check if input is too long
-    cmp bx, 31                ; Max 31 chars + 1 null = 32
-    jae .done                 
-    jmp .store
-.check_value:
-    cmp bx, 511               ; Max 511 chars
-    jae .done                 
-.store:
-    mov [di + bx], al         ; Store character
-    inc bx
-    mov [current_offset], bx
-    mov byte [di + bx], 0     ; Null terminate
-.done:
-    ret
+    .check_command:               ; Check if input is too long
+        cmp bx, 31                ; Max 31 chars + 1 null = 32
+        jae .done                 
+        jmp .store
+    .check_value:
+        cmp bx, 511               ; Max 511 chars
+        jae .done                 
+    .store:
+        mov [di + bx], al         ; Store character
+        inc bx
+        mov [current_offset], bx
+        mov byte [di + bx], 0     ; Null terminate
+    .done:
+        ret
 
 
 
