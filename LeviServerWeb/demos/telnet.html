@@ -16,7 +16,11 @@
   ws.onmessage = (e) => term.write(new Uint8Array(e.data));
   ws.onclose = () => term.write('\r\n*** connection closed ***\r\n');
   term.onData((data) => {
-  term.write(data); // show what you typed, locally
-  if (ws.readyState === WebSocket.OPEN) ws.send(data);
-});
+    if (data === '\r') {
+      term.write('\r\n'); // move to a fresh line locally on Enter
+    } else {
+      term.write(data);
+    }
+    if (ws.readyState === WebSocket.OPEN) ws.send(data);
+  });
 </script>
