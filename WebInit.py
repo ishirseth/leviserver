@@ -7,6 +7,10 @@ import os
 base_repo = os.path.dirname(os.path.abspath(__file__))
 web_root_dir = os.path.join(base_repo, "WebRoot")
 levis_web_dir = os.path.join(base_repo, "LeviServerWeb")
+telnet_web_dir = os.path.join(levis_web_dir, "telnet-web")
+
+def start_telnet_bridge():
+    subprocess.run(["node", "server.js"], cwd=telnet_web_dir)
 
 def start_server(port, directory):
     # This runs the server and lets the output stream directly to your terminal
@@ -27,6 +31,7 @@ threading.Thread(target=git_manager, daemon=True).start()
 # Start Server Threads (Raw output)
 threading.Thread(target=start_server, args=("8071", web_root_dir), daemon=True).start()
 threading.Thread(target=start_server, args=("8072", levis_web_dir), daemon=True).start()
+threading.Thread(target=start_telnet_bridge, daemon=True).start()
 
 print("LeviServer is running. Showing ALL logs (including 404s).")
 
