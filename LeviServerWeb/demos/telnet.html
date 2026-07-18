@@ -10,7 +10,7 @@
   term.open(document.getElementById('terminal'));
   fitAddon.fit();
 
-  const ws = new WebSocket('ws://leviserver.eu:3000/ws');
+  const ws = new WebSocket('wss://ishir.leviserver.eu/ws');
   ws.binaryType = 'arraybuffer';
 
   ws.onmessage = (e) => term.write(new Uint8Array(e.data));
