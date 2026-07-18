@@ -1,1 +1,1 @@
-{}
+{"levi": {"addnum": 0, "notes": ["hello", "i love leevi", "he is orange"], "username": "levi", "save": true, "messages": ["From levi: hello levi"], "move": {"move": false, "x": 2, "y": 2}}, "levi2": {"addnum": 0, "notes": [], "username": "", "save": false, "messages": [], "move": {"move": false, "x": 0, "y": 0}}}
