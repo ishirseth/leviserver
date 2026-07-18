@@ -32,7 +32,8 @@ $(FILETABLE1): | $(BUILD_DIR)
 	@rm -f $(FILETABLE1)
 	@printf "levi.txt\x00\x00\x00\x00\x00\x0C\x00\x00" >> $(FILETABLE1)
 	@printf "leska.txt\x00\x00\x00\x00\x0D\x00\x00" >> $(FILETABLE1)
-	@for i in $$(seq 14 43); do \
+	@printf "test.bin\x00\x00\x00\x00\x00\x0E\x00\x00" >> $(FILETABLE1)
+	@for i in $$(seq 15 43); do \
 		printf '\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00' >> $(FILETABLE1); \
 		printf "$$(printf '\\x%02x' $$i)" >> $(FILETABLE1); \
 		printf '\x00\x00' >> $(FILETABLE1); \
@@ -56,18 +57,22 @@ $(DISK): $(BOOT_BIN) $(KERNEL_BIN) $(FILETABLE1) $(FILETABLE2)
 	# 3. Write Kernel to Sector 1
 	dd if=$(KERNEL_BIN) of=$(DISK) bs=512 seek=1 count=9 conv=notrunc 2>/dev/null
 	
-	# 4. Write File Table to Sector 10
+	# 4. Write File Table to Sector 10 and 11
 	dd if=$(FILETABLE1) of=$(DISK) bs=512 seek=10 count=1 conv=notrunc 2>/dev/null
 	dd if=$(FILETABLE2) of=$(DISK) bs=512 seek=11 count=1 conv=notrunc 2>/dev/null
 	
 	# 5. Write files
 	dd if=$(FILES_DIR)/cats.txt of=$(DISK) bs=512 seek=12 count=1 conv=notrunc 2>/dev/null
 	dd if=$(FILES_DIR)/cats1.txt of=$(DISK) bs=512 seek=13 count=1 conv=notrunc 2>/dev/null
+	dd if=$(FILES_DIR)/test.bin of=$(DISK) bs=512 seek=14 count=1 conv=notrunc 2>/dev/null
 	dd if=$(FILES_DIR)/cats2.txt of=$(DISK) bs=512 seek=44 count=1 conv=notrunc 2>/dev/null
 
 # Execution
 run: $(DISK)
 	$(QEMU) -drive format=raw,file=$(DISK) -display gtk
+
+programs: files/test.asm
+	$(ASM) -f bin files/test.asm -o files/test.bin
 
 clean:
 	rm -rf $(BUILD_DIR) $(DISK)

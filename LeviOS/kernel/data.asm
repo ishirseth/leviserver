@@ -1,13 +1,17 @@
+; --- Commands ---
 
 levi_command: db "levi", 0
 echo_command: db "echo", 0
-readtxt_command: db "read", 0
+read_command: db "read", 0
 write_command: db "write", 0
 write_data_command: db "writedata", 0
 delete_command: db "delete", 0
 ls_command: db "ls", 0
 sl_command: db "sl", 0
 clear_command: db "clear", 0
+run_command: db "run", 0
+
+; --- Command Messages ---
 
 levi_str: db "-Levi says hi!", 0
 read_str1: db "-Reading ", 0
@@ -31,6 +35,10 @@ command:        times 32 db 0
 value:          times 512 db 0
 txt_buffer: times 512 db 0
 file_table_buffer: times 1024 db 0
+
+; --- Other ---
+
+bin_extension: db ".bin", 0
 
 ; --- Messages (moved after buffers to avoid being overwritten) ---
 msg: db "LeviOS is running"

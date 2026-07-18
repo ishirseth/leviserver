@@ -32,7 +32,10 @@ Filesys tasks:
 -add sl ✔
 -add clear ✔
 -add backspace ✔
--add exectuable programs which can be ran
+-add exectuable programs which can be ran ✔
+-empty character at end of write file name edge case ✔
+-add checks for .bin or .txt ✔
+-write and read .bin files
 -add some programs and games
 -make a text and program editor instead of rewriting the entire file
 -add serial communication

@@ -166,6 +166,8 @@ write_sector:
         ret
 ; txt_buffer = text and bl = sector
 read_sector:
+    mov ax, ds           ; set ES = DS first, before touching AX for int 0x13
+    mov es, ax
     add bx, 1
     mov ah, 0x02
     mov al, 1
@@ -227,13 +229,14 @@ check_value:
     je error
     cmp byte [value], 0x20 ; space
     je error
-
     ; check length
     mov si, value
     xor cx, cx
     .count_loop:
         cmp byte [si], 0
         je .count_done
+        cmp byte [si], 0x20 ; space anywhere in the name?
+        je error
         inc cx
         inc si
         cmp cx, ax ; check length ax = max
@@ -242,6 +245,31 @@ check_value:
     .count_done:
     mov ax, 1 ; pass flag
     ret
+
+; si = file name
+check_extension:
+    push si
+    .count_loop:
+        cmp byte [si], 0
+        je .count_done
+        inc cx
+        inc si
+        jmp .count_loop
+    .count_done:
+    pop si
+      
+    add si, cx        
+    sub si, 4         
+    mov di, bin_extension    ; reference string, ".bin"
+    mov cx, 4
+    repe cmpsb
+    jne .no_match          ; no match means not a bin file
+
+    mov ax, 1
+    ret
+    .no_match:
+        mov ax, 0
+        ret
 
 ; ----- MEMORY -----
 ; di = destination
@@ -271,5 +299,6 @@ error:
     mov si, err_msg
     call new_line
     call print
-    mov al, 0 ; error flag
-    ret
+    call new_line
+    call clear_input
+    jmp main

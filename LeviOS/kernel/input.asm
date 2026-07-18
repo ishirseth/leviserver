@@ -141,9 +141,9 @@ parse_input:
     je echo_function
 
     mov si, command
-    mov di, readtxt_command
+    mov di, read_command
     call .compare_loop
-    je readtxt_function
+    je read_function
 
     mov si, command
     mov di, write_command
@@ -174,6 +174,11 @@ parse_input:
     mov di, clear_command
     call .compare_loop
     je clear_function
+
+    mov si, command
+    mov di, run_command
+    call .compare_loop
+    je run_function
 
     ret              ; Return if no match found (not_equal)
     .compare_loop:

@@ -14,7 +14,7 @@ echo_function:
     call print
     ret
 
-readtxt_function:
+read_function:
     call load_file_table
 
     ; Search for the filename (which is in 'value' buffer)
@@ -37,9 +37,6 @@ readtxt_function:
     call print
     mov al, ':'
     call print_char
-
-    mov ax, ds           ; set ES = DS first, before touching AX for int 0x13
-    mov es, ax
 
     call read_sector
 
@@ -227,4 +224,23 @@ sl_function:
 
 clear_function:
     call clear_screen
+    ret
+
+run_function:
+    call load_file_table
+    mov si, value
+    call find_file
+    cmp ax, 0
+    je error
+
+    push ax ; preserve sector number
+    mov si, value
+    call check_extension
+    cmp ax, 0
+    je error
+    pop ax
+
+    mov bx, ax
+    call read_sector
+    call txt_buffer     ; run the program loaded into memory
     ret
