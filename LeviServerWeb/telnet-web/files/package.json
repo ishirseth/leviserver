@@ -1,0 +1,13 @@
+{
+  "name": "telnet-web-bridge",
+  "version": "1.0.0",
+  "description": "WebSocket-to-Telnet bridge with a browser terminal frontend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "ws": "^8.17.0"
+  }
+}
