@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/xterm/5.3.0/css/xterm.min.css" />
+<div id="terminal" style="height:500px;background:#111;"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/5.3.0/xterm.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/5.3.0/addon-fit/addon-fit.min.js"></script>
+<script>
+  const term = new Terminal({ convertEol: true, theme: { background: '#111' } });
+  const fitAddon = new FitAddon.FitAddon();
+  term.loadAddon(fitAddon);
+  term.open(document.getElementById('terminal'));
+  fitAddon.fit();
+
+  const ws = new WebSocket('ws://leviserver.eu:3000/ws');
+  ws.binaryType = 'arraybuffer';
+
+  ws.onmessage = (e) => term.write(new Uint8Array(e.data));
+  ws.onclose = () => term.write('\r\n*** connection closed ***\r\n');
+  term.onData((data) => { if (ws.readyState === WebSocket.OPEN) ws.send(data); });
+</script>
