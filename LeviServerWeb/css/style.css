@@ -60,6 +60,7 @@ h3 {
 
 p {
   line-height: 1.5;
+  margin: 0.1em 0; /* or margin: 0; for none at all */
 }
 
 .intro-box {
@@ -70,6 +71,30 @@ p {
   background-color: #1a1a1a;
   border-left: 3px solid #c1a7a7;
   padding-left: 10px;
+}
+
+.bar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.bar {
+  display: block;
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  text-decoration: none;
+  padding: 15px 20px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-weight: bold;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.bar:hover {
+  transform: scale(1.03);
+  border-color: var(--accent-color);
 }
 
 .projects-grid {

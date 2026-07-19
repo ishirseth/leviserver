@@ -1,3 +1,17 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Telnet Web Demo</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<div id="navbar"></div>
+<script src="/js/nav.js"></script>
+
 <link href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.min.css" rel="stylesheet" />
 <div id="terminal" style="height:500px;background:#111;"></div>
 
@@ -24,3 +38,18 @@
     if (ws.readyState === WebSocket.OPEN) ws.send(data);
   });
 </script>
+<section>
+  <h2>Telnet Web Demo</h2>
+  <div>
+    <p>This is my Telnet Server which you can access here via your web browser.</p>
+    <p>It is also accessible via any terminal with telnet installed.</p>
+  </div>
+  <div style="margin-top: 20px;">
+    <p>Telnet connection via terminal:</p>
+    <p>Host: leviserver.eu</p>
+    <p>Port: 1437</p>
+    <p>Command: telnet leviserver.eu 1437</p>
+  </div>
+</section>
+</body>
+</html>
