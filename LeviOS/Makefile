@@ -76,9 +76,10 @@ run: $(DISK)
 	$(QEMU) -drive format=raw,file=$(DISK) -display gtk
 
 programs:
-	$(ASM) -f bin files/test.asm -o files/test.bin
-	$(ASM) -f bin files/fbird.asm -o files/fbird.bin
-	$(ASM) -f bin files/snake.asm -o files/snake.bin
+	$(ASM) -f bin files/asm_programs/test.asm -o files/test.bin
+	$(ASM) -f bin files/asm_programs/fbird.asm -o files/fbird.bin
+	$(ASM) -f bin files/asm_programs/snake.asm -o files/snake.bin
+# yes they run 
 
 clean:
 	rm -rf $(BUILD_DIR) $(DISK)

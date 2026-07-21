@@ -37,8 +37,8 @@ Filesys tasks:
 -add checks for .bin or .txt ✔
 -write and read .bin files ✔
 -make buffers use resb instead of db to save space ✔
--add some programs and games ✔
--make pong
+-add some programs and games (credit to the people online who made them) ✔
+-make pong (will make myself)
 -make a text and program editor instead of rewriting the entire file
 -add serial communication
 
