@@ -5,9 +5,9 @@
 # 11 - 63: files (MAX 512 bytes each)
 
 files:
--max 32 (because file table)
+-max 64 (because file table)
 -max 512 char long (1 sc)
--max 13 char long file name (with .txt)
+-max 13 char long file name (with .txt or .bin)
 -little endian
 
 16 byte entries
@@ -35,7 +35,8 @@ Filesys tasks:
 -add exectuable programs which can be ran ✔
 -empty character at end of write file name edge case ✔
 -add checks for .bin or .txt ✔
--write and read .bin files
+-write and read .bin files ✔
+-make buffers use resb instead of db to save space ✔
 -add some programs and games
 -make a text and program editor instead of rewriting the entire file
 -add serial communication
@@ -49,11 +50,10 @@ Sector task:
 Commands:
 levi (levi)
 echo (repeat what is written for value)
-read (to read data from a file)
+read (to read data from a file, for .bin files reads raw hex)
 write (to create and select a file)
-writedata (to write data to the selected file)
+writedata (to write data to the selected file, for .bin files uses hex with space and lower case letters eg b0 44 b4)
 ls (list all files with sectors)
 sl (steam locomotive)
 delete (delete a file)
-
 

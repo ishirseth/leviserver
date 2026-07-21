@@ -89,9 +89,15 @@ str_to_num:
 num_to_str:
     push bx
     push si
-    mov ax, bx ; divisor
+    mov ax, bx
     xor bx, bx
     xor dx, dx
+
+    cmp ax, 0
+    jne .loop
+    mov byte [si], '0'
+    inc si
+    jmp .done
     .loop:
         cmp ax, 0 ; finish when quotient is 0
         je .reverse
@@ -115,6 +121,114 @@ num_to_str:
         pop si
         pop bx
         ret
+
+
+    push ax
+    push bx
+    push dx
+
+    mov ax, bx
+    mov dl, al
+    shr al, 4          ; high nibble
+    and dl, 0x0F       ; low nibble
+
+    call .nibble_to_char
+    mov [si], al
+    inc si
+
+    mov al, dl
+    call .nibble_to_char
+    mov [si], al
+    inc si
+
+    mov byte [si], 0   ; null terminate
+
+    pop dx
+    pop bx
+    pop ax
+    ret
+
+    .nibble_to_char:
+        cmp al, 10
+        jb .digit
+        add al, 'A' - 10
+        ret
+    .digit:
+        add al, '0'
+        ret
+
+; Converts a value in BX to a 2-character hex string at [SI]
+byte_to_hex:
+    push ax
+    push bx
+    push cx
+    push si
+    mov al, bl
+    
+    ; --- Process High Nibble ---
+    shr al, 4           ; Shift right by 4 to get high nibble
+    call .nibble_to_char
+    mov [si], al
+    inc si
+    ; --- Process Low Nibble ---
+    mov al, bl
+    and al, 0x0F        ; Mask out high bits to get low nibble
+    call .nibble_to_char
+    mov [si], al
+    inc si
+
+    ; Null terminator
+    mov byte [si], 0
+    pop si
+    pop cx
+    pop bx
+    pop ax
+    ret
+
+    .nibble_to_char:
+        cmp al, 9
+        jle .is_digit
+        add al, 'A' - 10    ; For A-F
+        ret
+    .is_digit:
+        add al, '0'         ; For 0-9
+        ret
+
+; Converts a 2-character hex string [si] to a value in bx
+hex_to_byte:
+    xor bx, bx
+    mov al, [si]
+    call .digit_hex
+    mov ch, al
+    mov al, [si + 1]
+    call .digit_hex
+    mov cl, al
+
+    mov al, ch  ; times 16
+    mov bl, 16
+    mul bl
+    add al, cl  ; add lower digit
+    mov bl, al
+    ret
+
+
+    .digit_hex:
+        cmp al, '0'  ; check if its a number      
+        jl .letter_hex
+        cmp al, '9'        
+        jg .letter_hex
+
+        sub al, '0'        ; ascii number to decimal
+        ret
+        .letter_hex:
+            cmp al, 'a' ; check if its a lettter
+            jl error
+            cmp al, 'f'
+            jg error
+
+            sub al, 'a'        ; ascii letter to decimal
+            add al, 10   
+            ret    
 
 ; --- FILE SYS ---
 
@@ -246,8 +360,9 @@ check_value:
     mov ax, 1 ; pass flag
     ret
 
-; si = file name
+; si = file name, ax = 1 (.bin file)
 check_extension:
+    xor cx, cx
     push si
     .count_loop:
         cmp byte [si], 0

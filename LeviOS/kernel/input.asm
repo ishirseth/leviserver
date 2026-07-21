@@ -102,7 +102,7 @@ store_char:
         jae .done                 
         jmp .store
     .check_value:
-        cmp bx, 511               ; Max 511 chars
+        cmp bx, 1599               ; Max 1599 chars
         jae .done                 
     .store:
         mov [di + bx], al         ; Store character

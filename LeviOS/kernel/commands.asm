@@ -16,8 +16,6 @@ echo_function:
 
 read_function:
     call load_file_table
-
-    ; Search for the filename (which is in 'value' buffer)
     mov si, value             ; The filename the user typed
     call find_file
     cmp ax, 0                 ; Did we find it?
@@ -39,13 +37,38 @@ read_function:
     call print_char
 
     call read_sector
+    mov si, value
+    call check_extension    ; check if its a .bin file
+    cmp ax, 1
+    je .read_bin
 
     mov si, txt_buffer
     call new_line
     call print
     ret
-    .not_equal:
-        ret
+
+    .read_bin:
+        call new_line
+        mov si, txt_buffer
+        mov cx, 512
+        .dump_loop:
+            mov bl, [si]         ; Get the raw byte
+            push si              ; Save position in txt_buffer
+            push cx
+            
+            mov si, num_buffer   ; Point at scratch space
+            call byte_to_hex     ; Convert to 2-char hex string
+            call print           ; Print it (e.g., "7F" or "00")
+            
+            pop cx
+            pop si               ; Restore position in txt_buffer
+            
+            mov al, ' '          ; Print a space between bytes
+            call print_char
+            
+            inc si
+            loop .dump_loop
+            ret
 
 write_function:
     call load_file_table
@@ -117,12 +140,32 @@ write_data_function:
     call num_to_str
     call print
 
+    mov si, write_file_buffer
+    call check_extension    ; check if its a .bin file
+    cmp ax, 1
+    je .write_data_bin
+
     mov di, txt_buffer ; destination
     mov si, value      ; source
     call mov_index_data
-    
     call write_sector
     ret
+
+    .write_data_bin:
+        mov si, value
+        mov di, txt_buffer
+
+        .loop:
+            call hex_to_byte
+            mov [di], bl
+
+            add si, 3
+            inc di
+            cmp [si], 0
+            jne .loop
+        mov bx, [write_sector_buffer]
+        call write_sector
+        ret
 
 delete_function:
     call new_line
@@ -227,6 +270,7 @@ clear_function:
     ret
 
 run_function:
+    call new_line
     call load_file_table
     mov si, value
     call find_file
