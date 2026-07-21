@@ -161,7 +161,7 @@ write_data_function:
 
             add si, 3
             inc di
-            cmp [si], 0
+            cmp byte [si], 0
             jne .loop
         mov bx, [write_sector_buffer]
         call write_sector
