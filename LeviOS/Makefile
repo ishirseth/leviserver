@@ -33,7 +33,9 @@ $(FILETABLE1): | $(BUILD_DIR)
 	@printf "levi.txt\x00\x00\x00\x00\x00\x0C\x00\x00" >> $(FILETABLE1)
 	@printf "leska.txt\x00\x00\x00\x00\x0D\x00\x00" >> $(FILETABLE1)
 	@printf "test.bin\x00\x00\x00\x00\x00\x0E\x00\x00" >> $(FILETABLE1)
-	@for i in $$(seq 15 43); do \
+	@printf "fbird.bin\x00\x00\x00\x00\x0F\x00\x00" >> $(FILETABLE1)
+	@printf "snake.bin\x00\x00\x00\x00\x10\x00\x00" >> $(FILETABLE1)
+	@for i in $$(seq 17 43); do \
 		printf '\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00' >> $(FILETABLE1); \
 		printf "$$(printf '\\x%02x' $$i)" >> $(FILETABLE1); \
 		printf '\x00\x00' >> $(FILETABLE1); \
@@ -65,14 +67,18 @@ $(DISK): $(BOOT_BIN) $(KERNEL_BIN) $(FILETABLE1) $(FILETABLE2)
 	dd if=$(FILES_DIR)/cats.txt of=$(DISK) bs=512 seek=12 count=1 conv=notrunc 2>/dev/null
 	dd if=$(FILES_DIR)/cats1.txt of=$(DISK) bs=512 seek=13 count=1 conv=notrunc 2>/dev/null
 	dd if=$(FILES_DIR)/test.bin of=$(DISK) bs=512 seek=14 count=1 conv=notrunc 2>/dev/null
+	dd if=$(FILES_DIR)/fbird.bin of=$(DISK) bs=512 seek=15 count=1 conv=notrunc 2>/dev/null
+	dd if=$(FILES_DIR)/snake.bin of=$(DISK) bs=512 seek=16 count=1 conv=notrunc 2>/dev/null
 	dd if=$(FILES_DIR)/cats2.txt of=$(DISK) bs=512 seek=44 count=1 conv=notrunc 2>/dev/null
 
 # Execution
 run: $(DISK)
 	$(QEMU) -drive format=raw,file=$(DISK) -display gtk
 
-programs: files/test.asm
+programs:
 	$(ASM) -f bin files/test.asm -o files/test.bin
+	$(ASM) -f bin files/fbird.asm -o files/fbird.bin
+	$(ASM) -f bin files/snake.asm -o files/snake.bin
 
 clean:
 	rm -rf $(BUILD_DIR) $(DISK)
