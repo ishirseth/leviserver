@@ -25,7 +25,7 @@ read_key:
     mov [command_offset], bx ; save command length
     mov word [current_offset], 0
 .value:
-    cmp [ignore_space_flag], 1
+    cmp byte [ignore_space_flag], 1
     je .ignore
     mov al, 0x20             ; Load space character
     call store_char         ; Save it to the buffer
