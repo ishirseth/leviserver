@@ -39,7 +39,7 @@ Filesys tasks:
 -make buffers use resb instead of db to save space ✔
 -add some programs and games (credit to the people online who made them) ✔
 -make pong and ball (both by Ishir/me) ✔
--fix problem with running pong after any other program (collision dosent work)
+-fix problem with running pong after any other program ✔
 -return from the other games ✔
 -make a text and program editor
 -add serial communication
@@ -62,6 +62,4 @@ delete (delete a file)
 
 For running a program to return you can:
 ; --- jump to kernel ---  (force to go back to the start of kernel)
-push 0x1000
-push 0x0000
-retf 
+jmp 0x1000:0x0000

@@ -15,6 +15,7 @@ start:
     mov cl, 0x00
     int 0x10
 
+    call clear_screen
     call draw_border
     mov byte [ball_y], 10
     mov byte [ball_x], 40
@@ -42,8 +43,6 @@ main:
 
     call update_paddles
     call check_collision
-    cmp byte [game_over_state], 1
-    je .esc_pressed
     call update_ball
 
     ;delay
@@ -87,27 +86,14 @@ main:
 
 .esc_pressed:
     ; clear, show cursor and then return to LeviOS
-    mov ah, 0x06        ; scroll up function
-    mov al, 0x00        ; clear entire window (0 = clear all)
-    mov bh, 0x07        ; white text on black background (attribute)
-    mov cx, 0x0000       ; top-left corner (row 0, col 0)
-    mov dx, 0x184F       ; bottom-right corner (row 24, col 79)
-    int 0x10
-
-    mov ah, 0x02        ; set cursor position
-    mov bh, 0x00
-    mov dh, 0x00
-    mov dl, 0x00
-    int 0x10
+    call clear_screen
 
     mov ah, 0x01
     mov ch, 0x06     ; bit 5 is 0 (visible), start scan line 6
     mov cl, 0x07     ; end scan line 7
     int 0x10
     
-    push 0x1000
-    push 0x0000
-    retf 
+    jmp 0x1000:0x0000   ; return to kernel LeviOS
 
 read_key:
     mov ah, 0x01          ; Check if key is available
@@ -203,10 +189,10 @@ check_collision:
         mov cl, [ball_y]
         mov dl, [paddle2_y]
         cmp cl, dl
-        jle .fail
+        jle start
         add dl, PADDLE_SIZE
         cmp cl, dl
-        jge .fail
+        jg start
 
         mov byte [ball_dx], -1
         jmp .right_ret
@@ -219,20 +205,16 @@ check_collision:
         mov cl, [ball_y]
         mov dl, [paddle1_y]
         cmp cl, dl
-        jle .fail
+        jle start
         add dl, PADDLE_SIZE
         cmp cl, dl
-        jge .fail
+        jg start
         
         mov byte [ball_dx], 1
         jmp .left_ret
 
-    .fail:
-        mov byte [game_over_state], 1
-        ret
 
 delay:              ; ax = time in ms
-    push ax         ; preserve ax
     mov cx, 1000 
     mul cx
 
@@ -240,7 +222,6 @@ delay:              ; ax = time in ms
     mov dx, ax      ; low 16 bits
     mov ah, 0x86
     int 0x15
-    pop ax
     ret
 
 draw_border:
@@ -286,16 +267,27 @@ draw_border:
         pop cx
         ret
 
+clear_screen:
+    mov ah, 0x06        ; scroll up function
+    mov al, 0x00        ; clear entire window (0 = clear all)
+    mov bh, 0x07        ; white text on black background (attribute)
+    mov cx, 0x0000       ; top-left corner (row 0, col 0)
+    mov dx, 0x184F       ; bottom-right corner (row 24, col 79)
+    int 0x10
+
+    mov ah, 0x02        ; set cursor position
+    mov bh, 0x00
+    mov dh, 0x00
+    mov dl, 0x00
+    int 0x10
+    ret
+
 
 
 ball_y: db 1
 ball_x: db 1
-ball_old_y: db 1
-ball_old_x: db 1
 ball_dy:  db 1     ; row velocity: +1 or -1 (0xFF)
 ball_dx:  db 1     ; column velocity: +1 or -1 (0xFF)
 
 paddle1_y: db 1
 paddle2_y: db 1
-
-game_over_state: db 0
