@@ -127,6 +127,11 @@ game:
 .direction:
 	cmp al, 177 ; 'n' - new game, only when 'n' is released
 	je start
+
+	; --- ADD ESC KEY CHECK HERE ---
+    cmp al, 1           ; ESC key make code is 1
+    je exit_to_boot    ; Jump to your far jump sequence
+
 	and al, 0x7F ; Recognize both press and release codes
 	cmp al, 17 ; 'w' - up
 	je .up
@@ -136,6 +141,7 @@ game:
 	je .down
 	cmp al, 32 ; 'd' - right
 	jne .delay
+
 
 .right:
 	mov al, '>'
@@ -294,14 +300,19 @@ print:
 	popa
 	ret
 
-msg_name: db 'Snake512',0
+
+exit_to_boot:
+    push 0x1000
+    push 0x0000
+    retf
+
+msg_name: db 'Snake',0
 msg_controls: db 'WASD - Direction, N - New Game',0
-msg_fail: db 'You lost =(',0
+msg_fail: db 'Lost',0
 msg_score: db 'Score:',0
 init_snake: db '< * *',0
 
 times 510-($-$$) db 0
-dw 0xAA55 ; Bootloader signature
 
 section .bss
 clockticks: resd 1

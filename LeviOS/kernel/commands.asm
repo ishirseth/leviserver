@@ -270,7 +270,7 @@ clear_function:
     ret
 
 run_function:
-    call new_line
+    call clear_screen
     call load_file_table
     mov si, value
     call find_file
@@ -287,4 +287,6 @@ run_function:
     mov bx, ax
     call read_sector
     call txt_buffer     ; run the program loaded into memory
+    mov si, done_msg
+    call print
     ret

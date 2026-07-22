@@ -25,9 +25,10 @@ delete_str: db "-Deleting ", 0
 bin_extension: db ".bin", 0
 
 ; --- Messages ---
-msg: db "LeviOS is running"
+msg: db "LeviOS"
     db " ", 0x0D,0x0A, 0
 err_msg:     db "Error!", 0
+done_msg: db "Done.", 0
 init_file_name: db "levi.txt", 0
     sl_line1: db "     ooOOOO", 0
     sl_line2: db "    oo     _____", 0

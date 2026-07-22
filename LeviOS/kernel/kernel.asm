@@ -7,6 +7,11 @@ start:
     mov ds, ax
     mov es, ax
 
+    mov ah, 0x01
+    mov ch, 0x06     ; bit 5 is 0 (visible), start scan line 6
+    mov cl, 0x07     ; end scan line 7
+    int 0x10
+
     mov word [write_sector_buffer], 12
     mov di, write_file_buffer
     mov si, init_file_name
@@ -14,6 +19,7 @@ start:
 
     call clear_input        ; initialize command/value buffers and input state
 
+    call clear_screen
     mov si, msg
     call print
     jmp main

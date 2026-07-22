@@ -38,8 +38,10 @@ Filesys tasks:
 -write and read .bin files ✔
 -make buffers use resb instead of db to save space ✔
 -add some programs and games (credit to the people online who made them) ✔
--make pong (will make myself)
--make a text and program editor instead of rewriting the entire file
+-make pong and ball (both by Ishir/me) ✔
+-fix problem with running pong after any other program (collision dosent work)
+-return from the other games ✔
+-make a text and program editor
 -add serial communication
 
 Sector task:
@@ -58,3 +60,8 @@ ls (list all files with sectors)
 sl (steam locomotive)
 delete (delete a file)
 
+For running a program to return you can:
+; --- jump to kernel ---  (force to go back to the start of kernel)
+push 0x1000
+push 0x0000
+retf 

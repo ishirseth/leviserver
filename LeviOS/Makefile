@@ -21,7 +21,7 @@ $(BOOT_BIN): $(BOOT) | $(BUILD_DIR)
 
 # Build Kernel
 $(KERNEL_BIN): $(KERNEL) | $(BUILD_DIR)
-	$(ASM) -f bin $(KERNEL) -i kernel/ -o $(KERNEL_BIN)
+	$(ASM) -f bin $(KERNEL) -l program.lst -i kernel/ -o $(KERNEL_BIN)
 
 # Create directory for build artifacts
 $(BUILD_DIR):
@@ -35,7 +35,9 @@ $(FILETABLE1): | $(BUILD_DIR)
 	@printf "test.bin\x00\x00\x00\x00\x00\x0E\x00\x00" >> $(FILETABLE1)
 	@printf "fbird.bin\x00\x00\x00\x00\x0F\x00\x00" >> $(FILETABLE1)
 	@printf "snake.bin\x00\x00\x00\x00\x10\x00\x00" >> $(FILETABLE1)
-	@for i in $$(seq 17 43); do \
+	@printf "pong.bin\x00\x00\x00\x00\x00\x11\x00\x00" >> $(FILETABLE1)
+	@printf "ball.bin\x00\x00\x00\x00\x00\x12\x00\x00" >> $(FILETABLE1)
+	@for i in $$(seq 19 43); do \
 		printf '\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00' >> $(FILETABLE1); \
 		printf "$$(printf '\\x%02x' $$i)" >> $(FILETABLE1); \
 		printf '\x00\x00' >> $(FILETABLE1); \
@@ -69,6 +71,8 @@ $(DISK): $(BOOT_BIN) $(KERNEL_BIN) $(FILETABLE1) $(FILETABLE2)
 	dd if=$(FILES_DIR)/test.bin of=$(DISK) bs=512 seek=14 count=1 conv=notrunc 2>/dev/null
 	dd if=$(FILES_DIR)/fbird.bin of=$(DISK) bs=512 seek=15 count=1 conv=notrunc 2>/dev/null
 	dd if=$(FILES_DIR)/snake.bin of=$(DISK) bs=512 seek=16 count=1 conv=notrunc 2>/dev/null
+	dd if=$(FILES_DIR)/pong.bin of=$(DISK) bs=512 seek=17 count=1 conv=notrunc 2>/dev/null
+	dd if=$(FILES_DIR)/ball.bin of=$(DISK) bs=512 seek=18 count=1 conv=notrunc 2>/dev/null
 	dd if=$(FILES_DIR)/cats2.txt of=$(DISK) bs=512 seek=44 count=1 conv=notrunc 2>/dev/null
 
 # Execution
@@ -79,6 +83,8 @@ programs:
 	$(ASM) -f bin files/asm_programs/test.asm -o files/test.bin
 	$(ASM) -f bin files/asm_programs/fbird.asm -o files/fbird.bin
 	$(ASM) -f bin files/asm_programs/snake.asm -o files/snake.bin
+	$(ASM) -f bin files/asm_programs/pong.asm -o files/pong.bin
+	$(ASM) -f bin files/asm_programs/ball.asm -o files/ball.bin
 # yes they run 
 
 clean:

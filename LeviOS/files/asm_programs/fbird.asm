@@ -100,9 +100,11 @@ fb16:   add al,[di+2]   ; Get character below head
         stosw
         mov al,0x4B     ; 'K'
         stosw
-        mov al,0x21     ; '!'
-        stosw
         mov cx,100      ; Wait 100 frames
+        ; --- jump to kernel ---
+        push 0x1000
+        push 0x0000
+        retf
 fb20:   push cx
         call wait_frame 
         pop cx
@@ -267,9 +269,8 @@ fb14:   push dx
         out (0x61),al
         ret
 
-        db "OTG"        ; 3 unused bytes
+        db "IS"
 
-        db 0x55,0xaa    ; Bootable signature
 
 pipe:   equ 0x0fa0
 score:  equ 0x0fa2

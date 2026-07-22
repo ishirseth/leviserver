@@ -1,0 +1,1017 @@
+     1                                  [org 0x0000]
+     2                                  
+     3                                  FILE_ENTRY_SIZE equ 16
+     4                                  
+     5                                  start:
+     6 00000000 8CC8                        mov ax, cs
+     7 00000002 8ED8                        mov ds, ax
+     8 00000004 8EC0                        mov es, ax
+     9                                  
+    10 00000006 B401                        mov ah, 0x01
+    11 00000008 B506                        mov ch, 0x06     ; bit 5 is 0 (visible), start scan line 6
+    12 0000000A B107                        mov cl, 0x07     ; end scan line 7
+    13 0000000C CD10                        int 0x10
+    14                                  
+    15 0000000E C706[1200]0C00              mov word [write_sector_buffer], 12
+    16 00000014 BF[2200]                    mov di, write_file_buffer
+    17 00000017 BE[E306]                    mov si, init_file_name
+    18 0000001A E83C02                      call mov_index_data
+    19                                  
+    20 0000001D E83F03                      call clear_input        ; initialize command/value buffers and input state
+    21                                  
+    22 00000020 E84B00                      call clear_screen
+    23 00000023 BE[CC06]                    mov si, msg
+    24 00000026 E80A00                      call print
+    25 00000029 EB00                        jmp main
+    26                                  
+    27                                  main:
+    28 0000002B E85402                      call read_key       ; AL now holds the typed character
+    29 0000002E E80E00                      call print_char
+    30 00000031 EBF8                        jmp main
+    31                                  
+    32                                  %include "lib.asm"       ; Utility functions
+     1                              <1> ; ----- DISPLAY -----
+     2                              <1> 
+     3                              <1> print:
+     4 00000033 AC                  <1>     lodsb
+     5 00000034 08C0                <1>     or al, al
+     6 00000036 7406                <1>     jz .done
+     7                              <1> 
+     8 00000038 B40E                <1>     mov ah, 0x0E
+     9 0000003A CD10                <1>     int 0x10
+    10                              <1> 
+    11 0000003C EBF5                <1>     jmp print
+    12                              <1>     .done:
+    13 0000003E C3                  <1>         ret
+    14                              <1> print_char:
+    15 0000003F B40E                <1>     mov ah, 0x0E
+    16 00000041 CD10                <1>     int 0x10
+    17 00000043 C3                  <1>     ret
+    18                              <1> 
+    19                              <1> new_line:
+    20 00000044 B403                <1>     mov ah, 0x03
+    21 00000046 B700                <1>     mov bh, 0x00
+    22 00000048 CD10                <1>     int 0x10             ; row -> DH
+    23                              <1> 
+    24 0000004A 80FE18              <1>     cmp dh, 24
+    25 0000004D 7C14                <1>     jl .increment
+    26                              <1>     ; already at last row: scroll the screen up ourselves
+    27 0000004F 50                  <1>     push ax
+    28 00000050 B406                <1>     mov ah, 0x06         ; scroll up function
+    29 00000052 B001                <1>     mov al, 1            ; scroll by 1 line
+    30 00000054 B707                <1>     mov bh, 0x07         ; attribute for blank line
+    31 00000056 B90000              <1>     mov cx, 0x0000       ; top-left
+    32 00000059 BA4F18              <1>     mov dx, 0x184F       ; bottom-right (24,79)
+    33 0000005C CD10                <1>     int 0x10
+    34 0000005E 58                  <1>     pop ax
+    35 0000005F B618                <1>     mov dh, 24           ; stay on last row after scrolling
+    36 00000061 EB02                <1>     jmp .set_cursor
+    37                              <1>     .increment:
+    38 00000063 FEC6                <1>         inc dh
+    39                              <1>     .set_cursor:
+    40 00000065 B200                <1>         mov dl, 0x00
+    41                              <1> 
+    42 00000067 B402                <1>         mov ah, 0x02
+    43 00000069 B700                <1>         mov bh, 0x00
+    44 0000006B CD10                <1>         int 0x10
+    45 0000006D C3                  <1>         ret
+    46                              <1> clear_screen:
+    47 0000006E B406                <1>     mov ah, 0x06        ; scroll up function
+    48 00000070 B000                <1>     mov al, 0x00        ; clear entire window (0 = clear all)
+    49 00000072 B707                <1>     mov bh, 0x07        ; white text on black background (attribute)
+    50 00000074 B90000              <1>     mov cx, 0x0000       ; top-left corner (row 0, col 0)
+    51 00000077 BA4F18              <1>     mov dx, 0x184F       ; bottom-right corner (row 24, col 79)
+    52 0000007A CD10                <1>     int 0x10
+    53                              <1> 
+    54 0000007C B402                <1>     mov ah, 0x02        ; set cursor position
+    55 0000007E B700                <1>     mov bh, 0x00
+    56 00000080 B600                <1>     mov dh, 0x00
+    57 00000082 B200                <1>     mov dl, 0x00
+    58 00000084 CD10                <1>     int 0x10
+    59 00000086 C3                  <1>     ret
+    60                              <1> 
+    61                              <1> ; ------ CONVERT ------
+    62                              <1> ; si = input string - bx = int 
+    63                              <1> ; max: 65,535
+    64                              <1> str_to_num:
+    65 00000087 31DB                <1>     xor bx, bx
+    66                              <1>     .loop:
+    67 00000089 8A04                <1>         mov al, [si]
+    68 0000008B 3C00                <1>         cmp al, 0
+    69 0000008D 7414                <1>         je .done
+    70                              <1> 
+    71 0000008F 2C30                <1>         sub al, '0'
+    72 00000091 30E4                <1>         xor ah, ah
+    73                              <1> 
+    74 00000093 50                  <1>         push ax              ; save digit
+    75 00000094 89D8                <1>         mov ax, bx           ; AX = current total
+    76 00000096 B90A00              <1>         mov cx, 10           ; use CX as multiplier, not BX
+    77 00000099 F7E1                <1>         mul cx               ; AX = AX * 10 (DX:AX, but DX=0 for small numbers)
+    78 0000009B 89C3                <1>         mov bx, ax           ; BX = new total
+    79 0000009D 58                  <1>         pop ax               ; restore digit
+    80                              <1> 
+    81 0000009E 01C3                <1>         add bx, ax
+    82 000000A0 46                  <1>         inc si
+    83 000000A1 EBE6                <1>         jmp .loop
+    84                              <1>     .done:
+    85 000000A3 C3                  <1>         ret
+    86                              <1> 
+    87                              <1> ; bx = int si = string
+    88                              <1> ; max: 65,535
+    89                              <1> num_to_str:
+    90 000000A4 53                  <1>     push bx
+    91 000000A5 56                  <1>     push si
+    92 000000A6 89D8                <1>     mov ax, bx
+    93 000000A8 31DB                <1>     xor bx, bx
+    94 000000AA 31D2                <1>     xor dx, dx
+    95                              <1> 
+    96 000000AC 83F800              <1>     cmp ax, 0
+    97 000000AF 7506                <1>     jne .loop
+    98 000000B1 C60430              <1>     mov byte [si], '0'
+    99 000000B4 46                  <1>     inc si
+   100 000000B5 EB21                <1>     jmp .done
+   101                              <1>     .loop:
+   102 000000B7 83F800              <1>         cmp ax, 0 ; finish when quotient is 0
+   103 000000BA 740F                <1>         je .reverse
+   104 000000BC B90A00              <1>         mov cx, 10 ; divides to get remainder 
+   105 000000BF F7F1                <1>         div cx
+   106 000000C1 83C230              <1>         add dx, '0' ; makes remainder a char
+   107 000000C4 52                  <1>         push dx
+   108 000000C5 31D2                <1>         xor dx, dx ; clear remainder
+   109 000000C7 FEC3                <1>         inc bl
+   110 000000C9 EBEC                <1>         jmp .loop
+   111                              <1>     .reverse:
+   112 000000CB 80FB00              <1>         cmp bl, 0
+   113 000000CE 7408                <1>         je .done
+   114 000000D0 5A                  <1>         pop dx
+   115 000000D1 8814                <1>         mov [si], dl
+   116 000000D3 46                  <1>         inc si
+   117 000000D4 FECB                <1>         dec bl
+   118 000000D6 EBF3                <1>         jmp .reverse
+   119                              <1>     .done:
+   120 000000D8 C60400              <1>         mov byte [si], 0  ; add the null termiantor at the end
+   121 000000DB 5E                  <1>         pop si
+   122 000000DC 5B                  <1>         pop bx
+   123 000000DD C3                  <1>         ret
+   124                              <1> 
+   125                              <1> 
+   126 000000DE 50                  <1>     push ax
+   127 000000DF 53                  <1>     push bx
+   128 000000E0 52                  <1>     push dx
+   129                              <1> 
+   130 000000E1 89D8                <1>     mov ax, bx
+   131 000000E3 88C2                <1>     mov dl, al
+   132 000000E5 C0E804              <1>     shr al, 4          ; high nibble
+   133 000000E8 80E20F              <1>     and dl, 0x0F       ; low nibble
+   134                              <1> 
+   135 000000EB E81200              <1>     call .nibble_to_char
+   136 000000EE 8804                <1>     mov [si], al
+   137 000000F0 46                  <1>     inc si
+   138                              <1> 
+   139 000000F1 88D0                <1>     mov al, dl
+   140 000000F3 E80A00              <1>     call .nibble_to_char
+   141 000000F6 8804                <1>     mov [si], al
+   142 000000F8 46                  <1>     inc si
+   143                              <1> 
+   144 000000F9 C60400              <1>     mov byte [si], 0   ; null terminate
+   145                              <1> 
+   146 000000FC 5A                  <1>     pop dx
+   147 000000FD 5B                  <1>     pop bx
+   148 000000FE 58                  <1>     pop ax
+   149 000000FF C3                  <1>     ret
+   150                              <1> 
+   151                              <1>     .nibble_to_char:
+   152 00000100 3C0A                <1>         cmp al, 10
+   153 00000102 7203                <1>         jb .digit
+   154 00000104 0437                <1>         add al, 'A' - 10
+   155 00000106 C3                  <1>         ret
+   156                              <1>     .digit:
+   157 00000107 0430                <1>         add al, '0'
+   158 00000109 C3                  <1>         ret
+   159                              <1> 
+   160                              <1> ; Converts a value in BX to a 2-character hex string at [SI]
+   161                              <1> byte_to_hex:
+   162 0000010A 50                  <1>     push ax
+   163 0000010B 53                  <1>     push bx
+   164 0000010C 51                  <1>     push cx
+   165 0000010D 56                  <1>     push si
+   166 0000010E 88D8                <1>     mov al, bl
+   167                              <1>     
+   168                              <1>     ; --- Process High Nibble ---
+   169 00000110 C0E804              <1>     shr al, 4           ; Shift right by 4 to get high nibble
+   170 00000113 E81500              <1>     call .nibble_to_char
+   171 00000116 8804                <1>     mov [si], al
+   172 00000118 46                  <1>     inc si
+   173                              <1>     ; --- Process Low Nibble ---
+   174 00000119 88D8                <1>     mov al, bl
+   175 0000011B 240F                <1>     and al, 0x0F        ; Mask out high bits to get low nibble
+   176 0000011D E80B00              <1>     call .nibble_to_char
+   177 00000120 8804                <1>     mov [si], al
+   178 00000122 46                  <1>     inc si
+   179                              <1> 
+   180                              <1>     ; Null terminator
+   181 00000123 C60400              <1>     mov byte [si], 0
+   182 00000126 5E                  <1>     pop si
+   183 00000127 59                  <1>     pop cx
+   184 00000128 5B                  <1>     pop bx
+   185 00000129 58                  <1>     pop ax
+   186 0000012A C3                  <1>     ret
+   187                              <1> 
+   188                              <1>     .nibble_to_char:
+   189 0000012B 3C09                <1>         cmp al, 9
+   190 0000012D 7E03                <1>         jle .is_digit
+   191 0000012F 0437                <1>         add al, 'A' - 10    ; For A-F
+   192 00000131 C3                  <1>         ret
+   193                              <1>     .is_digit:
+   194 00000132 0430                <1>         add al, '0'         ; For 0-9
+   195 00000134 C3                  <1>         ret
+   196                              <1> 
+   197                              <1> ; Converts a 2-character hex string [si] to a value in bx
+   198                              <1> hex_to_byte:
+   199 00000135 31DB                <1>     xor bx, bx
+   200 00000137 8A04                <1>     mov al, [si]
+   201 00000139 E81500              <1>     call .digit_hex
+   202 0000013C 88C5                <1>     mov ch, al
+   203 0000013E 8A4401              <1>     mov al, [si + 1]
+   204 00000141 E80D00              <1>     call .digit_hex
+   205 00000144 88C1                <1>     mov cl, al
+   206                              <1> 
+   207 00000146 88E8                <1>     mov al, ch  ; times 16
+   208 00000148 B310                <1>     mov bl, 16
+   209 0000014A F6E3                <1>     mul bl
+   210 0000014C 00C8                <1>     add al, cl  ; add lower digit
+   211 0000014E 88C3                <1>     mov bl, al
+   212 00000150 C3                  <1>     ret
+   213                              <1> 
+   214                              <1> 
+   215                              <1>     .digit_hex:
+   216 00000151 3C30                <1>         cmp al, '0'  ; check if its a number      
+   217 00000153 7C07                <1>         jl .letter_hex
+   218 00000155 3C39                <1>         cmp al, '9'        
+   219 00000157 7F03                <1>         jg .letter_hex
+   220                              <1> 
+   221 00000159 2C30                <1>         sub al, '0'        ; ascii number to decimal
+   222 0000015B C3                  <1>         ret
+   223                              <1>         .letter_hex:
+   224 0000015C 3C61                <1>             cmp al, 'a' ; check if its a lettter
+   225 0000015E 0F8C0E01            <1>             jl error
+   226 00000162 3C66                <1>             cmp al, 'f'
+   227 00000164 0F8F0801            <1>             jg error
+   228                              <1> 
+   229 00000168 2C61                <1>             sub al, 'a'        ; ascii letter to decimal
+   230 0000016A 040A                <1>             add al, 10   
+   231 0000016C C3                  <1>             ret    
+   232                              <1> 
+   233                              <1> ; --- FILE SYS ---
+   234                              <1> 
+   235                              <1> load_file_table:
+   236 0000016D B402                <1>     mov ah, 0x02
+   237 0000016F B002                <1>     mov al, 2              ; load 2 sectors (1024 bytes) instead of 1
+   238 00000171 B500                <1>     mov ch, 0
+   239 00000173 B10B                <1>     mov cl, 11             ; start at sector 10 (BIOS 1-indexed = 11)
+   240 00000175 B600                <1>     mov dh, 0
+   241 00000177 B280                <1>     mov dl, 0x80
+   242 00000179 BB[9208]            <1>     mov bx, file_table_buffer
+   243 0000017C CD13                <1>     int 0x13
+   244 0000017E C3                  <1>     ret
+   245                              <1> write_file_table:
+   246                              <1>     ; write both tables back to disk (sectors 10-11)
+   247 0000017F 50                  <1>     push ax
+   248 00000180 B403                <1>     mov ah, 0x03
+   249 00000182 B002                <1>     mov al, 2              ; write 2 sectors (both tables)
+   250 00000184 B500                <1>     mov ch, 0
+   251 00000186 B10B                <1>     mov cl, 11             ; start at sector 10 (BIOS 1-indexed = 11)
+   252 00000188 B600                <1>     mov dh, 0
+   253 0000018A B280                <1>     mov dl, 0x80
+   254 0000018C BB[9208]            <1>     mov bx, file_table_buffer
+   255 0000018F CD13                <1>     int 0x13
+   256 00000191 58                  <1>     pop ax
+   257 00000192 C3                  <1>     ret
+   258                              <1> 
+   259                              <1> ; txt_buffer = text and bl = sector
+   260                              <1> write_sector:
+   261 00000193 83C301              <1>     add bx, 1
+   262 00000196 B400                <1>     mov ah, 0x00     ; reset disk
+   263 00000198 B280                <1>     mov dl, 0x80
+   264 0000019A CD13                <1>     int 0x13
+   265                              <1> 
+   266 0000019C B80103              <1>     mov ax, 0x0301          ; AH=03h (Write), AL=01h (1 sector)
+   267 0000019F B500                <1>     mov ch, 0               ; Cylinder 0
+   268 000001A1 88D9                <1>     mov cl, bl              ; Sector 
+   269 000001A3 B600                <1>     mov dh, 0               ; Head 0
+   270 000001A5 B280                <1>     mov dl, 0x80            ; Drive 0x80
+   271 000001A7 1E                  <1>     push ds
+   272 000001A8 07                  <1>     pop es
+   273 000001A9 BB[9206]            <1>     mov bx, txt_buffer      ; Buffer offset
+   274 000001AC CD13                <1>     int 0x13                ; Call BIOS
+   275 000001AE 7304                <1>     jnc .done            ; If no carry, success!
+   276                              <1> 
+   277 000001B0 E8BD00              <1>     call error     ; error
+   278 000001B3 C3                  <1>     ret
+   279                              <1>     .done:
+   280 000001B4 C3                  <1>         ret
+   281                              <1> ; txt_buffer = text and bl = sector
+   282                              <1> read_sector:
+   283 000001B5 8CD8                <1>     mov ax, ds           ; set ES = DS first, before touching AX for int 0x13
+   284 000001B7 8EC0                <1>     mov es, ax
+   285 000001B9 83C301              <1>     add bx, 1
+   286 000001BC B402                <1>     mov ah, 0x02
+   287 000001BE B001                <1>     mov al, 1
+   288 000001C0 B500                <1>     mov ch, 0
+   289 000001C2 88D9                <1>     mov cl, bl           ; sector number 
+   290 000001C4 B600                <1>     mov dh, 0
+   291 000001C6 B280                <1>     mov dl, 0x80
+   292 000001C8 BB[9206]            <1>     mov bx, txt_buffer
+   293 000001CB CD13                <1>     int 0x13
+   294 000001CD 0F829F00            <1>     jc error
+   295 000001D1 C3                  <1>     ret
+   296                              <1> 
+   297                              <1> ; INPUT: SI = address of filename string
+   298                              <1> ; OUTPUT: AX = sector number, or 0 if not found
+   299                              <1> find_file:
+   300 000001D2 BB[9208]            <1>     mov bx, file_table_buffer
+   301 000001D5 BA4000              <1>     mov dx, 64                    ; scan all 64 entries
+   302                              <1>     .next_entry:
+   303 000001D8 803F00              <1>         cmp byte [bx], 0
+   304 000001DB 740B                <1>         je .skip                      ; empty entry? skip it, don't stop
+   305                              <1>         
+   306 000001DD 56                  <1>         push si
+   307 000001DE 89DF                <1>         mov di, bx
+   308 000001E0 B90D00              <1>         mov cx, FILE_ENTRY_SIZE - 3
+   309 000001E3 F3A6                <1>         repe cmpsb
+   310 000001E5 5E                  <1>         pop si
+   311 000001E6 7409                <1>         je .found
+   312                              <1>     .skip:
+   313 000001E8 83C310              <1>         add bx, FILE_ENTRY_SIZE
+   314 000001EB 4A                  <1>         dec dx
+   315 000001EC 75EA                <1>         jnz .next_entry
+   316 000001EE 31C0                <1>         xor ax, ax                    ; scanned everything, not found
+   317 000001F0 C3                  <1>         ret
+   318                              <1>     .found:
+   319 000001F1 8B470D              <1>         mov ax, [bx + FILE_ENTRY_SIZE - 3]
+   320 000001F4 C3                  <1>         ret
+   321                              <1> 
+   322                              <1> ; finds first empty sector in the filetable 
+   323                              <1> find_free_sector:
+   324 000001F5 BB[9208]            <1>     mov bx, file_table_buffer
+   325 000001F8 B94000              <1>     mov cx, 64                    ; scan all 64 entries
+   326                              <1>     .check_entry:
+   327 000001FB 803F00              <1>         cmp byte [bx], 0               ; empty entry = name field starts with 0
+   328 000001FE 7408                <1>         je .found
+   329 00000200 83C310              <1>         add bx, FILE_ENTRY_SIZE
+   330 00000203 E2F6                <1>         loop .check_entry
+   331                              <1>         ; cx hit 0 -- scanned all 64 entries, none free
+   332 00000205 31C0                <1>         xor ax, ax                    ; no free entry found
+   333 00000207 C3                  <1>         ret
+   334                              <1>     .found:
+   335 00000208 8B470D              <1>         mov ax, [bx + FILE_ENTRY_SIZE - 3]   ; sector, pre-filled by the Makefile
+   336 0000020B C3                  <1>         ret
+   337                              <1> 
+   338                              <1> ; check if value is not too long and exists
+   339                              <1> ; ax = max length
+   340                              <1> check_value:
+   341                              <1>     ; check if it exists
+   342 0000020C 803E[5200]00        <1>     cmp byte [value], 0
+   343 00000211 745D                <1>     je error
+   344 00000213 803E[5200]20        <1>     cmp byte [value], 0x20 ; space
+   345 00000218 7456                <1>     je error
+   346                              <1>     ; check length
+   347 0000021A BE[5200]            <1>     mov si, value
+   348 0000021D 31C9                <1>     xor cx, cx
+   349                              <1>     .count_loop:
+   350 0000021F 803C00              <1>         cmp byte [si], 0
+   351 00000222 740D                <1>         je .count_done
+   352 00000224 803C20              <1>         cmp byte [si], 0x20 ; space anywhere in the name?
+   353 00000227 7447                <1>         je error
+   354 00000229 41                  <1>         inc cx
+   355 0000022A 46                  <1>         inc si
+   356 0000022B 39C1                <1>         cmp cx, ax ; check length ax = max
+   357 0000022D 7741                <1>         ja error
+   358 0000022F EBEE                <1>         jmp .count_loop
+   359                              <1>     .count_done:
+   360 00000231 B80100              <1>     mov ax, 1 ; pass flag
+   361 00000234 C3                  <1>     ret
+   362                              <1> 
+   363                              <1> ; si = file name, ax = 1 (.bin file)
+   364                              <1> check_extension:
+   365 00000235 31C9                <1>     xor cx, cx
+   366 00000237 56                  <1>     push si
+   367                              <1>     .count_loop:
+   368 00000238 803C00              <1>         cmp byte [si], 0
+   369 0000023B 7404                <1>         je .count_done
+   370 0000023D 41                  <1>         inc cx
+   371 0000023E 46                  <1>         inc si
+   372 0000023F EBF7                <1>         jmp .count_loop
+   373                              <1>     .count_done:
+   374 00000241 5E                  <1>     pop si
+   375                              <1>       
+   376 00000242 01CE                <1>     add si, cx        
+   377 00000244 83EE04              <1>     sub si, 4         
+   378 00000247 BF[C706]            <1>     mov di, bin_extension    ; reference string, ".bin"
+   379 0000024A B90400              <1>     mov cx, 4
+   380 0000024D F3A6                <1>     repe cmpsb
+   381 0000024F 7504                <1>     jne .no_match          ; no match means not a bin file
+   382                              <1> 
+   383 00000251 B80100              <1>     mov ax, 1
+   384 00000254 C3                  <1>     ret
+   385                              <1>     .no_match:
+   386 00000255 B80000              <1>         mov ax, 0
+   387 00000258 C3                  <1>         ret
+   388                              <1> 
+   389                              <1> ; ----- MEMORY -----
+   390                              <1> ; di = destination
+   391                              <1> ; si = source
+   392                              <1> mov_index_data:
+   393 00000259 AC                  <1>     lodsb           ; Load [SI] into AL, inc SI
+   394 0000025A AA                  <1>     stosb           ; Store AL into [DI], inc DI
+   395 0000025B 84C0                <1>     test al, al     ; Check if 0 (null terminator)
+   396 0000025D 75FA                <1>     jnz mov_index_data       ; Continue until 0 is copied
+   397 0000025F C3                  <1>     ret
+   398                              <1> 
+   399                              <1> ; ----- TIME -----
+   400                              <1> delay:              ; ax = time in ms
+   401 00000260 50                  <1>     push ax         ; preserve ax
+   402 00000261 B9E803              <1>     mov cx, 1000 
+   403 00000264 F7E1                <1>     mul cx
+   404                              <1> 
+   405 00000266 89D1                <1>     mov cx, dx      ; high 16 bits
+   406 00000268 89C2                <1>     mov dx, ax      ; low 16 bits
+   407 0000026A B486                <1>     mov ah, 0x86
+   408 0000026C CD15                <1>     int 0x15
+   409 0000026E 58                  <1>     pop ax
+   410 0000026F C3                  <1>     ret
+   411                              <1> 
+   412                              <1> ; ----- ERROR -----
+   413                              <1> error:
+   414 00000270 BE[D606]            <1>     mov si, err_msg
+   415 00000273 E8CEFD              <1>     call new_line
+   416 00000276 E8BAFD              <1>     call print
+   417 00000279 E8C8FD              <1>     call new_line
+   418 0000027C E8E000              <1>     call clear_input
+   419 0000027F E9A9FD              <1>     jmp main
+    33                                  %include "input.asm"     ; Logic that handles buffers and user keys
+     1                              <1> 
+     2                              <1> ; ----- INPUT -----
+     3                              <1> 
+     4                              <1> read_key:
+     5 00000282 B400                <1>     mov ah, 0x00
+     6 00000284 CD16                <1>     int 0x16
+     7                              <1> 
+     8 00000286 3C0D                <1>     cmp al, 0x0D          ; Enter?
+     9 00000288 7442                <1>     je .enter_pressed
+    10 0000028A 3C1B                <1>     cmp al, 0x1B          ; Escape?
+    11 0000028C 743E                <1>     je .enter_pressed    ; Also do new entry when esc is pressed
+    12 0000028E 3C08                <1>     cmp al, 0x08          ; Backspace?
+    13 00000290 7446                <1>     je .backspace
+    14 00000292 3C20                <1>     cmp al, 0x20          ; Space?
+    15 00000294 7404                <1>     je .space_pressed
+    16                              <1>     
+    17                              <1>     ; Otherwise, store the char
+    18 00000296 E89800              <1>     call store_char
+    19 00000299 C3                  <1>     ret
+    20                              <1> 
+    21                              <1> .space_pressed:
+    22 0000029A 803E[0800]01        <1>     cmp byte [space_pressed_flag], 1
+    23 0000029F 7413                <1>     je .value
+    24                              <1>     
+    25 000002A1 C606[0800]01        <1>     mov byte [space_pressed_flag], 1
+    26 000002A6 8B1E[0200]          <1>     mov bx, [current_offset]
+    27 000002AA 891E[0600]          <1>     mov [command_offset], bx ; save command length
+    28 000002AE C706[0200]0000      <1>     mov word [current_offset], 0
+    29                              <1> .value:
+    30 000002B4 803E[0900]01        <1>     cmp byte [ignore_space_flag], 1
+    31 000002B9 7405                <1>     je .ignore
+    32 000002BB B020                <1>     mov al, 0x20             ; Load space character
+    33 000002BD E87100              <1>     call store_char         ; Save it to the buffer
+    34                              <1>     .ignore:
+    35                              <1> 
+    36 000002C0 C606[0900]00        <1>     mov byte [ignore_space_flag], 0
+    37 000002C5 C706[0000][5200]    <1>     mov word [active_ptr], value
+    38 000002CB C3                  <1>     ret
+    39                              <1> .enter_pressed:
+    40 000002CC E8B100              <1>     call parse_input
+    41 000002CF E88D00              <1>     call clear_input
+    42 000002D2 E86FFD              <1>     call new_line
+    43 000002D5 E953FD              <1>     jmp main
+    44                              <1> .backspace:
+    45 000002D8 8B1E[0200]          <1>     mov bx, [current_offset]
+    46 000002DC 83FB00              <1>     cmp bx, 0
+    47 000002DF 7521                <1>     jne .do_backspace
+    48                              <1>     ; offset is 0 -- check if we're in value and can cross back to command
+    49 000002E1 813E[0000][5200]    <1>     cmp word [active_ptr], value
+    50 000002E7 7537                <1>     jne .done                    ; already in command with offset 0, nothing to do
+    51                              <1> 
+    52 000002E9 C706[0000][3200]    <1>     mov word [active_ptr], command
+    53 000002EF C606[0800]00        <1>     mov byte [space_pressed_flag], 0
+    54 000002F4 C606[0900]01        <1>     mov byte [ignore_space_flag], 1
+    55 000002F9 8B1E[0600]          <1>     mov bx, [command_offset]
+    56 000002FD 891E[0200]          <1>     mov [current_offset], bx
+    57 00000301 C3                  <1>     ret
+    58                              <1> 
+    59                              <1>     .do_backspace:
+    60                              <1>         ; visual erase
+    61 00000302 B008                <1>         mov al, 0x08
+    62 00000304 E838FD              <1>         call print_char
+    63 00000307 B020                <1>         mov al, ' '
+    64 00000309 E833FD              <1>         call print_char
+    65 0000030C B008                <1>         mov al, 0x08
+    66 0000030E E82EFD              <1>         call print_char
+    67 00000311 E80E00              <1>         call cursor_right
+    68                              <1> 
+    69 00000314 4B                  <1>         dec bx
+    70 00000315 891E[0200]          <1>         mov [current_offset], bx
+    71 00000319 8B3E[0000]          <1>         mov di, [active_ptr]
+    72 0000031D C60100              <1>         mov byte [di + bx], 0
+    73                              <1>     .done:
+    74 00000320 C3                  <1>         ret
+    75                              <1> 
+    76                              <1> .no_store:
+    77 00000321 C3                  <1>     ret
+    78                              <1> 
+    79                              <1> cursor_right:
+    80 00000322 B403                <1>     mov ah, 0x03
+    81 00000324 B700                <1>     mov bh, 0x00
+    82 00000326 CD10                <1>     int 0x10          ; dh = row, dl = column
+    83                              <1> 
+    84 00000328 FEC2                <1>     inc dl
+    85 0000032A B402                <1>     mov ah, 0x02
+    86 0000032C B700                <1>     mov bh, 0x00
+    87 0000032E CD10                <1>     int 0x10          ; set cursor to same row, column+1
+    88 00000330 C3                  <1>     ret
+    89                              <1> 
+    90                              <1> store_char:
+    91 00000331 8B3E[0000]          <1>     mov di, [active_ptr]      ; di = current buffer address
+    92 00000335 8B1E[0200]          <1>     mov bx, [current_offset]  ; bx = current offset
+    93                              <1> 
+    94                              <1>     ; Check which buffer is active
+    95 00000339 81FF[3200]          <1>     cmp di, command           ; Is this the command buffer?
+    96 0000033D 7408                <1>     je .check_command
+    97                              <1>     
+    98 0000033F 81FF[5200]          <1>     cmp di, value             ; Is this the value buffer?
+    99 00000343 7409                <1>     je .check_value
+   100                              <1>     
+   101 00000345 EB0D                <1>     jmp .store                ; Fallback/Error handling
+   102                              <1>     .check_command:               ; Check if input is too long
+   103 00000347 83FB1F              <1>         cmp bx, 31                ; Max 31 chars + 1 null = 32
+   104 0000034A 7312                <1>         jae .done                 
+   105 0000034C EB06                <1>         jmp .store
+   106                              <1>     .check_value:
+   107 0000034E 81FB3F06            <1>         cmp bx, 1599               ; Max 1599 chars
+   108 00000352 730A                <1>         jae .done                 
+   109                              <1>     .store:
+   110 00000354 8801                <1>         mov [di + bx], al         ; Store character
+   111 00000356 43                  <1>         inc bx
+   112 00000357 891E[0200]          <1>         mov [current_offset], bx
+   113 0000035B C60100              <1>         mov byte [di + bx], 0     ; Null terminate
+   114                              <1>     .done:
+   115 0000035E C3                  <1>         ret
+   116                              <1> 
+   117                              <1> 
+   118                              <1> 
+   119                              <1> ; ----- PROCESS INPUT -----
+   120                              <1> 
+   121                              <1> clear_input:
+   122 0000035F BF[3200]            <1>     mov di, command        ; Start at the beginning of the command buffer
+   123 00000362 B9A000              <1>     mov cx, 160             ; Total size of both buffers (32+128)
+   124 00000365 30C0                <1>     xor al, al
+   125 00000367 F3AA                <1>     rep stosb              ; Efficiently clears the memory in one go
+   126                              <1>     
+   127                              <1>     ; Reset the state variables so we are ready for the next command
+   128 00000369 C706[0000][3200]    <1>     mov word [active_ptr], command
+   129 0000036F C706[0200]0000      <1>     mov word [current_offset], 0
+   130 00000375 C606[0800]00        <1>     mov byte [space_pressed_flag], 0
+   131 0000037A C606[0900]01        <1>     mov byte [ignore_space_flag], 1
+   132 0000037F C3                  <1>     ret
+   133                              <1> 
+   134                              <1> parse_input:
+   135 00000380 BE[3200]            <1>     mov si, command
+   136 00000383 BF[4906]            <1>     mov di, levi_command
+   137 00000386 E87A00              <1>     call .compare_loop
+   138 00000389 0F848700            <1>     je levi_function
+   139                              <1> 
+   140 0000038D BE[3200]            <1>     mov si, command
+   141 00000390 BF[4E06]            <1>     mov di, echo_command
+   142 00000393 E86D00              <1>     call .compare_loop
+   143 00000396 0F848400            <1>     je echo_function
+   144                              <1> 
+   145 0000039A BE[3200]            <1>     mov si, command
+   146 0000039D BF[5306]            <1>     mov di, read_command
+   147 000003A0 E86000              <1>     call .compare_loop
+   148 000003A3 0F848600            <1>     je read_function
+   149                              <1> 
+   150 000003A7 BE[3200]            <1>     mov si, command
+   151 000003AA BF[5806]            <1>     mov di, write_command
+   152 000003AD E85300              <1>     call .compare_loop
+   153 000003B0 0F84E700            <1>     je write_function
+   154                              <1> 
+   155 000003B4 BE[3200]            <1>     mov si, command
+   156 000003B7 BF[5E06]            <1>     mov di, write_data_command
+   157 000003BA E84600              <1>     call .compare_loop
+   158 000003BD 0F844001            <1>     je write_data_function
+   159                              <1> 
+   160 000003C1 BE[3200]            <1>     mov si, command
+   161 000003C4 BF[6806]            <1>     mov di, delete_command
+   162 000003C7 E83900              <1>     call .compare_loop
+   163 000003CA 0F848A01            <1>     je delete_function
+   164                              <1> 
+   165 000003CE BE[3200]            <1>     mov si, command
+   166 000003D1 BF[6F06]            <1>     mov di, ls_command
+   167 000003D4 E82C00              <1>     call .compare_loop
+   168 000003D7 0F84BE01            <1>     je ls_function
+   169                              <1> 
+   170 000003DB BE[3200]            <1>     mov si, command
+   171 000003DE BF[7206]            <1>     mov di, sl_command
+   172 000003E1 E81F00              <1>     call .compare_loop
+   173 000003E4 0F84E101            <1>     je sl_function
+   174                              <1> 
+   175 000003E8 BE[3200]            <1>     mov si, command
+   176 000003EB BF[7506]            <1>     mov di, clear_command
+   177 000003EE E81200              <1>     call .compare_loop
+   178 000003F1 0F841F02            <1>     je clear_function
+   179                              <1> 
+   180 000003F5 BE[3200]            <1>     mov si, command
+   181 000003F8 BF[7B06]            <1>     mov di, run_command
+   182 000003FB E80500              <1>     call .compare_loop
+   183 000003FE 0F841602            <1>     je run_function
+   184                              <1> 
+   185 00000402 C3                  <1>     ret              ; Return if no match found (not_equal)
+   186                              <1>     .compare_loop:
+   187 00000403 8A04                <1>         mov al, [si]
+   188 00000405 8A1D                <1>         mov bl, [di]
+   189 00000407 38D8                <1>         cmp al, bl
+   190 00000409 7508                <1>         jne .done        ; Mismatch: ZF=0
+   191 0000040B 3C00                <1>         cmp al, 0        ; End of string: ZF=1
+   192 0000040D 7404                <1>         je .done
+   193 0000040F 46                  <1>         inc si
+   194 00000410 47                  <1>         inc di
+   195 00000411 EBF0                <1>         jmp .compare_loop
+   196                              <1>     .done:
+   197 00000413 C3                  <1>         ret
+   198                              <1> 
+   199                              <1> 
+   200                              <1> 
+    34                                  %include "commands.asm"  ; The specific command implementations
+     1                              <1> ; ----- COMMANDS -----
+     2                              <1> 
+     3                              <1> levi_function:
+     4 00000414 BE[7F06]            <1>     mov si, levi_str
+     5 00000417 E82AFC              <1>     call new_line
+     6 0000041A E816FC              <1>     call print
+     7 0000041D C3                  <1>     ret
+     8                              <1> 
+     9                              <1> echo_function:
+    10 0000041E E823FC              <1>     call new_line
+    11 00000421 B02D                <1>     mov al, '-'
+    12 00000423 E819FC              <1>     call print_char
+    13 00000426 BE[5200]            <1>     mov si, value
+    14 00000429 E807FC              <1>     call print
+    15 0000042C C3                  <1>     ret
+    16                              <1> 
+    17                              <1> read_function:
+    18 0000042D E83DFD              <1>     call load_file_table
+    19 00000430 BE[5200]            <1>     mov si, value             ; The filename the user typed
+    20 00000433 E89CFD              <1>     call find_file
+    21 00000436 83F800              <1>     cmp ax, 0                 ; Did we find it?
+    22 00000439 0F8433FE            <1>     je error             ; If AL=0, not found
+    23 0000043D 89C3                <1>     mov bx, ax
+    24                              <1> 
+    25                              <1>     ; print message stuff
+    26 0000043F E802FC              <1>     call new_line
+    27 00000442 BE[8E06]            <1>     mov si, read_str1
+    28 00000445 E8EBFB              <1>     call print
+    29 00000448 BE[5200]            <1>     mov si, value
+    30 0000044B E8E5FB              <1>     call print
+    31 0000044E BE[9806]            <1>     mov si, read_str2
+    32 00000451 E8DFFB              <1>     call print
+    33 00000454 BE[0A00]            <1>     mov si, num_buffer
+    34 00000457 E84AFC              <1>     call num_to_str
+    35 0000045A E8D6FB              <1>     call print
+    36 0000045D B03A                <1>     mov al, ':'
+    37 0000045F E8DDFB              <1>     call print_char
+    38                              <1> 
+    39 00000462 E850FD              <1>     call read_sector
+    40 00000465 BE[5200]            <1>     mov si, value
+    41 00000468 E8CAFD              <1>     call check_extension    ; check if its a .bin file
+    42 0000046B 83F801              <1>     cmp ax, 1
+    43 0000046E 740A                <1>     je .read_bin
+    44                              <1> 
+    45 00000470 BE[9206]            <1>     mov si, txt_buffer
+    46 00000473 E8CEFB              <1>     call new_line
+    47 00000476 E8BAFB              <1>     call print
+    48 00000479 C3                  <1>     ret
+    49                              <1> 
+    50                              <1>     .read_bin:
+    51 0000047A E8C7FB              <1>         call new_line
+    52 0000047D BE[9206]            <1>         mov si, txt_buffer
+    53 00000480 B90002              <1>         mov cx, 512
+    54                              <1>         .dump_loop:
+    55 00000483 8A1C                <1>             mov bl, [si]         ; Get the raw byte
+    56 00000485 56                  <1>             push si              ; Save position in txt_buffer
+    57 00000486 51                  <1>             push cx
+    58                              <1>             
+    59 00000487 BE[0A00]            <1>             mov si, num_buffer   ; Point at scratch space
+    60 0000048A E87DFC              <1>             call byte_to_hex     ; Convert to 2-char hex string
+    61 0000048D E8A3FB              <1>             call print           ; Print it (e.g., "7F" or "00")
+    62                              <1>             
+    63 00000490 59                  <1>             pop cx
+    64 00000491 5E                  <1>             pop si               ; Restore position in txt_buffer
+    65                              <1>             
+    66 00000492 B020                <1>             mov al, ' '          ; Print a space between bytes
+    67 00000494 E8A8FB              <1>             call print_char
+    68                              <1>             
+    69 00000497 46                  <1>             inc si
+    70 00000498 E2E9                <1>             loop .dump_loop
+    71 0000049A C3                  <1>             ret
+    72                              <1> 
+    73                              <1> write_function:
+    74 0000049B E8CFFC              <1>     call load_file_table
+    75                              <1> 
+    76 0000049E B80D00              <1>     mov ax, FILE_ENTRY_SIZE - 3
+    77 000004A1 E868FD              <1>     call check_value
+    78 000004A4 3C00                <1>     cmp al, 0                 ; check_value returns 0 = fail, 1 = ok
+    79 000004A6 7458                <1>     je .done
+    80                              <1> 
+    81                              <1>     ; --- Check filename doesn't already exist ---
+    82 000004A8 BE[5200]            <1>     mov si, value
+    83 000004AB E824FD              <1>     call find_file
+    84 000004AE 83F800              <1>     cmp ax, 0
+    85 000004B1 751C                <1>     jne .skip_entry              ; if a sector was returned file already exists
+    86                              <1> 
+    87 000004B3 E83FFD              <1>     call find_free_sector       ; AL = sector number, BX = entry address
+    88 000004B6 83F800              <1>     cmp ax, 0
+    89 000004B9 0F84B3FD            <1>     je error                    ; bail here, so we never write to sector 0
+    90                              <1>     
+    91                              <1>     ; write new entry into the buffer 
+    92 000004BD 50                  <1>     push ax
+    93 000004BE BE[5200]            <1>     mov si, value
+    94 000004C1 89DF                <1>     mov di, bx
+    95 000004C3 B90D00              <1>     mov cx, FILE_ENTRY_SIZE - 3
+    96 000004C6 F3A4                <1>     rep movsb
+    97 000004C8 58                  <1>     pop ax
+    98 000004C9 89470D              <1>     mov [bx + FILE_ENTRY_SIZE - 3], ax
+    99 000004CC E8B0FC              <1>     call write_file_table
+   100                              <1> 
+   101                              <1>     .skip_entry:  ; entry already created
+   102                              <1> 
+   103 000004CF 50                  <1>     push ax
+   104 000004D0 A3[1200]            <1>     mov word [write_sector_buffer], ax
+   105 000004D3 BF[2200]            <1>     mov di, write_file_buffer ; destination
+   106 000004D6 BE[5200]            <1>     mov si, value      ; source
+   107 000004D9 E87DFD              <1>     call mov_index_data
+   108 000004DC 58                  <1>     pop ax
+   109                              <1> 
+   110 000004DD 50                  <1>     push ax
+   111 000004DE E863FB              <1>     call new_line
+   112 000004E1 BE[A406]            <1>     mov si, write_str
+   113 000004E4 E84CFB              <1>     call print
+   114 000004E7 BE[5200]            <1>     mov si, value
+   115 000004EA E846FB              <1>     call print
+   116 000004ED BE[9806]            <1>     mov si, read_str2
+   117 000004F0 E840FB              <1>     call print
+   118 000004F3 58                  <1>     pop ax
+   119 000004F4 89C3                <1>     mov bx, ax
+   120 000004F6 BE[0A00]            <1>     mov si, num_buffer
+   121 000004F9 E8A8FB              <1>     call num_to_str
+   122 000004FC E834FB              <1>     call print
+   123 000004FF C3                  <1>     ret
+   124                              <1>     .done:
+   125 00000500 C3                  <1>         ret
+   126                              <1> 
+   127                              <1> write_data_function:
+   128 00000501 A1[1200]            <1>     mov ax, [write_sector_buffer]
+   129 00000504 89C3                <1>     mov bx, ax
+   130                              <1> 
+   131 00000506 E83BFB              <1>     call new_line
+   132 00000509 BE[AF06]            <1>     mov si, write_data_str
+   133 0000050C E824FB              <1>     call print
+   134 0000050F BE[2200]            <1>     mov si, write_file_buffer
+   135 00000512 E81EFB              <1>     call print
+   136 00000515 BE[9806]            <1>     mov si, read_str2
+   137 00000518 E818FB              <1>     call print
+   138                              <1> 
+   139 0000051B BE[0A00]            <1>     mov si, num_buffer
+   140 0000051E E883FB              <1>     call num_to_str
+   141 00000521 E80FFB              <1>     call print
+   142                              <1> 
+   143 00000524 BE[2200]            <1>     mov si, write_file_buffer
+   144 00000527 E80BFD              <1>     call check_extension    ; check if its a .bin file
+   145 0000052A 83F801              <1>     cmp ax, 1
+   146 0000052D 740D                <1>     je .write_data_bin
+   147                              <1> 
+   148 0000052F BF[9206]            <1>     mov di, txt_buffer ; destination
+   149 00000532 BE[5200]            <1>     mov si, value      ; source
+   150 00000535 E821FD              <1>     call mov_index_data
+   151 00000538 E858FC              <1>     call write_sector
+   152 0000053B C3                  <1>     ret
+   153                              <1> 
+   154                              <1>     .write_data_bin:
+   155 0000053C BE[5200]            <1>         mov si, value
+   156 0000053F BF[9206]            <1>         mov di, txt_buffer
+   157                              <1> 
+   158                              <1>         .loop:
+   159 00000542 E8F0FB              <1>             call hex_to_byte
+   160 00000545 881D                <1>             mov [di], bl
+   161                              <1> 
+   162 00000547 83C603              <1>             add si, 3
+   163 0000054A 47                  <1>             inc di
+   164 0000054B 803C00              <1>             cmp byte [si], 0
+   165 0000054E 75F2                <1>             jne .loop
+   166 00000550 8B1E[1200]          <1>         mov bx, [write_sector_buffer]
+   167 00000554 E83CFC              <1>         call write_sector
+   168 00000557 C3                  <1>         ret
+   169                              <1> 
+   170                              <1> delete_function:
+   171 00000558 E8E9FA              <1>     call new_line
+   172 0000055B E80FFC              <1>     call load_file_table     ; init
+   173 0000055E BE[5200]            <1>     mov si, value
+   174 00000561 E86EFC              <1>     call find_file
+   175 00000564 83F800              <1>     cmp ax, 0    ; check if found
+   176 00000567 0F8405FD            <1>     je error
+   177                              <1> 
+   178 0000056B 53                  <1>     push bx
+   179 0000056C 50                  <1>     push ax
+   180 0000056D BE[BC06]            <1>     mov si, delete_str
+   181 00000570 E8C0FA              <1>     call print
+   182 00000573 BE[5200]            <1>     mov si, value
+   183 00000576 E8BAFA              <1>     call print
+   184 00000579 BE[9806]            <1>     mov si, read_str2
+   185 0000057C E8B4FA              <1>     call print
+   186 0000057F 58                  <1>     pop ax
+   187 00000580 89C3                <1>     mov bx, ax
+   188 00000582 BE[0A00]            <1>     mov si, num_buffer 
+   189 00000585 E81CFB              <1>     call num_to_str
+   190 00000588 E8A8FA              <1>     call print
+   191 0000058B 5B                  <1>     pop bx
+   192                              <1> 
+   193 0000058C 89DF                <1>     mov di, bx               ; clear file entry name
+   194 0000058E B90D00              <1>     mov cx, 13
+   195 00000591 30C0                <1>     xor al, al
+   196 00000593 F3AA                <1>     rep stosb
+   197 00000595 E8E7FB              <1>     call write_file_table
+   198                              <1> 
+   199 00000598 C3                  <1>     ret
+   200                              <1> 
+   201                              <1> ls_function:
+   202 00000599 E8D1FB              <1>     call load_file_table
+   203 0000059C BB[9208]            <1>     mov bx, file_table_buffer
+   204 0000059F B94000              <1>     mov cx, 64                  ; scan all 64 entries
+   205                              <1>     .next_entry:
+   206 000005A2 803F00              <1>         cmp byte [bx], 0            ; empty entry?
+   207 000005A5 741C                <1>         je .skip                    ; skip it (don't print blank entries)
+   208 000005A7 51                  <1>         push cx
+   209                              <1> 
+   210 000005A8 53                  <1>         push bx
+   211 000005A9 89DE                <1>         mov si, bx
+   212 000005AB E896FA              <1>         call new_line
+   213 000005AE E882FA              <1>         call print
+   214 000005B1 5B                  <1>         pop bx
+   215 000005B2 53                  <1>         push bx
+   216 000005B3 8B5F0D              <1>         mov word bx, [bx + FILE_ENTRY_SIZE - 3]
+   217 000005B6 E8EBFA              <1>         call num_to_str
+   218 000005B9 B020                <1>         mov al, ' '
+   219 000005BB E881FA              <1>         call print_char
+   220 000005BE E872FA              <1>         call print
+   221 000005C1 5B                  <1>         pop bx
+   222                              <1> 
+   223 000005C2 59                  <1>         pop cx
+   224                              <1>     .skip:
+   225 000005C3 83C310              <1>         add bx, FILE_ENTRY_SIZE
+   226 000005C6 E2DA                <1>         loop .next_entry
+   227 000005C8 C3                  <1>         ret
+   228                              <1> 
+   229                              <1> sl_function:
+   230 000005C9 E878FA              <1>     call new_line
+   231 000005CC B336                <1>     mov bl, 54 ; right
+   232                              <1> 
+   233                              <1>     .loop:
+   234 000005CE BE[EC06]            <1>         mov si, sl_line1
+   235 000005D1 E82900              <1>         call .print_train
+   236 000005D4 BE[F806]            <1>         mov si, sl_line2
+   237 000005D7 E82300              <1>         call .print_train
+   238 000005DA BE[0907]            <1>         mov si, sl_line3
+   239 000005DD E81D00              <1>         call .print_train
+   240 000005E0 BE[2407]            <1>         mov si, sl_line4
+   241 000005E3 E81700              <1>         call .print_train
+   242 000005E6 BE[3F07]            <1>         mov si, sl_line5
+   243 000005E9 E81100              <1>         call .print_train
+   244                              <1> 
+   245 000005EC B86400              <1>         mov ax, 100
+   246 000005EF E86EFC              <1>         call delay
+   247 000005F2 E879FA              <1>         call clear_screen
+   248                              <1> 
+   249 000005F5 FECB                <1>         dec bl
+   250 000005F7 80FB00              <1>         cmp bl, 0
+   251 000005FA 7FD2                <1>         jg .loop
+   252 000005FC C3                  <1>     ret
+   253                              <1> 
+   254                              <1>     .print_train:
+   255 000005FD 56                  <1>         push si
+   256 000005FE B403                <1>         mov ah, 0x03
+   257 00000600 B700                <1>         mov bh, 0x00
+   258 00000602 CD10                <1>         int 0x10             ; get current row into dh
+   259 00000604 B402                <1>         mov ah, 0x02
+   260 00000606 B700                <1>         mov bh, 0x00
+   261 00000608 88DA                <1>         mov dl, bl           ; column X
+   262 0000060A CD10                <1>         int 0x10
+   263 0000060C 5E                  <1>         pop si
+   264 0000060D E823FA              <1>         call print
+   265 00000610 E831FA              <1>         call new_line
+   266 00000613 C3                  <1>         ret
+   267                              <1> 
+   268                              <1> clear_function:
+   269 00000614 E857FA              <1>     call clear_screen
+   270 00000617 C3                  <1>     ret
+   271                              <1> 
+   272                              <1> run_function:
+   273 00000618 E853FA              <1>     call clear_screen
+   274 0000061B E84FFB              <1>     call load_file_table
+   275 0000061E BE[5200]            <1>     mov si, value
+   276 00000621 E8AEFB              <1>     call find_file
+   277 00000624 83F800              <1>     cmp ax, 0
+   278 00000627 0F8445FC            <1>     je error
+   279                              <1> 
+   280 0000062B 50                  <1>     push ax ; preserve sector number
+   281 0000062C BE[5200]            <1>     mov si, value
+   282 0000062F E803FC              <1>     call check_extension
+   283 00000632 83F800              <1>     cmp ax, 0
+   284 00000635 0F8437FC            <1>     je error
+   285 00000639 58                  <1>     pop ax
+   286                              <1> 
+   287 0000063A 89C3                <1>     mov bx, ax
+   288 0000063C E876FB              <1>     call read_sector
+   289 0000063F E8(9206)            <1>     call txt_buffer     ; run the program loaded into memory
+   290 00000642 BE[DD06]            <1>     mov si, done_msg
+   291 00000645 E8EBF9              <1>     call print
+   292 00000648 C3                  <1>     ret
+    35                                  %include "data.asm"      ; Data must be first so everything else can see the buffers
+     1                              <1> ; --- Commands ---
+     2                              <1> 
+     3 00000649 6C65766900          <1> levi_command: db "levi", 0
+     4 0000064E 6563686F00          <1> echo_command: db "echo", 0
+     5 00000653 7265616400          <1> read_command: db "read", 0
+     6 00000658 777269746500        <1> write_command: db "write", 0
+     7 0000065E 777269746564617461- <1> write_data_command: db "writedata", 0
+     7 00000667 00                  <1>
+     8 00000668 64656C65746500      <1> delete_command: db "delete", 0
+     9 0000066F 6C7300              <1> ls_command: db "ls", 0
+    10 00000672 736C00              <1> sl_command: db "sl", 0
+    11 00000675 636C65617200        <1> clear_command: db "clear", 0
+    12 0000067B 72756E00            <1> run_command: db "run", 0
+    13                              <1> 
+    14                              <1> ; --- Command Messages ---
+    15                              <1> 
+    16 0000067F 2D4C65766920736179- <1> levi_str: db "-Levi says hi!", 0
+    16 00000688 732068692100        <1>
+    17 0000068E 2D52656164696E6720- <1> read_str1: db "-Reading ", 0
+    17 00000697 00                  <1>
+    18 00000698 20617420736563746F- <1> read_str2: db " at sector ", 0
+    18 000006A1 722000              <1>
+    19 000006A4 2D53656C6563746564- <1> write_str: db "-Selected ", 0
+    19 000006AD 2000                <1>
+    20 000006AF 2D57726974696E6720- <1> write_data_str: db "-Writing to ", 0
+    20 000006B8 746F2000            <1>
+    21 000006BC 2D44656C6574696E67- <1> delete_str: db "-Deleting ", 0
+    21 000006C5 2000                <1>
+    22                              <1> 
+    23                              <1> ; --- Other ---
+    24                              <1> 
+    25 000006C7 2E62696E00          <1> bin_extension: db ".bin", 0
+    26                              <1> 
+    27                              <1> ; --- Messages ---
+    28 000006CC 4C6576694F53        <1> msg: db "LeviOS"
+    29 000006D2 200D0A00            <1>     db " ", 0x0D,0x0A, 0
+    30 000006D6 4572726F722100      <1> err_msg:     db "Error!", 0
+    31 000006DD 446F6E652E00        <1> done_msg: db "Done.", 0
+    32 000006E3 6C6576692E74787400  <1> init_file_name: db "levi.txt", 0
+    33 000006EC 20202020206F6F4F4F- <1>     sl_line1: db "     ooOOOO", 0
+    33 000006F5 4F4F00              <1>
+    34 000006F8 202020206F6F202020- <1>     sl_line2: db "    oo     _____", 0
+    34 00000701 20205F5F5F5F5F00    <1>
+    35 00000709 2020205F495F5F6E5F- <1>     sl_line3: db "   _I__n_n__||_|| ________", 0
+    35 00000712 6E5F5F7C7C5F7C7C20- <1>
+    35 0000071B 5F5F5F5F5F5F5F5F00  <1>
+    36 00000724 203E285F5F5F5F5F5F- <1>     sl_line4: db " >(_________|_7_|-|______|", 0
+    36 0000072D 5F5F5F7C5F375F7C2D- <1>
+    36 00000736 7C5F5F5F5F5F5F7C00  <1>
+    37 0000073F 202020202020282928- <1>     sl_line5: db "      ()() ()() o    oo  oo", 0
+    37 00000748 292028292829206F20- <1>
+    37 00000751 2020206F6F20206F6F- <1>
+    37 0000075A 00                  <1>
+    38                              <1> 
+    39                              <1> 
+    40                              <1> section .bss
+    41                              <1> ; --- State Variables ---
+    42 00000000 ????                <1> active_ptr:         resw 1
+    43 00000002 ????????            <1> current_offset:     resw 2  ; (or resw 1, since a word is 2 bytes)
+    44 00000006 ????                <1> command_offset:     resw 1
+    45 00000008 ??                  <1> space_pressed_flag: resb 1
+    46 00000009 ??                  <1> ignore_space_flag:  resb 1
+    47                              <1> 
+    48                              <1> ; --- Buffers (0 bytes in your .img file!) ---
+    49 0000000A ????????????????    <1> num_buffer:         resb 8
+    50 00000012 <res 10h>           <1> write_sector_buffer: resb 16 
+    51 00000022 <res 10h>           <1> write_file_buffer:  resb FILE_ENTRY_SIZE
+    52 00000032 <res 20h>           <1> command:            resb 32
+    53 00000052 <res 640h>          <1> value:              resb 1600
+    54 00000692 <res 200h>          <1> txt_buffer:         resb 512
+    55 00000892 <res 400h>          <1> file_table_buffer:  resb 1024

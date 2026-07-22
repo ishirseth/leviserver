@@ -7,6 +7,8 @@ read_key:
 
     cmp al, 0x0D          ; Enter?
     je .enter_pressed
+    cmp al, 0x1B          ; Escape?
+    je .enter_pressed    ; Also do new entry when esc is pressed
     cmp al, 0x08          ; Backspace?
     je .backspace
     cmp al, 0x20          ; Space?
