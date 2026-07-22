@@ -14,13 +14,13 @@
     14                                  
     15 0000000E C706[1200]0C00              mov word [write_sector_buffer], 12
     16 00000014 BF[2200]                    mov di, write_file_buffer
-    17 00000017 BE[E306]                    mov si, init_file_name
+    17 00000017 BE[E606]                    mov si, init_file_name
     18 0000001A E83C02                      call mov_index_data
     19                                  
     20 0000001D E83F03                      call clear_input        ; initialize command/value buffers and input state
     21                                  
     22 00000020 E84B00                      call clear_screen
-    23 00000023 BE[CC06]                    mov si, msg
+    23 00000023 BE[CF06]                    mov si, msg
     24 00000026 E80A00                      call print
     25 00000029 EB00                        jmp main
     26                                  
@@ -407,7 +407,7 @@
    375                              <1>       
    376 00000242 01CE                <1>     add si, cx        
    377 00000244 83EE04              <1>     sub si, 4         
-   378 00000247 BF[C706]            <1>     mov di, bin_extension    ; reference string, ".bin"
+   378 00000247 BF[CA06]            <1>     mov di, bin_extension    ; reference string, ".bin"
    379 0000024A B90400              <1>     mov cx, 4
    380 0000024D F3A6                <1>     repe cmpsb
    381 0000024F 7504                <1>     jne .no_match          ; no match means not a bin file
@@ -443,7 +443,7 @@
    411                              <1> 
    412                              <1> ; ----- ERROR -----
    413                              <1> error:
-   414 00000270 BE[D606]            <1>     mov si, err_msg
+   414 00000270 BE[D906]            <1>     mov si, err_msg
    415 00000273 E8CEFD              <1>     call new_line
    416 00000276 E8BAFD              <1>     call print
    417 00000279 E8C8FD              <1>     call new_line
@@ -585,52 +585,52 @@
    133                              <1> 
    134                              <1> parse_input:
    135 00000380 BE[3200]            <1>     mov si, command
-   136 00000383 BF[4906]            <1>     mov di, levi_command
+   136 00000383 BF[4C06]            <1>     mov di, levi_command
    137 00000386 E87A00              <1>     call .compare_loop
    138 00000389 0F848700            <1>     je levi_function
    139                              <1> 
    140 0000038D BE[3200]            <1>     mov si, command
-   141 00000390 BF[4E06]            <1>     mov di, echo_command
+   141 00000390 BF[5106]            <1>     mov di, echo_command
    142 00000393 E86D00              <1>     call .compare_loop
    143 00000396 0F848400            <1>     je echo_function
    144                              <1> 
    145 0000039A BE[3200]            <1>     mov si, command
-   146 0000039D BF[5306]            <1>     mov di, read_command
+   146 0000039D BF[5606]            <1>     mov di, read_command
    147 000003A0 E86000              <1>     call .compare_loop
    148 000003A3 0F848600            <1>     je read_function
    149                              <1> 
    150 000003A7 BE[3200]            <1>     mov si, command
-   151 000003AA BF[5806]            <1>     mov di, write_command
+   151 000003AA BF[5B06]            <1>     mov di, write_command
    152 000003AD E85300              <1>     call .compare_loop
    153 000003B0 0F84E700            <1>     je write_function
    154                              <1> 
    155 000003B4 BE[3200]            <1>     mov si, command
-   156 000003B7 BF[5E06]            <1>     mov di, write_data_command
+   156 000003B7 BF[6106]            <1>     mov di, write_data_command
    157 000003BA E84600              <1>     call .compare_loop
    158 000003BD 0F844001            <1>     je write_data_function
    159                              <1> 
    160 000003C1 BE[3200]            <1>     mov si, command
-   161 000003C4 BF[6806]            <1>     mov di, delete_command
+   161 000003C4 BF[6B06]            <1>     mov di, delete_command
    162 000003C7 E83900              <1>     call .compare_loop
    163 000003CA 0F848A01            <1>     je delete_function
    164                              <1> 
    165 000003CE BE[3200]            <1>     mov si, command
-   166 000003D1 BF[6F06]            <1>     mov di, ls_command
+   166 000003D1 BF[7206]            <1>     mov di, ls_command
    167 000003D4 E82C00              <1>     call .compare_loop
    168 000003D7 0F84BE01            <1>     je ls_function
    169                              <1> 
    170 000003DB BE[3200]            <1>     mov si, command
-   171 000003DE BF[7206]            <1>     mov di, sl_command
+   171 000003DE BF[7506]            <1>     mov di, sl_command
    172 000003E1 E81F00              <1>     call .compare_loop
    173 000003E4 0F84E101            <1>     je sl_function
    174                              <1> 
    175 000003E8 BE[3200]            <1>     mov si, command
-   176 000003EB BF[7506]            <1>     mov di, clear_command
+   176 000003EB BF[7806]            <1>     mov di, clear_command
    177 000003EE E81200              <1>     call .compare_loop
    178 000003F1 0F841F02            <1>     je clear_function
    179                              <1> 
    180 000003F5 BE[3200]            <1>     mov si, command
-   181 000003F8 BF[7B06]            <1>     mov di, run_command
+   181 000003F8 BF[7E06]            <1>     mov di, run_command
    182 000003FB E80500              <1>     call .compare_loop
    183 000003FE 0F841602            <1>     je run_function
    184                              <1> 
@@ -654,7 +654,7 @@
      1                              <1> ; ----- COMMANDS -----
      2                              <1> 
      3                              <1> levi_function:
-     4 00000414 BE[7F06]            <1>     mov si, levi_str
+     4 00000414 BE[8206]            <1>     mov si, levi_str
      5 00000417 E82AFC              <1>     call new_line
      6 0000041A E816FC              <1>     call print
      7 0000041D C3                  <1>     ret
@@ -677,11 +677,11 @@
     24                              <1> 
     25                              <1>     ; print message stuff
     26 0000043F E802FC              <1>     call new_line
-    27 00000442 BE[8E06]            <1>     mov si, read_str1
+    27 00000442 BE[9106]            <1>     mov si, read_str1
     28 00000445 E8EBFB              <1>     call print
     29 00000448 BE[5200]            <1>     mov si, value
     30 0000044B E8E5FB              <1>     call print
-    31 0000044E BE[9806]            <1>     mov si, read_str2
+    31 0000044E BE[9B06]            <1>     mov si, read_str2
     32 00000451 E8DFFB              <1>     call print
     33 00000454 BE[0A00]            <1>     mov si, num_buffer
     34 00000457 E84AFC              <1>     call num_to_str
@@ -762,11 +762,11 @@
    109                              <1> 
    110 000004DD 50                  <1>     push ax
    111 000004DE E863FB              <1>     call new_line
-   112 000004E1 BE[A406]            <1>     mov si, write_str
+   112 000004E1 BE[A706]            <1>     mov si, write_str
    113 000004E4 E84CFB              <1>     call print
    114 000004E7 BE[5200]            <1>     mov si, value
    115 000004EA E846FB              <1>     call print
-   116 000004ED BE[9806]            <1>     mov si, read_str2
+   116 000004ED BE[9B06]            <1>     mov si, read_str2
    117 000004F0 E840FB              <1>     call print
    118 000004F3 58                  <1>     pop ax
    119 000004F4 89C3                <1>     mov bx, ax
@@ -782,11 +782,11 @@
    129 00000504 89C3                <1>     mov bx, ax
    130                              <1> 
    131 00000506 E83BFB              <1>     call new_line
-   132 00000509 BE[AF06]            <1>     mov si, write_data_str
+   132 00000509 BE[B206]            <1>     mov si, write_data_str
    133 0000050C E824FB              <1>     call print
    134 0000050F BE[2200]            <1>     mov si, write_file_buffer
    135 00000512 E81EFB              <1>     call print
-   136 00000515 BE[9806]            <1>     mov si, read_str2
+   136 00000515 BE[9B06]            <1>     mov si, read_str2
    137 00000518 E818FB              <1>     call print
    138                              <1> 
    139 0000051B BE[0A00]            <1>     mov si, num_buffer
@@ -830,11 +830,11 @@
    177                              <1> 
    178 0000056B 53                  <1>     push bx
    179 0000056C 50                  <1>     push ax
-   180 0000056D BE[BC06]            <1>     mov si, delete_str
+   180 0000056D BE[BF06]            <1>     mov si, delete_str
    181 00000570 E8C0FA              <1>     call print
    182 00000573 BE[5200]            <1>     mov si, value
    183 00000576 E8BAFA              <1>     call print
-   184 00000579 BE[9806]            <1>     mov si, read_str2
+   184 00000579 BE[9B06]            <1>     mov si, read_str2
    185 0000057C E8B4FA              <1>     call print
    186 0000057F 58                  <1>     pop ax
    187 00000580 89C3                <1>     mov bx, ax
@@ -884,15 +884,15 @@
    231 000005CC B336                <1>     mov bl, 54 ; right
    232                              <1> 
    233                              <1>     .loop:
-   234 000005CE BE[EC06]            <1>         mov si, sl_line1
+   234 000005CE BE[EF06]            <1>         mov si, sl_line1
    235 000005D1 E82900              <1>         call .print_train
-   236 000005D4 BE[F806]            <1>         mov si, sl_line2
+   236 000005D4 BE[FB06]            <1>         mov si, sl_line2
    237 000005D7 E82300              <1>         call .print_train
-   238 000005DA BE[0907]            <1>         mov si, sl_line3
+   238 000005DA BE[0C07]            <1>         mov si, sl_line3
    239 000005DD E81D00              <1>         call .print_train
-   240 000005E0 BE[2407]            <1>         mov si, sl_line4
+   240 000005E0 BE[2707]            <1>         mov si, sl_line4
    241 000005E3 E81700              <1>         call .print_train
-   242 000005E6 BE[3F07]            <1>         mov si, sl_line5
+   242 000005E6 BE[4207]            <1>         mov si, sl_line5
    243 000005E9 E81100              <1>         call .print_train
    244                              <1> 
    245 000005EC B86400              <1>         mov ax, 100
@@ -940,63 +940,64 @@
    287 0000063A 89C3                <1>     mov bx, ax
    288 0000063C E876FB              <1>     call read_sector
    289 0000063F E8(9206)            <1>     call txt_buffer     ; run the program loaded into memory
-   290 00000642 BE[DD06]            <1>     mov si, done_msg
-   291 00000645 E8EBF9              <1>     call print
-   292 00000648 C3                  <1>     ret
+   290 00000642 E8FFF9              <1>     call new_line
+   291 00000645 BE[E006]            <1>     mov si, done_msg
+   292 00000648 E8E8F9              <1>     call print
+   293 0000064B C3                  <1>     ret
     35                                  %include "data.asm"      ; Data must be first so everything else can see the buffers
      1                              <1> ; --- Commands ---
      2                              <1> 
-     3 00000649 6C65766900          <1> levi_command: db "levi", 0
-     4 0000064E 6563686F00          <1> echo_command: db "echo", 0
-     5 00000653 7265616400          <1> read_command: db "read", 0
-     6 00000658 777269746500        <1> write_command: db "write", 0
-     7 0000065E 777269746564617461- <1> write_data_command: db "writedata", 0
-     7 00000667 00                  <1>
-     8 00000668 64656C65746500      <1> delete_command: db "delete", 0
-     9 0000066F 6C7300              <1> ls_command: db "ls", 0
-    10 00000672 736C00              <1> sl_command: db "sl", 0
-    11 00000675 636C65617200        <1> clear_command: db "clear", 0
-    12 0000067B 72756E00            <1> run_command: db "run", 0
+     3 0000064C 6C65766900          <1> levi_command: db "levi", 0
+     4 00000651 6563686F00          <1> echo_command: db "echo", 0
+     5 00000656 7265616400          <1> read_command: db "read", 0
+     6 0000065B 777269746500        <1> write_command: db "write", 0
+     7 00000661 777269746564617461- <1> write_data_command: db "writedata", 0
+     7 0000066A 00                  <1>
+     8 0000066B 64656C65746500      <1> delete_command: db "delete", 0
+     9 00000672 6C7300              <1> ls_command: db "ls", 0
+    10 00000675 736C00              <1> sl_command: db "sl", 0
+    11 00000678 636C65617200        <1> clear_command: db "clear", 0
+    12 0000067E 72756E00            <1> run_command: db "run", 0
     13                              <1> 
     14                              <1> ; --- Command Messages ---
     15                              <1> 
-    16 0000067F 2D4C65766920736179- <1> levi_str: db "-Levi says hi!", 0
-    16 00000688 732068692100        <1>
-    17 0000068E 2D52656164696E6720- <1> read_str1: db "-Reading ", 0
-    17 00000697 00                  <1>
-    18 00000698 20617420736563746F- <1> read_str2: db " at sector ", 0
-    18 000006A1 722000              <1>
-    19 000006A4 2D53656C6563746564- <1> write_str: db "-Selected ", 0
-    19 000006AD 2000                <1>
-    20 000006AF 2D57726974696E6720- <1> write_data_str: db "-Writing to ", 0
-    20 000006B8 746F2000            <1>
-    21 000006BC 2D44656C6574696E67- <1> delete_str: db "-Deleting ", 0
-    21 000006C5 2000                <1>
+    16 00000682 2D4C65766920736179- <1> levi_str: db "-Levi says hi!", 0
+    16 0000068B 732068692100        <1>
+    17 00000691 2D52656164696E6720- <1> read_str1: db "-Reading ", 0
+    17 0000069A 00                  <1>
+    18 0000069B 20617420736563746F- <1> read_str2: db " at sector ", 0
+    18 000006A4 722000              <1>
+    19 000006A7 2D53656C6563746564- <1> write_str: db "-Selected ", 0
+    19 000006B0 2000                <1>
+    20 000006B2 2D57726974696E6720- <1> write_data_str: db "-Writing to ", 0
+    20 000006BB 746F2000            <1>
+    21 000006BF 2D44656C6574696E67- <1> delete_str: db "-Deleting ", 0
+    21 000006C8 2000                <1>
     22                              <1> 
     23                              <1> ; --- Other ---
     24                              <1> 
-    25 000006C7 2E62696E00          <1> bin_extension: db ".bin", 0
+    25 000006CA 2E62696E00          <1> bin_extension: db ".bin", 0
     26                              <1> 
     27                              <1> ; --- Messages ---
-    28 000006CC 4C6576694F53        <1> msg: db "LeviOS"
-    29 000006D2 200D0A00            <1>     db " ", 0x0D,0x0A, 0
-    30 000006D6 4572726F722100      <1> err_msg:     db "Error!", 0
-    31 000006DD 446F6E652E00        <1> done_msg: db "Done.", 0
-    32 000006E3 6C6576692E74787400  <1> init_file_name: db "levi.txt", 0
-    33 000006EC 20202020206F6F4F4F- <1>     sl_line1: db "     ooOOOO", 0
-    33 000006F5 4F4F00              <1>
-    34 000006F8 202020206F6F202020- <1>     sl_line2: db "    oo     _____", 0
-    34 00000701 20205F5F5F5F5F00    <1>
-    35 00000709 2020205F495F5F6E5F- <1>     sl_line3: db "   _I__n_n__||_|| ________", 0
-    35 00000712 6E5F5F7C7C5F7C7C20- <1>
-    35 0000071B 5F5F5F5F5F5F5F5F00  <1>
-    36 00000724 203E285F5F5F5F5F5F- <1>     sl_line4: db " >(_________|_7_|-|______|", 0
-    36 0000072D 5F5F5F7C5F375F7C2D- <1>
-    36 00000736 7C5F5F5F5F5F5F7C00  <1>
-    37 0000073F 202020202020282928- <1>     sl_line5: db "      ()() ()() o    oo  oo", 0
-    37 00000748 292028292829206F20- <1>
-    37 00000751 2020206F6F20206F6F- <1>
-    37 0000075A 00                  <1>
+    28 000006CF 4C6576694F53        <1> msg: db "LeviOS"
+    29 000006D5 200D0A00            <1>     db " ", 0x0D,0x0A, 0
+    30 000006D9 4572726F722100      <1> err_msg:     db "Error!", 0
+    31 000006E0 446F6E652E00        <1> done_msg: db "Done.", 0
+    32 000006E6 6C6576692E74787400  <1> init_file_name: db "levi.txt", 0
+    33 000006EF 20202020206F6F4F4F- <1>     sl_line1: db "     ooOOOO", 0
+    33 000006F8 4F4F00              <1>
+    34 000006FB 202020206F6F202020- <1>     sl_line2: db "    oo     _____", 0
+    34 00000704 20205F5F5F5F5F00    <1>
+    35 0000070C 2020205F495F5F6E5F- <1>     sl_line3: db "   _I__n_n__||_|| ________", 0
+    35 00000715 6E5F5F7C7C5F7C7C20- <1>
+    35 0000071E 5F5F5F5F5F5F5F5F00  <1>
+    36 00000727 203E285F5F5F5F5F5F- <1>     sl_line4: db " >(_________|_7_|-|______|", 0
+    36 00000730 5F5F5F7C5F375F7C2D- <1>
+    36 00000739 7C5F5F5F5F5F5F7C00  <1>
+    37 00000742 202020202020282928- <1>     sl_line5: db "      ()() ()() o    oo  oo", 0
+    37 0000074B 292028292829206F20- <1>
+    37 00000754 2020206F6F20206F6F- <1>
+    37 0000075D 00                  <1>
     38                              <1> 
     39                              <1> 
     40                              <1> section .bss

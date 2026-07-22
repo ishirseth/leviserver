@@ -69,7 +69,6 @@ update_ball:
     mov al, [ball_x]
     add ah, [ball_dy]
     add al, [ball_dx]
-    add al, [ball_dx]
     mov [ball_y], ah
     mov [ball_x], al
 
@@ -83,13 +82,13 @@ check_collision:
     cmp byte [ball_y], 22
     je .bottom
     .bottom_ret:
-    cmp byte [ball_x], 76
+    cmp byte [ball_x], 78
     je .right
     .right_ret:
     cmp byte [ball_y], 1
     je .top
     .top_ret:
-    cmp byte [ball_x], 2
+    cmp byte [ball_x], 1
     je .left
     .left_ret:
     ret

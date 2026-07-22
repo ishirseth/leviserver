@@ -287,6 +287,7 @@ run_function:
     mov bx, ax
     call read_sector
     call txt_buffer     ; run the program loaded into memory
+    call new_line
     mov si, done_msg
     call print
     ret

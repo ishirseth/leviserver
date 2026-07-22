@@ -47,7 +47,12 @@ main:
 
     ;delay
     mov ax, SPEED
-    call delay
+    mov cx, 1000 
+    mul cx
+    mov cx, dx      ; high 16 bits
+    mov dx, ax      ; low 16 bits
+    mov ah, 0x86
+    int 0x15
 
     jmp main
 
@@ -213,16 +218,6 @@ check_collision:
         mov byte [ball_dx], 1
         jmp .left_ret
 
-
-delay:              ; ax = time in ms
-    mov cx, 1000 
-    mul cx
-
-    mov cx, dx      ; high 16 bits
-    mov dx, ax      ; low 16 bits
-    mov ah, 0x86
-    int 0x15
-    ret
 
 draw_border:
     push cx
