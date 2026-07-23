@@ -11,36 +11,50 @@
 <div id="navbar"></div>
 <script src="/js/nav.js"></script>
 
-<section>
-<h2>Server</h2>
+<section class="server-section">
+  <h2>My Home Server</h2>
 
-<div class="project-div">
-  <img src="../images/Server.jpeg" alt="Server" class="project-img project-img--left project-img--big">
-</div>
-<p>My home server is built around an ASUS P7F-M uATX motherboard paired with an Intel Xeon X3450 processor, featuring 4 physical cores and 8 virtual cores with VT-x support. 
-    It has 16GB of DDR-3 RAM, a 64GB SSD where the operating system is installed, and a 500GB and 160GB HDD for storage. 
-    In addition to that, it has a Ati Radeon X550 Advantage GPU which is connected via VGA.
-    It also uses an atx Maxdata case which has slots for HDDs/SSDs and has a DVD/CD drive and floppy drive.
-    It has an IDE to USB adapter for the DVD drive, and a FDD to USB adapter for the floppy drive, which lets me use floppies and disks.
-    Networking is handled through a small USB Wi-Fi adapter for wireless connectivity. 
-    The motherboard offers six SATA ports and multiple PCIe slots for expansion, and the system is cooled with a standard CPU fan and heatsink and power is supplied by a Be quiet! 430W PSU.</p>
+  <div class="project-div">
+    <img src="../images/Server.jpeg" alt="Server" class="project-img project-img--left project-img--big">
+  </div>
 
-<p>The server runs Ubuntu because Linux is lightweight, stable, and ideal for older hardware, while still being capable of running all the services I need. 
-    I have a small public Telnet server set up that can be accessed through the terminal; it responds to specific commands and was mostly a fun project because I enjoy how simple Telnet is. 
-    You can connect to it either by visiting the demo page or by using a terminal and connecting with the details also found in the demo page.
-    Remote access is also available via SSH and VNC. 
-    On the local network, the server acts as a NAS using CasaOS, letting me store and access files from any device at home.
-    Also the server runs OpenWebRX, a software-defined radio (SDR) receiver that allows me to listen to radio signals with the connected SDR device and it is publicly accessible. 
-    Finally, it also hosts this website, making it a versatile home server.</p>
+  <div class="server-intro">
+    <p>My home server is a versatile machine capable of hosting various services.</p>
+  </div>
 
-<p>My internet plan uses DS-Lite I don't have a public IPv4 address, so I can't expose my server directly to the internet.
-To solve this, I connected my home server to an AWS EC2 instance using Tailscale, which creates a private encrypted tunnel between the two machines.
-All the A records for the domain and subdomains point to the EC2's public IPv4, so all traffic enters through the EC2 first.
-The EC2 runs nginx on port 80, and depending on the subdomain used (like ishir. or sdr.), it proxies the request through the Tailscale tunnel to the correct port on my home server where the relevant service is running.
-For SSH and Telnet access, socat runs on the EC2 to forward those connections on specific ports directly to my home server's Tailscale IP.
-Finally, the home server has a script that pulls the latest code from my private GitHub repository every 30 seconds, 
-meaning I can push changes from any device with access to the repository and the changes go live almost instantly without needing to manually restart anything or even accessing the server.</p>
+  <div class="server-specs">
+    <h3>Hardware Specifications</h3>
+    <ul>
+      <li><strong>Motherboard:</strong> ASUS P7F-M uATX (featuring 6 SATA ports and multiple PCIe expansion slots)</li>
+      <li><strong>Processor:</strong> Intel Xeon X3450 (4 physical cores, 8 virtual cores with VT-x support)</li>
+      <li><strong>Memory &amp; Storage:</strong> 16GB DDR3 RAM, 64GB SSD (for the OS), plus 500GB and 160GB HDDs</li>
+      <li><strong>Graphics:</strong> ATI Radeon X550 Advantage GPU (connected via VGA)</li>
+      <li><strong>Case &amp; Drives:</strong> ATX Maxdata case with HDD/SSD slots, DVD/CD drive (via IDE-to-USB adapter), and a floppy drive (via FDD-to-USB adapter) allowing me to use floppies and disks</li>
+      <li><strong>Networking &amp; Power:</strong> Small USB Wi-Fi adapter for wireless connectivity, powered by a Be quiet! 430W PSU with standard cooling</li>
+    </ul>
+  </div>
 
+  <div class="server-services">
+    <h3>Software &amp; Services</h3>
+    <p>The server runs <strong>Ubuntu</strong> because Linux is lightweight, stable, and ideal for older hardware while still capable of running all my services:</p>
+    <ul>
+      <li><strong>Website Hosting:</strong> Hosts this very website, featuring a script that pulls the latest code from my GitHub repository every 30 seconds, so changes go live without manual restarts.</li>
+      <li><strong>NAS Storage:</strong> Acts as a local NAS using CasaOS, letting me store and access files from any device at home.</li>
+      <li><strong>OpenWebRX:</strong> A publicly accessible software-defined radio (SDR) receiver that allows listening to radio signals via the connected SDR device.</li>
+      <li><strong>Public Telnet Server:</strong> A terminal-accessible server responding to specific commands (built as a fun project); accessible via the demo page or by using a terminal with details found on the demo page.</li>
+      <li><strong>Remote Management:</strong> Fully accessible remotely via SSH and VNC.</li>
+    </ul>
+  </div>
+
+  <div class="server-networking">
+    <h3>Network Architecture &amp; Public Access</h3>
+    <p>Because my internet plan uses DS-Lite and lacks a public IPv4 address, I implemented a workaround to make my services public:</p>
+    <ul>
+      <li><strong>Tunneling:</strong> A private encrypted Tailscale tunnel connects my home server to an AWS EC2 instance.</li>
+      <li><strong>Reverse Proxy:</strong> Domain and subdomain A records point to the EC2's public IPv4. An Nginx instance on the EC2 on port 80 proxies requests (like <code>ishir.</code> or <code>sdr.</code>) through the Tailscale tunnel to the correct port on my home server.</li>
+      <li><strong>Port Forwarding:</strong> socat runs on the EC2 instance to forward direct connections like SSH, Telnet and Websockets (e.g., my telnet service) straight to my home server's Tailscale IP.</li>
+    </ul>
+  </div>
 </section>
 </body>
 </html>

@@ -12,53 +12,45 @@
 <script src="/js/nav.js"></script>
 
 
-<section>
-<h2>Rotor Controller</h2>
+<section class="rotor-section">
+  <h2>Rotor Controller</h2>
 
-<div class="project-div">
-  <img src="../images/RotorController.jpeg" alt="Rotor Controller" class="project-img project-img--left project-img">
-  <div>
-    <p>
-    This is a DIY controller for the two-phase motor inside my old antenna rotator.
-    I built it because the original controller was too loud for my liking.
-    The original has since been quieted and put back into use, but the DIY unit worked well in the meantime.
-    It's worth documenting because it was an interesting project since I had to make it act like the original but I had access to modern components.</p>
-  </div>
-  </div>
-
-<div class="project-div project-div--right">
-  <img src="../images/RotorControllerBox.jpeg" alt="Rotor Controller Box" class="project-img project-img--right project-img">
-  <div>
-    This is the controller in a plastic box, so that it looks more organized.
-    It has two power supplies inside: a 24V and a 48V supply for the motor and then the esp 8266 is connected by a usb c cable to a usb port with 5V output.
-    To achive the 48V needed, 2 pairs of SSRSs(Solid State Relays) are used acting as a half-bridge.
-    Since the esp 8266 has wifi capabilities, the controller can be operated remotely from a phone or computer on the same network.</p>
-  </div>
+  <!-- 1. Main Cover Photo: The Controller in the Clear Box & Intro -->
+  <div class="project-div">
+    <img src="../images/RotorControllerBox.jpeg" alt="Rotor Controller Box" class="project-img project-img--left project-img">
+    <div>
+      <p>This is a DIY controller for the two-phase motor inside my old antenna rotator.</p>
+      <p>I built it because the original controller was old and making noise, and also I found the project interesting. The original has since been fixed and I use it now, but the DIY unit worked well in the meantime.</p>
+      <p>It's worth documenting because it was an interesting project since I had to make it imitate the original but with modern components.</p>
+      <p>This is the controller in a plastic box, so that it looks more "organized". It has two power supplies inside: a 24V and a 48V supply for the motor and then the ESP 8266 is connected by a usb C cable to a usb port with 5V output.</p>
+      <p>To achive the 48V peak to peak voltage needed for the motor, 2 pairs of SSRSs (Solid State Relays) are used acting as a half-bridge.</p>
+      <p>Since the esp 8266 has WIFI capabilities, the controller can be operated remotely from a phone or computer on the same network.</p>
+    </div>
   </div>
 
-<div class="project-div">
-  <img src="../images/RotorControllerSchematic.jpeg" alt="schematic" class="project-img project-img--left project-img">
-  <div>
-    <p>
-    The rotator motor has two coils, both referenced to a common 24V midpoint rail since the motor was designed to have the ends of both coils connected together.
-    Each phase needs a signal that swings above and below that midpoint of 24V.
-    The original controller achieved this naturally using stepped-down mains AC, which already swings around 0V.
-    Since this design only produces positive voltages, 0-48V square waves centered on the 24V midpoint are used instead, which produces the same effective bipolar swing relative to the common rail.
-    Each phase is driven by one SSR half-bridge pair.
-    One SSR pulls the phase line up to 48V, while the other pulls it down to 0V.
-    The ESP drives the first SSR directly with a square wave, and the second SSR with the same signal inverted (180° out of phase), ensuring the two SSRs never conduct at the same time.
-    Phase 2 is driven identically, but its square wave is shifted 90° relative to Phase 1 — this phase difference is what produces the rotating magnetic field the motor needs to turn.</p>
-  </div>
+  <!-- 2. Technical & Schematic Details -->
+  <div class="project-div project-div--right">
+    <img src="../images/RotorControllerSchematic.jpeg" alt="schematic" class="project-img project-img--right project-img">
+    <div>
+      <p>The rotator motor has two coils, both referenced to a common 24V midpoint rail since the motor was designed to have the ends of both coils connected together.</p>
+      <p>Each phase needs a signal that swings above and below that midpoint of 24V.</p>
+      <p>The original controller achieved this naturally using stepped-down mains AC, which already swings around 0V.</p>
+      <p>Since this design only produces positive voltages, 0-48V square waves centered on the 24V midpoint are used instead, which produces the same effective bipolar swing relative to the common rail.</p>
+      <p>Each phase is driven by one SSR half-bridge pair.</p>
+      <p>One SSR pulls the phase line up to 48V, while the other pulls it down to 0V.</p>
+      <p>The ESP drives the first SSR directly with a square wave, and the second SSR with the same signal inverted (180° out of phase), ensuring the two SSRs never conduct at the same time.</p>
+      <p>Phase 2 is driven identically by the other two SSRs, but its square wave is shifted 90° relative to Phase 1 — this phase difference is what produces the rotating magnetic field the motor needs to turn.</p>
+    </div>
   </div>
 
-<div class="project-div project-div--right">
-  <img src="../images/Antenna.jpeg" alt="Antenna" style="width: 40%; height: 60%; margin-left: 20px;">
-  <div>
-    <p>
-    This picture shows my antenna used for amateur radio with the rotator under it. 
-    I needed a rotor since the antenna is directional and needs to be pointed wherever I want to transmit.
-    The rotator is quite old and when I got it donated from a local ham radio club I thought it would be too weak, but it works well even with such a large antenna on it.</p>
-  </div>
+  <!-- 3. The Final Antenna -->
+  <div class="project-div">
+    <img src="../images/Antenna.jpeg" alt="Antenna" style="width: 40%; height: 60%; margin-left: 20px;">
+    <div>
+      <p>This picture shows my antenna used for amateur radio with the rotator under it.</p>
+      <p>I needed a rotor since the antenna is directional and needs to be pointed wherever I want to transmit.</p>
+      <p>The rotator is quite old and when I got it donated. I thought it would be too weak, but it works well even with such a large antenna on it.</p>
+    </div>
   </div>
 
 </section>
