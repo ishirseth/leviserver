@@ -102,7 +102,7 @@ def cmd_ascii(argument):
 def cmd_help(argument):
     if argument:
         return b"~Unwanted argument\r\n"
-    return b"~Commands: help, levi, ascii <char>, login <username>, logout, add <num>, clradd, echo <msg>, who, whoami, message <user> <msg>, inbox, clrinbox, prime <num>, note <msg>, clrnote <num>, notes, move, exit\r\n"
+    return b"~Commands: help, levi, ascii <char>, metar <icao>, login <username>, logout, add <num>, clradd, echo <msg>, who, whoami, message <user> <msg>, inbox, clrinbox, prime <num>, note <msg>, clrnote <num>, notes, move, exit\r\n"
 
 def cmd_echo(argument, echo):
     if not argument or not echo:
@@ -133,13 +133,15 @@ def cmd_message(addr, argument, message):
 def cmd_inbox(addr, argument):
     if argument:
         return b"~Unwanted argument\r\n"
+    if not userdata[addr[1]]["save"]:
+        return b"~You must be logged in to view your inbox\r\n"
+    
+    messages = userdata[addr[1]]["messages"]
+    if not messages:
+        return b"~No messages\r\n"
     else:
-        messages = saveddata[userdata[addr[1]]["username"]]["messages"]
-        if not messages:
-            return b"~No messages\r\n"
-        else:
-            response = ("~Inbox:\r\n" + "".join(f"~  {i+1}. {msg}\r\n" for i, msg in enumerate(userdata[addr[1]]["messages"])))
-            return response.encode()
+        response = ("~Inbox:\r\n" + "".join(f"~  {i+1}. {msg}\r\n" for i, msg in enumerate(messages)))
+        return response.encode()
         
 def cmd_clrinbox(addr, argument):
     if argument:
@@ -237,6 +239,15 @@ def cmd_move(conn, addr):
     for i in range(movey):
         conn.sendall(f"~{str(int(rows[i]))}\r\n".encode())
 
+def cmd_metar(argument):
+    if not argument:
+        return b"~Missing argument\r\n"
+    else:
+        result = subprocess.run(["curl", "-s", "--max-time", "5", f"https://aviationweather.gov/api/data/metar?ids={argument}"], capture_output=True, text=True)
+        if result.stdout == "":
+            return b"~N/A\r\n"
+        else:
+            return f"~METAR for {argument}: {result.stdout}\r\n".encode()
 
 def handle_client(conn, addr):
     clients.append(addr)
@@ -312,6 +323,8 @@ def handle_client(conn, addr):
                             resp = cmd_notes(addr, argument)
                         elif command == "move":
                             userdata[addr[1]]["move"]["move"] = True  
+                        elif command == "metar":
+                            resp = cmd_metar(argument)
                         elif command:
                             resp = b"~Unknown command\r\n"
 
