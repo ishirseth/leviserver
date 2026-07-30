@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demos</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<div id="navbar"></div>
+  <script src="/js/nav.js"></script>
+  <script src="libv86.js"></script>
+  <script>
+    const emulator = new V86({
+      wasm_path: "v86.wasm",
+      screen_container: document.getElementById("screen_container"),
+      bios: { url: "bios/seabios.bin" },
+      vga_bios: { url: "bios/vgabios.bin" },
+      hda: { url: "images/disk.img", size: 32768 },
+      autostart: true,
+    });
+  </script>
+
+<section>
+<div id="screen_container">
+  <div style="white-space: pre; font: 14px monospace; line-height: 14px"></div>
+  <canvas style="display: none"></canvas>
+</div>
+</section>
+
+</body>
+</html>

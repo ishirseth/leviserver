@@ -8,7 +8,7 @@ const http = require('http');
 const net = require('net');
 const path = require('path');
 const express = require('express');
-const { WebSocketServer } = require('ws');
+const { WebSocketServer } = require('./node_modules/ws');
 
 // ---- YOUR FIXED TELNET TARGET ----
 const TELNET_HOST = 'leviserver.eu';

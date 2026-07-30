@@ -7,7 +7,7 @@ import os
 base_repo = os.path.dirname(os.path.abspath(__file__))
 web_root_dir = os.path.join(base_repo, "WebRoot")
 levis_web_dir = os.path.join(base_repo, "LeviServerWeb")
-telnet_web_dir = os.path.join(levis_web_dir, "telnet-web")
+telnet_web_dir = os.path.join(levis_web_dir, "demos/assets/telnet-web")
 
 def start_telnet_bridge():
     subprocess.run(["node", "server.js"], cwd=telnet_web_dir)

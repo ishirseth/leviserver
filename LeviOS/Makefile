@@ -1,6 +1,12 @@
 # --- Configuration ---
-ASM = nasm
-QEMU = qemu-system-i386
+
+#ASM = nasm
+#QEMU = qemu-system-i386
+
+SHELL := cmd.exe
+ASM = ./nasm.exe
+QEMU = "C:\Program Files\qemu\qemu-system-i386.exe"
+
 BOOT = boot/boot.asm
 KERNEL = kernel/kernel.asm
 FILES_DIR = files
