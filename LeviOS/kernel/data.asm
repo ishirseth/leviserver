@@ -10,6 +10,7 @@ ls_command: db "ls", 0
 sl_command: db "sl", 0
 clear_command: db "clear", 0
 run_command: db "run", 0
+help_command: db "help", 0
 
 ; --- Command Messages ---
 
@@ -29,6 +30,19 @@ msg: db "LeviOS"
     db " ", 0x0D,0x0A, 0
 err_msg:     db "Error!", 0
 done_msg: db "Done.", 0
+help_msg:
+    db "levi - prints the levi message", 0x0D,0x0A
+    db "echo <msg> - echoes back what you wrote", 0x0D,0x0A
+    db "ls - lists all files and programs", 0x0D,0x0A
+    db "read <filename> - reads a file", 0x0D,0x0A
+    db "run <filename> - runs .bin programs", 0x0D,0x0A
+    db "write <filename> - creates/selects a file to then write data to", 0x0D,0x0A
+    db "writedata <file contents> - writes to the file selected with write, for .bin files use lowercase hex with spaces between", 0x0D,0x0A
+    db "delete <filename> - deletes a file", 0x0D,0x0A
+    db "clear - clears the screen", 0x0D,0x0A
+    db "sl - steam locomotive", 0x0D,0x0A
+    db 0
+    
 init_file_name: db "levi.txt", 0
     sl_line1: db "     ooOOOO", 0
     sl_line2: db "    oo     _____", 0

@@ -1,14 +1,14 @@
-# Sector layout (max 63 with CHS):
+# Sector layout (max 0-63 with CHS):
 # 0: bootloader (512 bytes)
 # 1-9: kernel (512 bytes)
-# 10: filetable1 (512 bytes starting 0x1400)
-# 11 - 63: files (MAX 512 bytes each)
+# 10: filetable1 (512 bytes)
+# 11: filetable2 (512 bytes)
+# 12 - 63: files (MAX 512 bytes each)
 
 files:
--max 64 (because file table)
 -max 512 char long (1 sc)
 -max 13 char long file name (with .txt or .bin)
--little endian
+-little endian file entry
 
 16 byte entries
 
@@ -21,7 +21,7 @@ files:
 # uu = unused
 # ✔ = done
 
-Filesys tasks:
+Tasks:
 -check that filename dosent exist on write ✔
 -add ls ✔
 -finish writetxt to also write content ✔
@@ -41,15 +41,9 @@ Filesys tasks:
 -make pong and ball (both by Ishir/me) ✔
 -fix problem with running pong after any other program ✔
 -return from the other games ✔
--add help command
+-add help command ✔
 -fix ls visually
 -add serial communication
-
-Sector task:
--switch from CHS to LBA to increase max sectors from 63 to 2^64
- ⤷ add more filetables
- ⤷ chage write and read to use cx 
- ⤷ yeah i dont wanna do this task
 
 Commands:
 levi (levi)
@@ -59,8 +53,11 @@ write (to create and select a file)
 writedata (to write data to the selected file, for .bin files uses hex with space and lower case letters eg b0 44 b4)
 ls (list all files with sectors)
 sl (steam locomotive)
+run (run a .bin program)
 delete (delete a file)
 
 For running a program to return you can:
 ; --- jump to kernel ---  (force to go back to the start of kernel)
 jmp 0x1000:0x0000
+
+ret                       (cleanly go back to where it was called from)

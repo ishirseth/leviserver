@@ -182,6 +182,12 @@ parse_input:
     call .compare_loop
     je run_function
 
+    mov si, command
+    mov di, help_command
+    call .compare_loop
+    je help_function
+
+
     ret              ; Return if no match found (not_equal)
     .compare_loop:
         mov al, [si]

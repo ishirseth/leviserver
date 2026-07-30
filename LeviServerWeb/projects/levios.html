@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project 1</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<div id="navbar"></div>
+<script src="/js/nav.js"></script>
+
+
+<section>
+<h2>LeviOS</h2>
+
+<div class="project-div project-div--right">
+  <img src="../images/LeviOSBoot.png" alt="LeviOS Boot" class="project-img project-img--right project-img">
+  <p>
+    LeviOS is my operating system built completely from scratch in x86 NASM assembly,
+    running in 16-bit real mode capable of booting from any standard drive. 
+    The bootloader lives in the very first 512-byte sector of the disk, 
+    gets loaded by the BIOS, and hands off control to a custom kernel — no existing OS,
+    bootloader, or library code involved anywhere in the stack.
+  </p>
+</div>
+
+<div class="project-div">
+  <img src="../images/LeviOS.png" alt="LeviOS" class="project-img project-img--left project-img">
+  <p>
+    Disk access is handled through classic CHS (cylinder-head-sector) addressing via BIOS
+    interrupts. LeviOS implements its own file system on top of raw disk sectors: a two-sector
+    file table holds up to 64 file entries, each one mapping a filename to the sector where its
+    data lives. Every file is capped at a single 512-byte sector, keeping the whole design simple
+    and predictable. Each 16-byte file table entry follows a simple layout: the first 13 bytes
+    store the filename, the next 2 bytes store the sector number where the file's data lives, 
+    and the final byte is unused padding. 
+    The built-in shell supports creating, reading, writing, and deleting files aswell as
+    listing the file table, and a handful of quality-of-life features like backspace-aware input
+    editing and screen clearing.
+  </p>
+</div>
+
+<div class="project-div project-div--right">
+  <img src="../images/LeviOSPong.png" alt="LeviOS Pong" class="project-img project-img--right project-img">
+  <p>
+    Beyond the shell and file system, LeviOS can load and execute standalone 512-byte machine
+    code programs via its <code>run</code> command — turning it from a simple shell into a real
+    platform other programs can run on. I wrote two of these myself, <code>pong.bin</code> and
+    <code>ball.bin</code>, a two-player Pong game and a simpler bouncing-ball demo (uses pong's code but without paddles), both built
+    entirely from scratch with x86 assembly inside the 512-byte-per-program limit. I also ported over a
+    couple of existing public bootsector programs — a Snake implementation and a Flappy Bird
+    clone — as fun demonstrations of just how much can fit in half a kilobyte of raw machine code;
+    those two were not written by me, but run happily on LeviOS's execution model all the same.
+  </p>
+</div>
+
+<p>You can try LeviOS directly in your browser on the <a href="../demos/levios.html">demo page</a> —
+    no downloads or setup required. You can also find details there on building and running it natively.
+</p>
+
+
+</section>
+</body>
+</html>

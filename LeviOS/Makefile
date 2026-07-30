@@ -1,25 +1,44 @@
 # --- Configuration ---
 
-#ASM = nasm
-#QEMU = qemu-system-i386
-
-SHELL := sh
-ASM = ./nasm.exe
-QEMU = "C:\Program Files\qemu\qemu-system-i386.exe"
+ifeq ($(OS),Windows_NT)
+    SHELL := sh
+    ASM = ./nasm.exe
+    QEMU = "C:\Program Files\qemu\qemu-system-i386.exe"
+    QEMU_IMG = "C:\Program Files\qemu\qemu-img.exe"
+else
+    ASM = nasm
+    QEMU = qemu-system-i386
+    QEMU_IMG = qemu-img
+endif
 
 BOOT = boot/boot.asm
 KERNEL = kernel/kernel.asm
 FILES_DIR = files
 BUILD_DIR = build
 DISK = $(BUILD_DIR)/disk.img
+WEB_DISK = ../LeviServerWeb/demos/assets/levios-web/disk.img
 
 BOOT_BIN = $(BUILD_DIR)/boot.bin
 KERNEL_BIN = $(BUILD_DIR)/kernel.bin
 FILETABLE1 = $(BUILD_DIR)/filetable1.bin
 FILETABLE2 = $(BUILD_DIR)/filetable2.bin
 
-# --- Targets ---
-all: $(DISK)
+.PHONY: all clean programs run build_all web
+
+# --- Default Target ---
+# Running 'make' will clean old artifacts, assemble user programs, and build the disk image
+all: clean
+	@$(MAKE) build_all
+
+build_all: programs $(DISK)
+
+# Assemble User Programs
+programs:
+	$(ASM) -f bin files/asm_programs/test.asm -o files/test.bin
+	$(ASM) -f bin files/asm_programs/fbird.asm -o files/fbird.bin
+	$(ASM) -f bin files/asm_programs/snake.asm -o files/snake.bin
+	$(ASM) -f bin files/asm_programs/pong.asm -o files/pong.bin
+	$(ASM) -f bin files/asm_programs/ball.asm -o files/ball.bin
 
 # Build Bootloader
 $(BOOT_BIN): $(BOOT) | $(BUILD_DIR)
@@ -33,11 +52,10 @@ $(KERNEL_BIN): $(KERNEL) | $(BUILD_DIR)
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-
 $(FILETABLE1): | $(BUILD_DIR)
 	@rm -f $(FILETABLE1)
 	@printf "levi.txt\x00\x00\x00\x00\x00\x0C\x00\x00" >> $(FILETABLE1)
-	@printf "leska.txt\x00\x00\x00\x00\x0D\x00\x00" >> $(FILETABLE1)
+	@printf "test1.txt\x00\x00\x00\x00\x0D\x00\x00" >> $(FILETABLE1)
 	@printf "test.bin\x00\x00\x00\x00\x00\x0E\x00\x00" >> $(FILETABLE1)
 	@printf "fbird.bin\x00\x00\x00\x00\x0F\x00\x00" >> $(FILETABLE1)
 	@printf "snake.bin\x00\x00\x00\x00\x10\x00\x00" >> $(FILETABLE1)
@@ -48,9 +66,10 @@ $(FILETABLE1): | $(BUILD_DIR)
 		printf "$$(printf '\\x%02x' $$i)" >> $(FILETABLE1); \
 		printf '\x00\x00' >> $(FILETABLE1); \
 	done
+
 $(FILETABLE2): | $(BUILD_DIR)
 	@rm -f $(FILETABLE2)
-	@printf "lexi.txt\x00\x00\x00\x00\x00\x2C\x00\x00" >> $(FILETABLE2)
+	@printf "test2.txt\x00\x00\x00\x00\x00\x2C\x00\x00" >> $(FILETABLE2)
 	@for i in $$(seq 45 63); do \
 		printf '\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00' >> $(FILETABLE2); \
 		printf "$$(printf '\\x%02x' $$i)" >> $(FILETABLE2); \
@@ -81,17 +100,14 @@ $(DISK): $(BOOT_BIN) $(KERNEL_BIN) $(FILETABLE1) $(FILETABLE2)
 	dd if=$(FILES_DIR)/ball.bin of=$(DISK) bs=512 seek=18 count=1 conv=notrunc 2>/dev/null
 	dd if=$(FILES_DIR)/cats2.txt of=$(DISK) bs=512 seek=44 count=1 conv=notrunc 2>/dev/null
 
+web: $(DISK)
+	# Copy and pad image to 2MB for web demo
+	cp $(DISK) $(WEB_DISK)
+	$(QEMU_IMG) resize -f raw $(WEB_DISK) 2M 2>/dev/null
+
 # Execution
 run: $(DISK)
 	$(QEMU) -drive format=raw,file=$(DISK) -display gtk
-
-programs:
-	$(ASM) -f bin files/asm_programs/test.asm -o files/test.bin
-	$(ASM) -f bin files/asm_programs/fbird.asm -o files/fbird.bin
-	$(ASM) -f bin files/asm_programs/snake.asm -o files/snake.bin
-	$(ASM) -f bin files/asm_programs/pong.asm -o files/pong.bin
-	$(ASM) -f bin files/asm_programs/ball.asm -o files/ball.bin
-# yes they run 
 
 clean:
 	rm -rf $(BUILD_DIR) $(DISK)

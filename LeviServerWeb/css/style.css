@@ -63,6 +63,10 @@ p {
   margin: 0.1em 0; /* or margin: 0; for none at all */
 }
 
+a {
+  color: #7dd3fc;
+}
+
 .intro-box {
   border: 2px solid #2a1f1f;
   padding: 20px;
@@ -221,6 +225,20 @@ p {
   font-size: 1.1rem;
   color: #ffffff;
 }
+
+#screen_container {
+    width: 800px;
+    height: 600px;
+    margin-left: auto;
+}
+/* Force v86's internal canvas to stretch to fill the container */
+#screen_container canvas {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+    image-rendering: pixelated; /* Keeps text and 16-bit graphics crisp instead of blurry */
+}
+
 
 * {
   text-align: left;

@@ -13,22 +13,41 @@
 
 <section>
 <div id="screen_container">
-<div style="white-space: pre; font: 14px monospace; line-height: 14px"></div>
-<canvas style="display: none"></canvas>
+    <div style="white-space: pre; font: 14px monospace; line-height: 14px;"></div>
+    <canvas></canvas>
 </div>
 </section>
 
 <script src="assets/levios-web/libv86.js"></script>
 <script>
 const emulator = new V86({
-    wasm_path: "assets/levios-web/v86.wasm",
-    screen_container: document.getElementById("screen_container"),
-    bios: { url: "assets/levios-web/seabios.bin" },
-    vga_bios: { url: "assets/levios-web/vgabios.bin" },
-    hda: { url: "assets/levios-web/disk.img" }, // v86 will read the file size automatically
-    autostart: true,
-});
+      wasm_path: "assets/levios-web/v86.wasm",
+      screen_container: document.getElementById("screen_container"),
+      bios: { url: "assets/levios-web/seabios.bin?v=" + Date.now() },  // Bypass BIOS cache
+      vga_bios: { url: "assets/levios-web/vgabios.bin?v=" + Date.now() }, // Bypass VGA BIOS cache
+      hda: { url: "assets/levios-web/disk.img?v=" + Date.now() },         // Bypass Disk cache
+      autostart: true,
+  });
 </script>
+
+<section>
+  <h2>LeviOS Web Emulator</h2>
+  <div>
+  <p>Welcome to the web-based emulator for <strong>LeviOS</strong>, 
+    a 16-bit x86 operating system built entirely from scratch in Assembly.</p>
+  <p>Type <code>help</code> into the terminal once it boots up to see a list of all available commands.</p>
+  <br>
+  <p>Controls for the programs:</p>
+  <ul class="controls-list">
+    <li><strong>Pong</strong> — Player 1: W/S keys, Player 2: I/K keys, Escape: Quit</li>
+    <li><strong>Ball</strong> — Escape: Quit</li>
+    <li><strong>Fbird</strong> — Any key: Flap (Quit upon game over)</li>
+    <li><strong>Snake</strong> — WASD: Move, Escape: Quit</li>
+  </ul>
+  <p style="font-size: 0.9em; opacity: 0.8;">Want to build and run LeviOS locally? 
+    Check out the <a href="https://github.com/ishirseth/leviserver/blob/main/LeviOS/">repository</a> for all the files you need to download and instructions in the README file.</p>
+  </div>
+</section>
 
 </body>
 </html>

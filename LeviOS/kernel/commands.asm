@@ -291,3 +291,9 @@ run_function:
     mov si, done_msg
     call print
     ret
+
+help_function:
+    call new_line
+    mov si, help_msg
+    call print
+    ret

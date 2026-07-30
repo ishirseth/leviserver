@@ -1,1 +1,25 @@
-The OS img file can be found in the build directory and can be run with an emulator like qemu.
+# LeviOS
+
+A 16-bit x86 operating system written in Assembly.
+
+## Prerequisites
+
+- **NASM:** Included in project root for Windows (`nasm.exe`). Must be installed on Linux (`sudo apt install nasm`).
+- **QEMU:** Required for running the OS natively.
+  - **Windows:** Default install path (`C:\Program Files\qemu\`)
+  - **Linux:** System PATH (`sudo apt install qemu-system-x86`)
+- **Terminal / Shell:**
+  - **Windows:** Git Bash
+  - **Linux:** Standard Terminal
+
+*(Note: Linux package installation commands above are for Debian/Ubuntu-based distros; adapt `apt install` to your distro's package manager if using Arch, Fedora, etc.)*
+
+## Running the OS
+
+Run all commands from inside the `LeviOS` project root directory.
+
+### 1. Build & Run in QEMU (Native)
+Assembles all programs, generates `build/disk.img`, and launches the OS in QEMU:
+
+make
+make run
