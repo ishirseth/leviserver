@@ -41,7 +41,8 @@ Filesys tasks:
 -make pong and ball (both by Ishir/me) ✔
 -fix problem with running pong after any other program ✔
 -return from the other games ✔
--make a text and program editor
+-add help command
+-fix ls visually
 -add serial communication
 
 Sector task:

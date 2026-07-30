@@ -3,7 +3,7 @@
 #ASM = nasm
 #QEMU = qemu-system-i386
 
-SHELL := cmd.exe
+SHELL := sh
 ASM = ./nasm.exe
 QEMU = "C:\Program Files\qemu\qemu-system-i386.exe"
 
@@ -27,7 +27,7 @@ $(BOOT_BIN): $(BOOT) | $(BUILD_DIR)
 
 # Build Kernel
 $(KERNEL_BIN): $(KERNEL) | $(BUILD_DIR)
-	$(ASM) -f bin $(KERNEL) -l program.lst -i kernel/ -o $(KERNEL_BIN)
+	$(ASM) -f bin $(KERNEL) -i kernel/ -o $(KERNEL_BIN)
 
 # Create directory for build artifacts
 $(BUILD_DIR):

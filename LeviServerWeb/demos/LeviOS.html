@@ -9,25 +9,26 @@
 <body>
 
 <div id="navbar"></div>
-  <script src="/js/nav.js"></script>
-  <script src="libv86.js"></script>
-  <script>
-    const emulator = new V86({
-      wasm_path: "v86.wasm",
-      screen_container: document.getElementById("screen_container"),
-      bios: { url: "bios/seabios.bin" },
-      vga_bios: { url: "bios/vgabios.bin" },
-      hda: { url: "images/disk.img", size: 32768 },
-      autostart: true,
-    });
-  </script>
+<script src="/js/nav.js"></script>
 
 <section>
 <div id="screen_container">
-  <div style="white-space: pre; font: 14px monospace; line-height: 14px"></div>
-  <canvas style="display: none"></canvas>
+<div style="white-space: pre; font: 14px monospace; line-height: 14px"></div>
+<canvas style="display: none"></canvas>
 </div>
 </section>
+
+<script src="assets/levios-web/libv86.js"></script>
+<script>
+const emulator = new V86({
+    wasm_path: "assets/levios-web/v86.wasm",
+    screen_container: document.getElementById("screen_container"),
+    bios: { url: "assets/levios-web/seabios.bin" },
+    vga_bios: { url: "assets/levios-web/vgabios.bin" },
+    hda: { url: "assets/levios-web/disk.img" }, // v86 will read the file size automatically
+    autostart: true,
+});
+</script>
 
 </body>
 </html>
