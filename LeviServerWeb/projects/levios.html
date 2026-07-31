@@ -33,9 +33,9 @@
     interrupts. LeviOS implements its own file system on top of raw disk sectors: a two-sector
     file table holds up to 64 file entries, each one mapping a filename to the sector where its
     data lives. Every file is capped at a single 512-byte sector, keeping the whole design simple
-    and predictable. Each 16-byte file table entry follows a simple layout: the first 13 bytes
+    and predictable. Each 16-byte file table entry follows a simple layout: the first 12 bytes
     store the filename, the next 2 bytes store the sector number where the file's data lives, 
-    and the final byte is unused padding. 
+    and the final two bytes are unused padding. 
     The built-in shell supports creating, reading, writing, and deleting files aswell as
     listing the file table, and a handful of quality-of-life features like backspace-aware input
     editing and screen clearing.

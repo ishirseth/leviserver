@@ -73,7 +73,7 @@ read_function:
 write_function:
     call load_file_table
 
-    mov ax, FILE_ENTRY_SIZE - 3
+    mov ax, FILE_ENTRY_SIZE - 4
     call check_value
     cmp al, 0                 ; check_value returns 0 = fail, 1 = ok
     je .done
@@ -202,29 +202,63 @@ ls_function:
     call load_file_table
     mov bx, file_table_buffer
     mov cx, 64                  ; scan all 64 entries
+    xor dx, dx
     .next_entry:
         cmp byte [bx], 0            ; empty entry?
         je .skip                    ; skip it (don't print blank entries)
-        push cx
 
+        push cx
         push bx
         mov si, bx
-        call new_line
+
+        mov ah, 0x02        ; BIOS function: Set cursor position
+        mov bh, 0x00        ; Page number (0 is usually the standard text page)
+        mov dh, dh           ; Row number (0 is the top row)
+        mov dl, dl          ; Column number (0 is the leftmost column)
+        int 0x10            ; Call BIOS video service
+
         call print
         pop bx
         push bx
+        push dx
         mov word bx, [bx + FILE_ENTRY_SIZE - 3]
         call num_to_str
         mov al, ' '
         call print_char
         call print
+        pop dx
         pop bx
 
+        inc dh
+        cmp dh, 13
+        je .next_column
+        .done_next_column:
         pop cx
     .skip:
         add bx, FILE_ENTRY_SIZE
         loop .next_entry
+        
+        cmp dl, 0
+        je .end
+        mov ah, 0x02        ; Reset cursor position
+        mov bh, 0x00
+        mov dh, 12
+        mov dl, 0           
+        int 0x10            
         ret
+        .end:
+            mov ah, 0x02        ; Reset cursor position
+            mov bh, 0x00        
+            sub dh, 1          
+            mov dl, 0           
+            int 0x10            
+            ret
+    .next_column:
+        xor dh, dh
+        add dl, 18
+        jmp .done_next_column
+        
+
 
 sl_function:
     call new_line

@@ -55,7 +55,7 @@ $(BUILD_DIR):
 $(FILETABLE1): | $(BUILD_DIR)
 	@rm -f $(FILETABLE1)
 	@printf "levi.txt\x00\x00\x00\x00\x00\x0C\x00\x00" >> $(FILETABLE1)
-	@printf "test1.txt\x00\x00\x00\x00\x0D\x00\x00" >> $(FILETABLE1)
+	@printf "cats.txt\x00\x00\x00\x00\x00\x0D\x00\x00" >> $(FILETABLE1)
 	@printf "test.bin\x00\x00\x00\x00\x00\x0E\x00\x00" >> $(FILETABLE1)
 	@printf "fbird.bin\x00\x00\x00\x00\x0F\x00\x00" >> $(FILETABLE1)
 	@printf "snake.bin\x00\x00\x00\x00\x10\x00\x00" >> $(FILETABLE1)
@@ -69,7 +69,7 @@ $(FILETABLE1): | $(BUILD_DIR)
 
 $(FILETABLE2): | $(BUILD_DIR)
 	@rm -f $(FILETABLE2)
-	@printf "test2.txt\x00\x00\x00\x00\x00\x2C\x00\x00" >> $(FILETABLE2)
+	@printf "test2.txt\x00\x00\x00\x00\x2C\x00\x00" >> $(FILETABLE2)
 	@for i in $$(seq 45 63); do \
 		printf '\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00' >> $(FILETABLE2); \
 		printf "$$(printf '\\x%02x' $$i)" >> $(FILETABLE2); \

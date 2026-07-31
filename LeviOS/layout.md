@@ -7,7 +7,7 @@
 
 files:
 -max 512 char long (1 sc)
--max 13 char long file name (with .txt or .bin)
+-max 12 char long file name (with .txt or .bin)
 -little endian file entry
 
 16 byte entries
@@ -42,7 +42,8 @@ Tasks:
 -fix problem with running pong after any other program ✔
 -return from the other games ✔
 -add help command ✔
--fix ls visually
+-fix ls visually by having multiple columns ✔
+-make text/program editor
 -add serial communication
 
 Commands:
