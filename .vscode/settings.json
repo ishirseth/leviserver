@@ -1,0 +1,7 @@
+{
+  "code-runner.executorMap": {
+    "cpp": "cd $dir && g++ $fileName ../libs/glad/gl.c ../libs/imgui/IMGUI/imgui.cpp ../libs/imgui/IMGUI/imgui_draw.cpp ../libs/imgui/IMGUI/imgui_tables.cpp ../libs/imgui/IMGUI/imgui_widgets.cpp ../libs/imgui/IMGUI/backends/imgui_impl_glfw.cpp ../libs/imgui/IMGUI/backends/imgui_impl_opengl3.cpp -I\"../libs/glad\" -I\"../libs/glfw\" -I\"../libs/glm\" -I\"../libs/imgui/IMGUI\" -I\"../libs/imgui/IMGUI/backends\" -L\"../libs/glfw\" -lglfw3 -lopengl32 -lgdi32 -luser32 -lkernel32 -static -static-libgcc -static-libstdc++ -o ./main.exe && ./main.exe"
+  },
+  "code-runner.runInTerminal": true,
+  "code-runner.saveFileBeforeRun": true
+}
