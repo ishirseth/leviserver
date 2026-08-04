@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/libs/glad",
+                "${workspaceFolder}/libs/glfw",
+                "${workspaceFolder}/libs/glm",
+                "${workspaceFolder}/libs/imgui/IMGUI",
+                "${workspaceFolder}/libs/imgui/IMGUI/backends"
+            ],
+            "defines": [],
+            "compilerPath": "C:/path/to/your/g++.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-gcc-x64"
+        }
+    ],
+    "version": 4
+}
