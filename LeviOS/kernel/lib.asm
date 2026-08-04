@@ -44,11 +44,11 @@ new_line:
         int 0x10
         ret
 clear_screen:
-    mov ah, 0x06        ; scroll up function
-    mov al, 0x00        ; clear entire window (0 = clear all)
-    mov bh, 0x07        ; white text on black background (attribute)
-    mov cx, 0x0000       ; top-left corner (row 0, col 0)
-    mov dx, 0x184F       ; bottom-right corner (row 24, col 79)
+    mov ah, 0x06        
+    mov al, 0x00        
+    mov bh, 0x07        
+    mov cx, 0x0000      
+    mov dx, 0x184F       
     int 0x10
 
     mov ah, 0x02        ; set cursor position
@@ -263,16 +263,16 @@ write_sector:
     mov dl, 0x80
     int 0x13
 
-    mov ax, 0x0301          ; AH=03h (Write), AL=01h (1 sector)
-    mov ch, 0               ; Cylinder 0
-    mov cl, bl              ; Sector 
-    mov dh, 0               ; Head 0
-    mov dl, 0x80            ; Drive 0x80
+    mov ax, 0x0301       
+    mov ch, 0       
+    mov cl, bl             
+    mov dh, 0               
+    mov dl, 0x80            
     push ds
     pop es
-    mov bx, txt_buffer      ; Buffer offset
-    int 0x13                ; Call BIOS
-    jnc .done            ; If no carry, success!
+    mov bx, txt_buffer      
+    int 0x13                
+    jnc .done            
 
     call error     ; error
     ret
