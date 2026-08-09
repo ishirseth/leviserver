@@ -1,30 +1,32 @@
-; LeviOS bootloader - minimal version
+; LeviOS bootloader
 
-[org 0x7C00]        ; BIOS loads us here
+[org 0x7C00]      
 
 start:
+    mov [boot_drive], dl    ; save boot drive number
+    mov [ds:0x0500], dl     ; for kernel
     mov si, msg     ; point to message
 
 .print:
-    lodsb           ; load byte from SI into AL
-    or al, al       ; check if zero (end of string)
-    jz load_kernel          ; if zero, stop printing
+    lodsb         
+    or al, al      
+    jz load_kernel          
 
-    mov ah, 0x0E    ; BIOS teletype output
-    int 0x10        ; print AL to screen
+    mov ah, 0x0E    
+    int 0x10       
 
 
     jmp .print
 
 load_kernel:
-     call delay_3sec
+    call delay_3sec
 
     mov ah, 0x02
     mov al, 9        ; read 9 sectors
     mov ch, 0
     mov cl, 2
     mov dh, 0
-    mov dl, 0x80
+    mov dl, [boot_drive]
 
     mov bx, 0x1000
     mov es, bx
@@ -39,22 +41,22 @@ load_kernel:
     retf
 
 delay_3sec:
-    mov cx, 0x002D      ; high 16 bits of 3,000,000 microseconds
-    mov dx, 0xC6C0      ; low 16 bits of 3,000,000 microseconds
+    mov cx, 0x002D      
+    mov dx, 0xC6C0      
     mov ah, 0x86
     int 0x15
     ret
 
 clear_screen:
-    mov ah, 0x06        ; scroll up function
-    mov al, 0x00        ; clear entire window (0 = clear all)
-    mov bh, 0x07        ; white text on black background (attribute)
-    mov cx, 0x0000       ; top-left corner (row 0, col 0)
-    mov dx, 0x184F       ; bottom-right corner (row 24, col 79) - standard 80x25 screen
+    mov ah, 0x06    
+    mov al, 0x00       
+    mov bh, 0x07     
+    mov cx, 0x0000   
+    mov dx, 0x184F      
     int 0x10
 
-    mov ah, 0x02        ; set cursor position
-    mov bh, 0x00        ; page number (usually 0)
+    mov ah, 0x02        
+    mov bh, 0x00      
     mov dh, 0x00        ; row 0
     mov dl, 0x00        ; column 0
     int 0x10
@@ -72,6 +74,6 @@ msg:
     db "LeviOS booted!", 0x0D,0x0A
     db "Loading system...", 0
 
-
-times 510-($-$$) db 0  ; pad to 512 bytes
+times 509-($-$$) db 0  ; pad to 512 bytes
+boot_drive: db 0x80      
 dw 0xAA55              ; boot signature

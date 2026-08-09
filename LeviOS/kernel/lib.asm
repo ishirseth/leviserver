@@ -238,7 +238,7 @@ load_file_table:
     mov ch, 0
     mov cl, 11             ; start at sector 10 (BIOS 1-indexed = 11)
     mov dh, 0
-    mov dl, 0x80
+    mov dl, [drive]
     mov bx, file_table_buffer
     int 0x13
     ret
@@ -250,7 +250,7 @@ write_file_table:
     mov ch, 0
     mov cl, 11             ; start at sector 10 (BIOS 1-indexed = 11)
     mov dh, 0
-    mov dl, 0x80
+    mov dl, [drive]
     mov bx, file_table_buffer
     int 0x13
     pop ax
@@ -260,14 +260,14 @@ write_file_table:
 write_sector:
     add bx, 1
     mov ah, 0x00     ; reset disk
-    mov dl, 0x80
+    mov dl, [drive]
     int 0x13
 
     mov ax, 0x0301       
     mov ch, 0       
     mov cl, bl             
     mov dh, 0               
-    mov dl, 0x80            
+    mov dl, [drive]            
     push ds
     pop es
     mov bx, txt_buffer      
@@ -288,7 +288,7 @@ read_sector:
     mov ch, 0
     mov cl, bl           ; sector number 
     mov dh, 0
-    mov dl, 0x80
+    mov dl, [drive]
     mov bx, txt_buffer
     int 0x13
     jc error

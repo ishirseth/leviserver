@@ -22,7 +22,7 @@ write_data_str: db "-Writing to ", 0
 delete_str: db "-Deleting ", 0
 
 ; --- Other ---
-
+drive: db 0x80
 bin_extension: db ".bin", 0
 
 ; --- Messages ---

@@ -8,16 +8,23 @@ start:
     mov es, ax
 
     mov ah, 0x01
-    mov ch, 0x06     ; bit 5 is 0 (visible), start scan line 6
-    mov cl, 0x07     ; end scan line 7
+    mov ch, 0x06     
+    mov cl, 0x07  
     int 0x10
+
+    push ds
+    xor ax, ax
+    mov ds, ax  ;0x0000 like bootloader
+    mov al, [0x0500]
+    pop ds
+    mov [drive], al   ; select drive
 
     mov word [write_sector_buffer], 12
     mov di, write_file_buffer
     mov si, init_file_name
     call mov_index_data
 
-    call clear_input        ; initialize command/value buffers and input state
+    call clear_input        
 
     call clear_screen
     mov si, msg
@@ -25,11 +32,11 @@ start:
     jmp main
 
 main:
-    call read_key       ; AL now holds the typed character
+    call read_key    
     call print_char
     jmp main
 
-%include "lib.asm"       ; Utility functions
-%include "input.asm"     ; Logic that handles buffers and user keys
-%include "commands.asm"  ; The specific command implementations
-%include "data.asm"      ; Data must be first so everything else can see the buffers
+%include "lib.asm"      
+%include "input.asm"    
+%include "commands.asm" 
+%include "data.asm"   

@@ -199,6 +199,7 @@ delete_function:
     ret
 
 ls_function:
+    call clear_screen
     call load_file_table
     mov bx, file_table_buffer
     mov cx, 64                  ; scan all 64 entries
