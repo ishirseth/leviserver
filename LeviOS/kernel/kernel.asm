@@ -12,12 +12,7 @@ start:
     mov cl, 0x07  
     int 0x10
 
-    push ds
-    xor ax, ax
-    mov ds, ax  ;0x0000 like bootloader
-    mov al, [0x0500]
-    pop ds
-    mov [drive], al   ; select drive
+    mov [drive], 0x80   ; select drive
 
     mov word [write_sector_buffer], 12
     mov di, write_file_buffer

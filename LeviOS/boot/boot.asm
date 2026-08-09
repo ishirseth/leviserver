@@ -3,8 +3,7 @@
 [org 0x7C00]      
 
 start:
-    mov [boot_drive], dl    ; save boot drive number
-    mov [ds:0x0500], dl     ; for kernel
+    mov [boot_drive], 0x80    ; save boot drive number
     mov si, msg     ; point to message
 
 .print:

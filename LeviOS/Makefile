@@ -26,7 +26,6 @@ FILETABLE2 = $(BUILD_DIR)/filetable2.bin
 .PHONY: all clean programs run build_all web
 
 # --- Default Target ---
-# Running 'make' will clean old artifacts, assemble user programs, and build the disk image
 all: clean
 	@$(MAKE) build_all
 
