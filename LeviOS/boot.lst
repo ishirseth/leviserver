@@ -1,0 +1,92 @@
+     1                                  ; LeviOS bootloader
+     2                                  
+     3                                  [org 0x7C00]      
+     4                                  
+     5                                  start:
+     6 00000000 8816[FD01]                  mov [boot_drive], dl    ; save boot drive number
+     7 00000004 3E88160005                  mov [ds:0x0500], dl     ; for kernel
+     8 00000009 BE[5F00]                    mov si, msg     ; point to message
+     9                                  
+    10                                  .print:
+    11 0000000C AC                          lodsb         
+    12 0000000D 08C0                        or al, al      
+    13 0000000F 7406                        jz load_kernel          
+    14                                  
+    15 00000011 B40E                        mov ah, 0x0E    
+    16 00000013 CD10                        int 0x10       
+    17                                  
+    18                                  
+    19 00000015 EBF5                        jmp .print
+    20                                  
+    21                                  load_kernel:
+    22 00000017 E82100                      call delay_3sec
+    23                                  
+    24 0000001A B402                        mov ah, 0x02
+    25 0000001C B009                        mov al, 9        ; read 9 sectors
+    26 0000001E B500                        mov ch, 0
+    27 00000020 B102                        mov cl, 2
+    28 00000022 B600                        mov dh, 0
+    29 00000024 8A16[FD01]                  mov dl, [boot_drive]
+    30                                  
+    31 00000028 BB0010                      mov bx, 0x1000
+    32 0000002B 8EC3                        mov es, bx
+    33 0000002D BB0000                      mov bx, 0x0000
+    34 00000030 CD13                        int 0x13
+    35                                  
+    36 00000032 E81100                      call clear_screen
+    37                                  
+    38                                      ; --- jump to kernel ---
+    39 00000035 680010                      push 0x1000
+    40 00000038 6A00                        push 0x0000
+    41 0000003A CB                          retf
+    42                                  
+    43                                  delay_3sec:
+    44 0000003B B92D00                      mov cx, 0x002D      
+    45 0000003E BAC0C6                      mov dx, 0xC6C0      
+    46 00000041 B486                        mov ah, 0x86
+    47 00000043 CD15                        int 0x15
+    48 00000045 C3                          ret
+    49                                  
+    50                                  clear_screen:
+    51 00000046 B406                        mov ah, 0x06    
+    52 00000048 B000                        mov al, 0x00       
+    53 0000004A B707                        mov bh, 0x07     
+    54 0000004C B90000                      mov cx, 0x0000   
+    55 0000004F BA4F18                      mov dx, 0x184F      
+    56 00000052 CD10                        int 0x10
+    57                                  
+    58 00000054 B402                        mov ah, 0x02        
+    59 00000056 B700                        mov bh, 0x00      
+    60 00000058 B600                        mov dh, 0x00        ; row 0
+    61 0000005A B200                        mov dl, 0x00        ; column 0
+    62 0000005C CD10                        int 0x10
+    63 0000005E C3                          ret
+    64                                  
+    65                                  msg:
+    66 0000005F 200D0A                      db " ", 0x0D,0x0A
+    67 00000062 2020207C5C2D2D2D2F-         db "   |\---/|", 0x0D,0x0A
+    67 0000006B 7C0D0A             
+    68 0000006E 2020207C202C5F2C20-         db "   | ,_, |", 0x0D,0x0A
+    68 00000077 7C0D0A             
+    69 0000007A 202020205C5F605F2F-         db "    \_`_/-..----.", 0x0D,0x0A
+    69 00000083 2D2E2E2D2D2D2D2E0D-
+    69 0000008C 0A                 
+    70 0000008D 205F5F5F2F20602020-         db " ___/ `   ' ,''+ \", 0x0D,0x0A
+    70 00000096 2027202C27272B205C-
+    70 0000009F 0D0A               
+    71 000000A1 285F5F2E2E2E272020-         db "(__...'   __\    |`.___.';", 0x0D,0x0A
+    71 000000AA 205F5F5C202020207C-
+    71 000000B3 602E5F5F5F2E273B0D-
+    71 000000BC 0A                 
+    72 000000BD 2020285F2C2E2E2E27-         db "  (_,...'(_,.`__)/'.....+", 0x0D,0x0A
+    72 000000C6 285F2C2E605F5F292F-
+    72 000000CF 272E2E2E2E2E2B0D0A 
+    73 000000D8 200D0A                      db " ", 0x0D,0x0A
+    74 000000DB 4C6576694F5320626F-         db "LeviOS booted!", 0x0D,0x0A
+    74 000000E4 6F746564210D0A     
+    75 000000EB 4C6F6164696E672073-         db "Loading system...", 0
+    75 000000F4 797374656D2E2E2E00 
+    76                                  
+    77 000000FD 00<rep 100h>            times 509-($-$$) db 0  ; pad to 512 bytes
+    78 000001FD 80                      boot_drive: db 0x80      
+    79 000001FE 55AA                    dw 0xAA55              ; boot signature
