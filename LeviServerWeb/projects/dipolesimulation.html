@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project 1</title>
+<link rel="stylesheet" href="../css/style.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" crossorigin="anonymous"
+        onload="renderMathInElement(document.body);"></script>
+
+</head>
+<body>
+
+<div id="navbar"></div>
+<script src="/js/nav.js"></script>
+
+<section class="server-section">
+  <h2>Dipole Radiation Pattern Simulation</h2>
+
+  <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+    <img src="../images/DipoleRadiationPatterns.jpg" alt="Server" style="height: 500px; width: auto; object-fit: cover;">
+  </div>
+
+  <div style="margin-bottom: 20px;">
+    <p>A dipole is a type of simple omnidirectional antenna with two same sized elements on either side of the feed point.
+      It is commonly used in amateur radio and is normally half a wavelength long which makes it have a gain of 2.15dBi.
+      The radiation pattern of a dipole is a toroidal shape with the maximum radiation perpendicular to the axis of the dipole and nulls along the axis of the dipole.
+    </p>
+  </div>
+  
+  <div style="margin-bottom: 20px;">
+    <p>I simulated the power radiation pattern of a dipole antenna using C++ and OpenGL. 
+      The gain in one directional is calculated and then used as the radius of a point in 3D space from the center of the dipole.
+      The bigger the gain in a direction, the further away the point is from the center of the dipole and you can see where the lobes and nulls are.
+    </p>
+  </div>
+
+  <div style="margin-bottom: 20px;">
+    <p>The dipole is depndent on the wavelength of the signal being radiated (lamda/λ) and the length of the dipole (L). 
+      This shapes the radiation pattern which changes the dipole's gain in different directions.
+      The image above shows the simulated radiation pattern of a dipole going from L being 0.5 wavelenths (traditional dipole), to then L being 1 wavelengths, to then 1.5 wavelengths and finally 2 wavelengths long (top-left to bottom-right).
+    </p>
+  </div>
+
+  <div style="margin-bottom: 20px;">
+    <p>
+      The math behind the simulation is as follows (the result is the gain at angle theta): $$ G(\theta) = \left( \frac{\cos\left(\frac{\pi L}{\lambda} \cos(\theta)\right) - \cos\left(\frac{\pi L}{\lambda}\right)}{\sin(\theta)} \right)^2 $$
+    </p>
+  </div>
+  
+  <p style="font-size: 0.9em; opacity: 0.8;">The files for this simulation can be found in my <a href="https://github.com/ishirseth/leviserver" target="_blank" rel="noopener noreferrer">github</a> repository in the Simulation folder.</p>
+
+</section>
+</body>
+</html>
