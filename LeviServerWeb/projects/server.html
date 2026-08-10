@@ -14,8 +14,9 @@
 <section class="server-section">
   <h2>My Home Server</h2>
 
-  <div class="project-div">
-    <img src="../images/Server.jpeg" alt="Server" class="project-img project-img--left project-img--big">
+  <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+    <img src="../images/Server.jpeg" alt="Server" style="height: 450px; width: auto; object-fit: cover;">
+    <img src="../images/ServerOpen.jpeg" alt="Server Open" style="height: 450px; width: auto; object-fit: cover;">
   </div>
 
   <div class="server-intro">
@@ -27,10 +28,9 @@
     <ul>
       <li><strong>Motherboard:</strong> ASUS P7F-M uATX (featuring 6 SATA ports and multiple PCIe expansion slots)</li>
       <li><strong>Processor:</strong> Intel Xeon X3450 (4 physical cores, 8 virtual cores with VT-x support)</li>
-      <li><strong>Memory &amp; Storage:</strong> 16GB DDR3 RAM, 64GB SSD (for the OS), plus 500GB and 160GB HDDs</li>
-      <li><strong>Graphics:</strong> ATI Radeon X550 Advantage GPU (connected via VGA)</li>
-      <li><strong>Case &amp; Drives:</strong> ATX Maxdata case with HDD/SSD slots, DVD/CD drive (via IDE-to-USB adapter), and a floppy drive (via FDD-to-USB adapter) allowing me to use floppies and disks</li>
-      <li><strong>Networking &amp; Power:</strong> Small USB Wi-Fi adapter for wireless connectivity, powered by a Be quiet! 430W PSU with standard cooling</li>
+      <li><strong>Memory &amp; Storage:</strong> 16GB DDR3 RAM, 64GB SSD (for the OS), plus a 500GB hard drive.</li>
+      <li><strong>Case &amp; Drives:</strong> ATX case with HDD/SSD slots and a DVD/CD drive (via SATA), letting me use disks for extra storage.</li>
+      <li><strong>Networking &amp; Power:</strong> A direct Ethernet connection (also a small USB Wi-Fi adapter for wireless connectivity), powered by a Be quiet! 430W PSU with standard cooling</li>
     </ul>
   </div>
 
@@ -38,7 +38,7 @@
     <h3>Software &amp; Services</h3>
     <p>The server runs <strong>Ubuntu</strong> because Linux is lightweight, stable, and ideal for older hardware while still capable of running all my services:</p>
     <ul>
-      <li><strong>Website Hosting:</strong> Hosts this very website, featuring a script that pulls the latest code from my GitHub repository every 30 seconds, so changes go live without manual restarts.</li>
+      <li><strong>Website Hosting:</strong> Hosts this very website, featuring a script that gets changes from my Github repository, so changes go live without manual restarts.</li>
       <li><strong>NAS Storage:</strong> Acts as a local NAS using CasaOS, letting me store and access files from any device at home.</li>
       <li><strong>OpenWebRX:</strong> A publicly accessible software-defined radio (SDR) receiver that allows listening to radio signals via the connected SDR device.</li>
       <li><strong>Public Telnet Server:</strong> A terminal-accessible server responding to specific commands (built as a fun project); accessible via the <a href="../demos/telnet.html">demo page</a> or by using a terminal with details found on the demo page.</li>
