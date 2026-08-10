@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project 1</title>
+<link rel="stylesheet" href="../css/style.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" crossorigin="anonymous"
+        onload="renderMathInElement(document.body);"></script>
+
+</head>
+<body>
+
+<div id="navbar"></div>
+<script src="/js/nav.js"></script>
+
+<section class="server-section">
+  <h2>Schrödinger's Atomic Model Simulation of Hydrogen</h2>
+
+  <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+    <img src="../images/Atom.png" alt="Server" style="height: 450px; width: 750px; object-fit: cover;">
+  </div>
+
+  <div style="margin-bottom: 20px;">
+    <p>This is my simulation of a hydrogen atom according to the Schrödinger Atomic Model written in C++.
+        In quantum physics, the electron of an atom is not a particle that orbits the nucleus, but rather a wave that exists in a probability cloud around the nucleus.
+        It doesn't have a defined position unless measured, but it has a probability of being found in a certain area around the nucleus.
+        Unless measured, the electron is in a superposition of energy states or orbital states until a measurement forces it to localize or interact.
+    </p>
+  </div>
+  <div style="margin-bottom: 20px;">
+    <p> My simulation uses C++ and OpenGL to create a 3D representation of the probability cloud of an electron around a hydrogen atom.
+        It also uses multithreading for the CPU to calculate each point faster and the GPU is used to render the points in 3D space.
+        It uses the Schrödinger equation which outputs a wave function which can then be used to calculate the probability of finding the electron at a certain position around the nucleus
+        (using spherical coordinates: r for radius and theta and phi its angle relative to the nucleus).
+        The Schrödinger differential equation is solved into two parts for the radial and angular parts of the wave function. 
+        The radial part is solved using the Laguerre polynomials and the angular part is solved using the spherical harmonics (with the Legendre polynomials).
+        The denser the cloud is with points, the higher the probability of finding the electron there.
+    </p>
+  </div>
+  <div style="margin-bottom: 20px;">
+    <p>
+        The simulation/equation is time independent and depends on the quantum numbers n, l, and m. 
+        The simulation allows the user to change these quantum numbers and see how the probability cloud changes.
+    </p>
+    <ul>
+        <li><strong>Principal Quantum Number (n):</strong> Determines the energy level and size of the orbital.</li>
+        <li><strong>Angular Momentum Quantum Number (l):</strong> Determines the angular momentum/shape of the orbital.</li>
+        <li><strong>Magnetic Quantum Number (m):</strong> Determines the orientation of the orbital in space.</li>
+    </ul>
+  </div>
+  <div style="margin-bottom: 20px;">
+    <p>
+        The math behind the simulation using the Schrödinger equation is as follows (note that I didn't solve the Schrödinger equation myself but found the solutions online and used the math in my simulation):
+    </p>
+    <ul>
+        <li><strong>Schrödinger Differential Equation:</strong> $$ \frac{-\hbar^2}{2m}\nabla^2\Psi(\vec{r}) + V(\vec{r})\Psi(\vec{r}) = E\Psi(\vec{r}) $$ </li>
+        <li><strong>Radial Part of the Wave Function:</strong> $$ R_{nl}(r) = -\sqrt{ \left(\frac{2}{n a_0}\right)^3 \frac{(n-l-1)!}{2n[(n+l)!]^3} } \, e^{-r/na_0} \left(\frac{2r}{n a_0}\right)^l L_{n-l-1}^{2l+1}\left(\frac{2r}{n a_0}\right) $$ </li>
+        <li><strong>Probability Density for Radial Part:</strong> $$ P(r) = 4\pi r^2 \cdot [R_{nl}(r)]^2 $$ </li>
+        <li><strong>Angular Part of the Wave Function:</strong> $$ Y_l^0(\theta) = \sqrt{\frac{2l+1}{4\pi}} \cdot P_l^0(\cos\theta) $$ </li>
+        <li><strong>Probability Density for Angular Part:</strong> $$ P(\theta) = |Y_l^0(\theta)|^2 \cdot \sin(\theta) = [P_l^0(\cos\theta)]^2 \cdot \text{constant} \cdot \sin(\theta) $$ </li>
+    
+    </ul>
+  </div>
+  <p style="font-size: 0.9em; opacity: 0.8;">The files for this simulation can be found in my <a href="https://github.com/ishirseth/leviserver" target="_blank" rel="noopener noreferrer">github</a> repository in the Simulation folder.</p>
+
+</section>
+</body>
+</html>
