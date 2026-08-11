@@ -3,8 +3,13 @@
 [org 0x7C00]      
 
 start:
-    mov [boot_drive], 0x80    ; save boot drive number
-    mov si, msg     ; point to message
+    xor ax, ax
+    mov ds, ax
+    mov es, ax
+
+    mov [boot_drive], dl
+    mov [ds:0x0500], dl
+    mov si, msg
 
 .print:
     lodsb         

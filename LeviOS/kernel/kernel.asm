@@ -12,7 +12,12 @@ start:
     mov cl, 0x07  
     int 0x10
 
-    mov [drive], 0x80   ; select drive
+    push ds
+    xor ax, ax
+    mov ds, ax
+    mov al, [0x0500]
+    pop ds
+    mov [drive], al
 
     mov word [write_sector_buffer], 12
     mov di, write_file_buffer
