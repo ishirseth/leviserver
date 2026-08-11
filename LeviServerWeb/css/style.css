@@ -67,6 +67,13 @@ a {
   color: #7dd3fc;
 }
 
+ul li {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch; 
+  padding-bottom: 5px;
+}
+
 .intro-box {
   border: 2px solid #2a1f1f;
   padding: 20px;
@@ -162,6 +169,18 @@ a {
 
 .project-div--center {
   justify-content: center;
+}
+
+.row-img-container {
+  display: flex; 
+  gap: 10px; 
+  margin-bottom: 10px;
+}
+
+.row-img {
+  height: 450px; 
+  width: auto; 
+  object-fit: cover;
 }
 
 .project-video {
@@ -264,6 +283,15 @@ a {
   .project-img--big {
     width: 100%;
     margin: 0 0 12px 0;
+  }
+
+  .row-img-container {
+    flex-direction: column; 
+  }
+
+  .row-img {
+    height: auto; 
+    width: 100%;
   }
 
   .video-frame {
