@@ -3,13 +3,13 @@
 ; Pong
 ; esc to exit, w and s for paddle 1, i and k for paddle 2
 
+org 0x0693
+
 PADDLE_SIZE equ 4      ; paddle size
 PADDLE_STEP equ 2
 SPEED equ 70            ; lower = faster
 
 start:
-    nop             ; SUPER IMPORTANT LOL
-
     mov ah, 0x01
     mov ch, 0x20    ; bit 5 set = cursor hidden
     mov cl, 0x00
@@ -263,11 +263,11 @@ draw_border:
         ret
 
 clear_screen:
-    mov ah, 0x06        ; scroll up function
-    mov al, 0x00        ; clear entire window (0 = clear all)
-    mov bh, 0x07        ; white text on black background (attribute)
-    mov cx, 0x0000       ; top-left corner (row 0, col 0)
-    mov dx, 0x184F       ; bottom-right corner (row 24, col 79)
+    mov ah, 0x06        
+    mov al, 0x00   
+    mov bh, 0x07   
+    mov cx, 0x0000      
+    mov dx, 0x184F      
     int 0x10
 
     mov ah, 0x02        ; set cursor position

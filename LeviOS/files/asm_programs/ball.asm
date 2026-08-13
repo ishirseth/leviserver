@@ -2,6 +2,7 @@
 ; For my operating system LeviOS
 ; Ball
 
+org 0x0693
 
 start:
     mov ah, 0x01
@@ -162,11 +163,11 @@ draw_border:
         ret
 
 clear_screen:
-    mov ah, 0x06        ; scroll up function
-    mov al, 0x00        ; clear entire window (0 = clear all)
-    mov bh, 0x07        ; white text on black background (attribute)
-    mov cx, 0x0000       ; top-left corner (row 0, col 0)
-    mov dx, 0x184F       ; bottom-right corner (row 24, col 79)
+    mov ah, 0x06   
+    mov al, 0x00    
+    mov bh, 0x07  
+    mov cx, 0x0000     
+    mov dx, 0x184F    
     int 0x10
 
     mov ah, 0x02        ; set cursor position
