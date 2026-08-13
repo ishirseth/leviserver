@@ -106,8 +106,8 @@ web: $(DISK)
 
 # Execution
 run: $(DISK)
-	$(QEMU) -drive format=raw,file=$(DISK) -display gtk
-	#$(QEMU) -fda $(DISK) -display gtk
+	#$(QEMU) -drive format=raw,file=$(DISK) -display gtk
+	$(QEMU) -fda $(DISK) -display gtk
 
 clean:
 	rm -rf $(BUILD_DIR) $(DISK)# Execution

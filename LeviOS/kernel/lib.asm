@@ -165,14 +165,14 @@ byte_to_hex:
     push si
     mov al, bl
     
-    ; --- Process High Nibble ---
-    shr al, 4           ; Shift right by 4 to get high nibble
+
+    shr al, 4           
     call .nibble_to_char
     mov [si], al
     inc si
-    ; --- Process Low Nibble ---
+
     mov al, bl
-    and al, 0x0F        ; Mask out high bits to get low nibble
+    and al, 0x0F       
     call .nibble_to_char
     mov [si], al
     inc si
@@ -243,12 +243,11 @@ load_file_table:
     int 0x13
     ret
 write_file_table:
-    ; write both tables back to disk (sectors 10-11)
     push ax
     mov ah, 0x03
     mov al, 2              ; write 2 sectors (both tables)
     mov ch, 0
-    mov cl, 11             ; start at sector 10 (BIOS 1-indexed = 11)
+    mov cl, 11             ; start at sector 10 (11)
     mov dh, 0
     mov dl, [drive]
     mov bx, file_table_buffer
@@ -285,9 +284,9 @@ read_sector:
     add bx, 1
     mov ah, 0x02
     mov al, 1
-    mov ch, 0
-    mov cl, bl           ; sector number 
-    mov dh, 0
+    
+    call find_disk_address
+
     mov dl, [drive]
     mov bx, txt_buffer
     int 0x13
@@ -385,6 +384,47 @@ check_extension:
     .no_match:
         mov ax, 0
         ret
+
+find_disk_address:
+    cmp [drive], 0x80
+    je .disk
+    push ax
+    push bx
+    xor ax, ax
+    mov al, bl
+    mov bl, 36
+    div bl
+    mov ch, al
+    pop bx
+
+    push bx
+    xor ax, ax
+    mov al, bl
+    mov bl, 18
+    div bl
+    xor ah, ah
+    mov bl, 2
+    div bl
+    mov dh, ah
+    pop bx
+
+    push bx
+    xor ax, ax
+    mov al, bl
+    mov bl, 18
+    div bl
+    mov cl, ah
+    pop bx
+
+    pop ax
+    ret
+
+    .disk:
+        mov ch, 0       
+        mov cl, bl             
+        mov dh, 0   
+        ret
+
 
 ; ----- MEMORY -----
 ; di = destination
