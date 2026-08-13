@@ -11,6 +11,7 @@
         ;                             previous score.
         ;
 
+        org 0x2000
         use16
 
         mov ax,0x0002   ; Set 80x25 text mode
@@ -269,7 +270,6 @@ fb14:   push dx
         out (0x61),al
         ret
 
-        db "IS"
 
 
 pipe:   equ 0x0fa0

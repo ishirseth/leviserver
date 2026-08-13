@@ -5,7 +5,7 @@
 ; You're free to use, redistribute, modify, and edit this program
 ; in any way as long you attribute the original to me.
 
-org 0x7C00
+org 0x2000
 use16
 
 start:

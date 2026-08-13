@@ -45,7 +45,7 @@ $(BOOT_BIN): $(BOOT) | $(BUILD_DIR)
 
 # Build Kernel
 $(KERNEL_BIN): $(KERNEL) | $(BUILD_DIR)
-	$(ASM) -f bin $(KERNEL) -i kernel/ -o $(KERNEL_BIN)
+	$(ASM) -f bin $(KERNEL) -i kernel/ -o $(KERNEL_BIN) -l $(BUILD_DIR)/kernel.lst
 
 # Create directory for build artifacts
 $(BUILD_DIR):

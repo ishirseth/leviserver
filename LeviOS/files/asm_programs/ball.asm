@@ -2,7 +2,7 @@
 ; For my operating system LeviOS
 ; Ball
 
-org 0x0693
+org 0x2000
 
 start:
     mov ah, 0x01

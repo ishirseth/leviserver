@@ -65,5 +65,8 @@ write_sector_buffer: resb 16
 write_file_buffer:  resb FILE_ENTRY_SIZE
 command:            resb 32
 value:              resb 1600
-txt_buffer:         resb 512
 file_table_buffer:  resb 1024
+
+absolute 0x2000
+txt_buffer: resb 512
+; end

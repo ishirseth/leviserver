@@ -1,3 +1,5 @@
+org 0x2000
+
 mov al, 'D'
 mov ah, 0x0E
 int 0x10

@@ -3,7 +3,7 @@
 ; Pong
 ; esc to exit, w and s for paddle 1, i and k for paddle 2
 
-org 0x0693
+org 0x2000
 
 PADDLE_SIZE equ 4      ; paddle size
 PADDLE_STEP equ 2
