@@ -2,7 +2,7 @@
 
 ifeq ($(OS),Windows_NT)
     SHELL := sh
-    ASM = ./nasm.exe
+    ASM = nasm
     QEMU = "C:\Program Files\qemu\qemu-system-i386.exe"
     QEMU_IMG = "C:\Program Files\qemu\qemu-img.exe"
 else

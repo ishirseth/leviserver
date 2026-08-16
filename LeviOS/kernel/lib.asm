@@ -386,37 +386,13 @@ check_extension:
         ret
 
 find_disk_address:
-    cmp [drive], 0x80
+    cmp byte [drive], 0x80
     je .disk
-    push ax
-    push bx
-    xor ax, ax
-    mov al, bl
-    mov bl, 36
-    div bl
-    mov ch, al
-    pop bx
 
-    push bx
-    xor ax, ax
-    mov al, bl
-    mov bl, 18
-    div bl
-    xor ah, ah
-    mov bl, 2
-    div bl
-    mov dh, ah
-    pop bx
+    mov ch, 0       
+    mov cl, bl             
+    mov dh, 0 
 
-    push bx
-    xor ax, ax
-    mov al, bl
-    mov bl, 18
-    div bl
-    mov cl, ah
-    pop bx
-
-    pop ax
     ret
 
     .disk:
