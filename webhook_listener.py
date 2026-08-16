@@ -3,7 +3,7 @@ import subprocess
 
 class WebhookHandler(BaseHTTPRequestHandler):
     def do_POST(self):
-        subprocess.run(["/home/levi/Desktop/Server/leviserver/deploy.sh"])
+        subprocess.run(["/root/leviserver/deploy.sh"])
         self.send_response(200)
         self.end_headers()
         self.wfile.write(b"Deployed")

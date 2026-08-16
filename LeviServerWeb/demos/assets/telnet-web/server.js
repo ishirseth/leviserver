@@ -1,8 +1,3 @@
-// server.js
-// A minimal WebSocket <-> Telnet TCP bridge.
-// Browsers can't open raw TCP sockets, so this server does that part:
-// it opens a real TCP connection to your fixed telnet host, and relays
-// bytes between that socket and a WebSocket connection from the browser.
 
 const http = require('http');
 const net = require('net');
@@ -10,8 +5,7 @@ const path = require('path');
 const express = require('express');
 const { WebSocketServer } = require('./node_modules/ws');
 
-// ---- YOUR FIXED TELNET TARGET ----
-const TELNET_HOST = 'leviserver.eu';
+const TELNET_HOST = 'localhost';
 const TELNET_PORT = 1437;
 // -----------------------------------
 
