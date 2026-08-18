@@ -13,15 +13,15 @@
 <script src="/js/nav.js"></script> 
 
 <section>
-  <h2>Relaxation Oscillator</h2>
+  <h2>Schmitt trigger oscillator</h2>
 
   <div class="project-div">
-    <img src="../images/RelaxationOscillator.jpeg"
-         alt="Relaxation Oscillator"
+    <img src="../images/SchmittTrigger.jpeg"
+         alt="Schmitt Trigger Oscillator"
          class="project-img project-img--left">
 
     <div>
-      <p>This project is a relaxation oscillator built using a TL072 operational amplifier chip. 
+      <p>This project is a Schmitt trigger oscillator built using a TL072 operational amplifier chip. 
          The circuit operates from a 5V power supply and uses a small red LED to display the output of the oscillator. 
          In addition to the op-amp, the circuit consists of several resistors, a capacitor, and a 100 kΩ potentiometer (a variable resistor).
       </p>
@@ -36,12 +36,11 @@
     </div>
   </div>
 
-  <!-- VIDEOS (fixed layout) -->
   <div style="gap: 20px;" class="project-div project-div--left"> 
-  <video style="width: 500px; height: auto;" autoplay loop muted> 
-    <source src="../videos/RelaxationOscillatorSlow.mp4" type="video/mp4"> </video> 
-  <video style="width: 500px; height: auto;" autoplay loop muted> 
-    <source src="../videos/RelaxationOscillatorFast.mp4" type="video/mp4"> </video>
+  <video style="width: 500px; height: auto;" autoplay loop muted controls> 
+    <source src="videos/SchmittTriggerSlow.mp4" type="video/mp4"> </video> 
+  <video style="width: 500px; height: auto;" autoplay loop muted controls> 
+    <source src="videos/SchmittTriggerFast.mp4" type="video/mp4"> </video>
 
   </div>
   <div>
@@ -57,8 +56,8 @@
   </div>
 
   <div class="project-div project-div--center">
-  <img src="../images/RelaxationOscillatorSchematic.png"
-       alt="Relaxation Oscillator Schematic"
+  <img src="../images/SchmittTriggerSchematic.png"
+       alt="Schmitt Trigger Oscillator Schematic"
        class="project-img">
   </div>
   
@@ -75,7 +74,7 @@
     This feedback loop creates a continuous oscillation.
   </p>
   <p>
-    In a typical relaxation oscillator, dual supply rails such as +5V and -5V are often used, with ground acting as a midpoint reference.
+    In a typical Schmitt trigger oscillator, dual supply rails such as +5V and -5V are often used, with ground acting as a midpoint reference.
     However, in this circuit only a single 5V supply is available (+5V and 0V/GND).
     To replicate this behavior, a midpoint is created using a voltage divider made from two resistors, producing a 2.5V reference.
     The switching network is then referenced around this midpoint, allowing the op-amp to operate correctly while still running from a single 5V supply.

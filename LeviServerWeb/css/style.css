@@ -1,36 +1,62 @@
 /* /css/style.css */
 
+@import url('//fonts.googleapis.com/css?family=Oswald');
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
 :root {
-  --text-color: #e0e0e0;
-  --accent-color: #2b6634;
+  --text-color: #d6d6d6;
+  --accent-color: #39ff88;
+  --header-glow: 0 0 12px rgba(57, 255, 136, 0.25);
+  --accent-glow: 0 0 8px rgba(57, 255, 136, 0.6);
   --card-bg: #1f1f1f;
+  --background-color: #000000;
+  --background-gradient: linear-gradient(90deg, var(--background-color) 0%, rgb(27, 27, 27) 50%, var(--background-color) 100%);
+  --nav-background-color: #1f1f25;
+  --nav-card-background-color: rgba(47, 47, 49, 0.85);
+
+  --header-font: 'Oswald', sans-serif;
+  --text-font: 'Share Tech Mono', monospace;
 }
 
 body {
   margin: 0;
   padding: 0;
-  font-family: Arial, sans-serif;
+  font-family: var(--text-font);
   background: #121212;
-  background: linear-gradient(90deg, rgba(18, 18, 18, 1) 0%, rgb(47, 47, 47) 50%, rgb(78, 78, 78) 100%);
+  background: var(--background-gradient);
   color: var(--text-color);
   text-align: left;
 }
 
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, transparent 1px, transparent 3px);
+  z-index: 1;
+}
+
 nav {
-  background-color: #1f1f1f;
-  padding: 10px 20px;
-  display: flex;
-  gap: 20px;
+  padding: 5px;
+  background-color: rgba(31, 31, 37, 0.85);
+  box-shadow: 0 2px 20px rgba(0,0,0,0.5);
 }
 
 nav a {
+  margin-left: 15px;
+  font-family: var(--text-font);
   color: var(--text-color);
   text-decoration: none;
   font-weight: bold;
+  background: var(--nav-card-background-color);
+  padding: 5px 15px;
+  border-radius: 3px;
 }
 
 nav a:hover {
   color: var(--accent-color);
+  text-shadow: var(--accent-glow);
 }
 
 section {
@@ -41,26 +67,21 @@ section {
 }
 
 h1 {
-  font-weight: bold;
-  color: var(--text-color);
-  font-size: 70px;
+  font-family: var(--header-font);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: var(--header-glow);
 }
-
-h2 {
-  font-weight: bold;
-  color: var(--text-color);
-  font-size: 25px;
-}
-
-h3 {
-  font-weight: bold;
-  color: var(--text-color);
-  font-size: 18px;
+h2, h3 {
+  font-family: var(--header-font);
+  letter-spacing: 1px;
+  text-shadow: var(--header-glow);
 }
 
 p {
-  line-height: 1.5;
-  margin: 0.1em 0; /* or margin: 0; for none at all */
+  line-height: 1.6;
+  margin: 0.1em 0;
+  color: var(--text-color);
 }
 
 a {
@@ -79,8 +100,8 @@ ul li {
   padding: 20px;
   margin: 20px 0;
   border-radius: 10px;
-  background-color: #1a1a1a;
-  border-left: 3px solid #c1a7a7;
+  background-color: var(--card-bg);
+  border-left: 3px solid var(--accent-color);
   padding-left: 10px;
 }
 
@@ -114,15 +135,25 @@ ul li {
   gap: 20px;
 }
 
+.projects-grid a {
+  display: contents;
+  text-decoration: none;
+  color: var(--text-color);
+}
+
 .project-card {
-  background-color: var(--card-bg);
-  padding: 15px;
+  background: var(--card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  transition: transform 0.2s;
+  padding: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 250px;
+  grid-column: span 1;
 }
 
 .project-card:hover {
   transform: scale(1.05);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
   border: 1px solid var(--accent-color);
 }
 
@@ -228,21 +259,14 @@ ul li {
   max-width: 650px;
 }
 
+.article p {
+  margin-bottom: 1.4em;
+}
+
 .subtitle {
   font-weight: normal;
   color: #aaa;
   margin-bottom: 25px;
-}
-
-.article p {
-  line-height: 1.75;
-  margin-bottom: 1.4em;
-  color: #d6d6d6;
-}
-
-.article p.lead {
-  font-size: 1.1rem;
-  color: #ffffff;
 }
 
 #screen_container {
@@ -250,14 +274,21 @@ ul li {
     height: 600px;
     margin-left: auto;
 }
-/* Force v86's internal canvas to stretch to fill the container */
+
 #screen_container canvas {
     width: 100% !important;
     height: 100% !important;
     display: block;
-    image-rendering: pixelated; /* Keeps text and 16-bit graphics crisp instead of blurry */
+    image-rendering: pixelated; 
 }
 
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+section {
+  animation: fadeInUp 0.6s ease-out both;
+}
 
 * {
   text-align: left;
