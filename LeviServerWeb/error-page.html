@@ -1,97 +1,134 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
+<title>404 - Signal Lost</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
-<style type=text/css>
+  :root {
+    --accent-color: #39ff88;
+    --bg: #000000;
+    --card-bg: #1f1f1f;
+    --text-color: #d6d6d6;
+  }
 
-* {
-	-webkit-box-sizing: border-box;
-	box-sizing: border-box;
-}
+  * { box-sizing: border-box; }
 
-body {
-	padding: 0;
-	margin: 0;
-}
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0a0a0a;
+    color: var(--text-color);
+    font-family: 'Share Tech Mono', monospace;
+    text-align: center;
+    overflow: hidden;
+    position: relative;
+  }
 
-#notfound {
-	position: relative;
-	height: 100vh;
-}
+  /* scanline */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(
+      0deg, rgba(255,255,255,0.03) 0px, transparent 1px, transparent 3px
+    );
+    z-index: 1;
+  }
 
-#notfound .notfound {
-	position: absolute;
-	left: 50%;
-	top: 50%;
-	-webkit-transform: translate(-50%, -50%);
-	-ms-transform: translate(-50%, -50%);
-	transform: translate(-50%, -50%);
-}
-
-.notfound {
-	max-width: 520px;
-	width: 100%;
-	line-height: 1.4;
-	text-align: center;
-}
-
-.notfound .notfound-error {
-	position: relative;
-	height: 200px;
-	margin: 0px auto 20px;
-	z-index: -1;
-}
-
-.notfound .notfound-error h1 {
-	font-family: 'Montserrat', sans-serif;
-	font-size: 200px;
-	font-weight: 300;
-	margin: 0px;
-	color: #211b19;
-	position: absolute;
-	left: 50%;
-	top: 50%;
-		-webkit-transform: translate(-50%, -50%);
-		-ms-transform: translate(-50%, -50%);
-		transform: translate(-50%, -50%);
-}
-
-@media only screen and (max-width: 767px) {
-	.notfound .notfound-error h1 {
-		font-size: 148px;
+	.terminal {
+		padding: 40px 50px;
+		margin: 30px 0;
+		border-radius: 10px;
+		background-color: var(--card-bg);
+		border-left: 3px solid var(--accent-color);
+		box-shadow: 0 0 40px rgba(57,255,136,0.08);
 	}
-}
 
-@media only screen and (max-width: 480px) {
-	.notfound .notfound-error {
-	height: 148px;
-	margin: 0px auto 10px;
-}
-.notfound .notfound-error h1 {
-	font-size: 120px;
-	font-weight: 200px;
-}
-.notfound .notfound-error h2 {
-	font-size: 30px;
-}
-.notfound a {
-	padding: 7px 15px;
-	font-size: 24px;
-}
-.h2 {
-	font-size: 148px;
-}
-}
+  h1 {
+    font-size: 5rem;
+    margin: 0;
+    letter-spacing: 4px;
+    color: var(--accent-color);
+    text-shadow: 0 0 15px rgba(57,255,136,0.6);
+    animation: flicker 3.5s infinite;
+  }
+
+  @keyframes flicker {
+    0%, 92%, 100% { opacity: 1; }
+    93% { opacity: 0.4; }
+    94% { opacity: 1; }
+    96% { opacity: 0.5; }
+    97% { opacity: 1; }
+  }
+
+
+  .log {
+    margin: 25px 0;
+    text-align: left;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: #888;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding: 15px 0;
+  }
+
+  .log span { color: var(--accent-color); }
+
+  .cursor {
+    display: inline-block;
+    width: 9px;
+    height: 1em;
+    background: var(--accent-color);
+    vertical-align: middle;
+    margin-left: 4px;
+    animation: blink 1s steps(1) infinite;
+  }
+
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  a.home-link {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 12px 24px;
+    text-decoration: none;
+    color: var(--text-color);
+    border: 1px solid var(--accent-color);
+    border-radius: 6px;
+    font-weight: bold;
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.3s, color 0.3s;
+  }
+
+  a.home-link:hover {
+	box-shadow: 0 0 20px rgba(57,255,136,0.4);
+	color: var(--accent-color);
+  }
 </style>
 </head>
 <body>
-<div id="notfound">
-	<div class="notfound">
-		<h1>Sorry the page can't be loaded!</a></h1>
-		<div class="notfound-error">
-			<p>Contact the site's administrator or support for assistance.</p>
-		</div>
-	</div>
-</div>
+
+  <div class="terminal">
+    <h1>404</h1>
+
+    <div class="log">
+		> running program... <br>
+		> using address: <span>0x00000000</span><br>
+		> reading memory... <span>error: segfault</span><br>
+		> suggestion: <span>stay in your allocated memory!</span><span class="cursor"></span>
+    </div>
+
+    <a href="index.html" class="home-link">🡐 go back</a>
+  </div>
+
 </body>
 </html>

@@ -3,27 +3,50 @@
 <head>
     <title>LeviServer</title>
     <style>
+        @import url('//fonts.googleapis.com/css?family=Oswald');
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
         :root {
-            --text-color: #e0e0e0;
-            --accent-color: #2b6634;
-            --card-bg: #1f1f1f;
+        --text-color: #d6d6d6;
+        --accent-color: #39ff88;
+        --header-glow: 0 0 12px rgba(57, 255, 136, 0.25);
+        --accent-glow: 0 0 8px rgba(57, 255, 136, 0.6);
+        --card-bg: #1f1f1f;
+        --background-color: #000000;
+        --background-gradient: linear-gradient(90deg, var(--background-color) 0%, rgb(27, 27, 27) 50%, var(--background-color) 100%);
+
+        --header-font: 'Oswald', sans-serif;
+        --text-font: 'Share Tech Mono', monospace;
         }
+
         body {
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
+            font-family: var(--text-font);
             background: #121212;
-            background: linear-gradient(90deg, rgba(18,18,18,1) 0%, rgb(47,47,47) 50%, rgb(78,78,78) 100%);
+            background: var(--background-gradient);
             color: var(--text-color);
         }
+
         section {
-            padding: 40px 20px;
+            padding: 0 10px;
             max-width: 1000px;
+            margin: 10px;
         }
+
         h1 {
-            font-size: 70px;
-            color: var(--text-color);
+            font-family: var(--header-font);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: var(--header-glow);
         }
+
+        h2, h3 {
+            font-family: var(--header-font);
+            letter-spacing: 1px;
+            text-shadow: var(--header-glow);
+        }
+
         .cards {
             display: flex;
             gap: 20px;
@@ -42,6 +65,17 @@
             transform: scale(1.05);
             border: 1px solid var(--accent-color);
         }
+
+        @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+        }
+        section {
+        animation: fadeInUp 0.6s ease-out both;
+        }
+        .projects-grid .project-card:nth-child(1) { animation-delay: 0.1s; }
+        .projects-grid .project-card:nth-child(2) { animation-delay: 0.2s; }
+        .projects-grid .project-card:nth-child(3) { animation-delay: 0.3s; }
     </style>
 </head>
 <body>
