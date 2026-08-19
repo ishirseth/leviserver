@@ -41,10 +41,12 @@ nav {
   padding: 5px;
   background-color: rgba(31, 31, 37, 0.85);
   box-shadow: 0 2px 20px rgba(0,0,0,0.5);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 nav a {
-  margin-left: 15px;
   font-family: var(--text-font);
   color: var(--text-color);
   text-decoration: none;
@@ -147,7 +149,6 @@ ul li {
   border-radius: 8px;
   padding: 1.5rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  height: 250px;
   grid-column: span 1;
 }
 
@@ -158,10 +159,31 @@ ul li {
 }
 
 .project-card img {
-  width: 100%;
+  width: auto;
+  max-width: 300px;
   height: 150px;
   object-fit: fill;
   border-radius: 5px;
+  display: block; 
+  margin: 0 auto;
+}
+
+.projects-card-led {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  box-shadow: 0 0 6px var(--accent-color);
+  float: left;
+}
+
+.projects-card-tag {
+  background: var(--accent-color);
+  color: #000;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  float: right;
 }
 
 .project-div {
