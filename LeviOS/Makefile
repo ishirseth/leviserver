@@ -45,7 +45,7 @@ $(BOOT_BIN): $(BOOT) | $(BUILD_DIR)
 
 # Build Kernel
 $(KERNEL_BIN): $(KERNEL) | $(BUILD_DIR)
-	$(ASM) -f bin $(KERNEL) -i kernel/ -o $(KERNEL_BIN) -l $(BUILD_DIR)/kernel.lst
+	$(ASM) -f bin $(KERNEL) -i kernel/ -o $(KERNEL_BIN)
 
 # Create directory for build artifacts
 $(BUILD_DIR):
@@ -106,8 +106,8 @@ web: $(DISK)
 
 # Execution
 run: $(DISK)
-	$(QEMU) -drive format=raw,file=$(DISK) -display gtk
-	#$(QEMU) -fda $(DISK) -display gtk
+	#$(QEMU) -drive format=raw,file=$(DISK) -display gtk
+	$(QEMU) -fda $(DISK) -display gtk
 
 clean:
 	rm -rf $(BUILD_DIR) $(DISK)# Execution

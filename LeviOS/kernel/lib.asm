@@ -388,17 +388,31 @@ check_extension:
 find_disk_address:
     cmp byte [drive], 0x80
     je .disk
-
-    mov ch, 0       
-    mov cl, bl             
-    mov dh, 0 
-
+    
+    ; --- Floppy Logic (BL is 0-indexed) ---
+    cmp bl, 17          ; 0 to 17 are on Head 0 (18 sectors total)
+    jbe .floppy_head_0
+    
+    ; If BL is 18 or higher (Head 1)
+    sub bl, 18          ; Shift down so it resets relative to Head 1
+    mov dh, 1           ; Switch to Head 1
+    mov ch, 0           
+    inc bl              ; Convert from 0-indexed to 1-indexed for BIOS!
+    mov cl, bl
     ret
 
+    .floppy_head_0:
+        mov ch, 0           
+        mov dh, 0           
+        inc bl              ; Convert from 0-indexed to 1-indexed for BIOS!
+        mov cl, bl
+        ret
+
     .disk:
-        mov ch, 0       
-        mov cl, bl             
-        mov dh, 0   
+        mov ch, 0           
+        inc bl              ; Hard drives can also be 1-indexed depending on your counter
+        mov cl, bl                       
+        mov dh, 0    
         ret
 
 
