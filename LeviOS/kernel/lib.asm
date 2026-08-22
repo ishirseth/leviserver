@@ -257,50 +257,50 @@ write_file_table:
 
 ; txt_buffer = text and bl = sector
 write_sector:
-    add bx, 1
-    mov ah, 0x00     ; reset disk
+    call find_disk_address
+    mov ah, 0x00        ; reset disk
     mov dl, [drive]
     int 0x13
 
-    mov ax, 0x0301       
-    mov ch, 0       
-    mov cl, bl             
-    mov dh, 0               
-    mov dl, [drive]            
+    mov ah, 0x03
+    mov al, 1
+    mov dl, [drive]
     push ds
     pop es
-    mov bx, txt_buffer      
-    int 0x13                
-    jnc .done            
+    mov bx, txt_buffer
+    int 0x13
+    jnc .done
 
-    call error     ; error
+    call error
     ret
     .done:
         ret
 ; txt_buffer = text and bl = sector
 read_sector:
-    mov ax, ds           ; set ES = DS first, before touching AX for int 0x13
+    call find_disk_address
+    mov ax, ds
     mov es, ax
-    add bx, 1
+
+    mov dl, byte [drive]
+    mov ah, 0x00        ; reset disk
+    int 0x13
+
     mov ah, 0x02
     mov al, 1
-    
-    call find_disk_address
-
-    mov dl, [drive]
     mov bx, txt_buffer
+    mov dl, byte [drive]
     int 0x13
     jc error
     ret
 
-; INPUT: SI = address of filename string
-; OUTPUT: AX = sector number, or 0 if not found
+; SI = address of filename string
+; AX = sector number, or 0 if not found
 find_file:
     mov bx, file_table_buffer
-    mov dx, 64                    ; scan all 64 entries
+    mov dx, 64                  
     .next_entry:
         cmp byte [bx], 0
-        je .skip                      ; empty entry? skip it, don't stop
+        je .skip                    
         
         push si
         mov di, bx
@@ -312,7 +312,7 @@ find_file:
         add bx, FILE_ENTRY_SIZE
         dec dx
         jnz .next_entry
-        xor ax, ax                    ; scanned everything, not found
+        xor ax, ax                  
         ret
     .found:
         mov ax, [bx + FILE_ENTRY_SIZE - 3]
@@ -321,17 +321,16 @@ find_file:
 ; finds first empty sector in the filetable 
 find_free_sector:
     mov bx, file_table_buffer
-    mov cx, 64                    ; scan all 64 entries
+    mov cx, 64                
     .check_entry:
-        cmp byte [bx], 0               ; empty entry = name field starts with 0
+        cmp byte [bx], 0             
         je .found
         add bx, FILE_ENTRY_SIZE
         loop .check_entry
-        ; cx hit 0 -- scanned all 64 entries, none free
-        xor ax, ax                    ; no free entry found
+        xor ax, ax                  
         ret
     .found:
-        mov ax, [bx + FILE_ENTRY_SIZE - 3]   ; sector, pre-filled by the Makefile
+        mov ax, [bx + FILE_ENTRY_SIZE - 3]   
         ret
 
 ; check if value is not too long and exists
@@ -348,11 +347,11 @@ check_value:
     .count_loop:
         cmp byte [si], 0
         je .count_done
-        cmp byte [si], 0x20 ; space anywhere in the name?
+        cmp byte [si], 0x20
         je error
         inc cx
         inc si
-        cmp cx, ax ; check length ax = max
+        cmp cx, ax ; check length
         ja error
         jmp .count_loop
     .count_done:
@@ -374,7 +373,7 @@ check_extension:
       
     add si, cx        
     sub si, 4         
-    mov di, bin_extension    ; reference string, ".bin"
+    mov di, bin_extension   
     mov cx, 4
     repe cmpsb
     jne .no_match          ; no match means not a bin file
@@ -388,31 +387,31 @@ check_extension:
 find_disk_address:
     cmp byte [drive], 0x80
     je .disk
-    
-    ; --- Floppy Logic (BL is 0-indexed) ---
-    cmp bl, 17          ; 0 to 17 are on Head 0 (18 sectors total)
-    jbe .floppy_head_0
-    
-    ; If BL is 18 or higher (Head 1)
-    sub bl, 18          ; Shift down so it resets relative to Head 1
-    mov dh, 1           ; Switch to Head 1
-    mov ch, 0           
-    inc bl              ; Convert from 0-indexed to 1-indexed for BIOS!
-    mov cl, bl
+
+    mov ax, bx
+    xor dx, dx
+    mov cx, 36
+    div cx
+    push ax              ; save cylinder
+
+    mov ax, dx
+    xor dx, dx
+    mov cx, 18
+    div cx
+    mov dh, al           ; head
+    mov cl, dl
+    inc cl               ; sector
+
+    pop ax
+    mov ch, al         
+
     ret
 
-    .floppy_head_0:
-        mov ch, 0           
-        mov dh, 0           
-        inc bl              ; Convert from 0-indexed to 1-indexed for BIOS!
-        mov cl, bl
-        ret
-
     .disk:
-        mov ch, 0           
-        inc bl              ; Hard drives can also be 1-indexed depending on your counter
-        mov cl, bl                       
-        mov dh, 0    
+        mov ch, 0
+        mov cl, bl
+        inc cl
+        mov dh, 0
         ret
 
 
