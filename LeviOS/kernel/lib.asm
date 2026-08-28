@@ -271,22 +271,14 @@ write_sector:
     int 0x13
     jnc .done
 
-<<<<<<< HEAD
-    call error   
-=======
     call error
->>>>>>> 517e98a197392aa3bc08e6312cb5bacfeda26470
     ret
     .done:
         ret
 ; txt_buffer = text and bl = sector
 read_sector:
-<<<<<<< HEAD
-    mov ax, ds           
-=======
     call find_disk_address
     mov ax, ds
->>>>>>> 517e98a197392aa3bc08e6312cb5bacfeda26470
     mov es, ax
 
     mov dl, byte [drive]
@@ -305,17 +297,10 @@ read_sector:
 ; AX = sector number, or 0 if not found
 find_file:
     mov bx, file_table_buffer
-<<<<<<< HEAD
-    mov dx, 64                    ; scan 64 entries
-    .next_entry:
-        cmp byte [bx], 0
-        je .skip                      
-=======
     mov dx, 64                  
     .next_entry:
         cmp byte [bx], 0
         je .skip                    
->>>>>>> 517e98a197392aa3bc08e6312cb5bacfeda26470
         
         push si
         mov di, bx
@@ -327,11 +312,7 @@ find_file:
         add bx, FILE_ENTRY_SIZE
         dec dx
         jnz .next_entry
-<<<<<<< HEAD
-        xor ax, ax                   
-=======
         xor ax, ax                  
->>>>>>> 517e98a197392aa3bc08e6312cb5bacfeda26470
         ret
     .found:
         mov ax, [bx + FILE_ENTRY_SIZE - 3]
@@ -339,16 +320,6 @@ find_file:
 
 find_free_sector:
     mov bx, file_table_buffer
-<<<<<<< HEAD
-    mov cx, 64                    
-    .check_entry:
-        cmp byte [bx], 0               
-        je .found
-        add bx, FILE_ENTRY_SIZE
-        loop .check_entry
-
-        xor ax, ax                    
-=======
     mov cx, 64                
     .check_entry:
         cmp byte [bx], 0             
@@ -356,7 +327,6 @@ find_free_sector:
         add bx, FILE_ENTRY_SIZE
         loop .check_entry
         xor ax, ax                  
->>>>>>> 517e98a197392aa3bc08e6312cb5bacfeda26470
         ret
     .found:
         mov ax, [bx + FILE_ENTRY_SIZE - 3]   
@@ -402,11 +372,7 @@ check_extension:
       
     add si, cx        
     sub si, 4         
-<<<<<<< HEAD
-    mov di, bin_extension    ; reference string
-=======
     mov di, bin_extension   
->>>>>>> 517e98a197392aa3bc08e6312cb5bacfeda26470
     mov cx, 4
     repe cmpsb
     jne .no_match          ; no match means not a bin file
@@ -421,30 +387,6 @@ find_disk_address:
     cmp byte [drive], 0x80
     je .disk
 
-<<<<<<< HEAD
-    cmp bl, 17        
-    jbe .floppy_head_0
-    
-    sub bl, 18          
-    mov dh, 1          
-    mov ch, 0           
-    inc bl             
-    mov cl, bl
-    ret
-
-    .floppy_head_0:
-        mov ch, 0           
-        mov dh, 0           
-        inc bl            
-        mov cl, bl
-        ret
-
-    .disk:
-        mov ch, 0           
-        inc bl          
-        mov cl, bl                       
-        mov dh, 0    
-=======
     mov ax, bx
     xor dx, dx
     mov cx, 36
@@ -469,7 +411,6 @@ find_disk_address:
         mov cl, bl
         inc cl
         mov dh, 0
->>>>>>> 517e98a197392aa3bc08e6312cb5bacfeda26470
         ret
 
 

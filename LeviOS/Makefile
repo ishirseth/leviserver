@@ -97,10 +97,10 @@ web: $(DISK)
 	cp $(DISK) $(WEB_DISK)
 	$(QEMU_IMG) resize -f raw $(WEB_DISK) 2M 2>/dev/null
 
-# Execution
+# Execution (socat - /dev/pts/1,raw,echo=0)
 run: $(DISK)
-	#$(QEMU) -drive format=raw,file=$(DISK) -display gtk
-	$(QEMU) -fda $(DISK) -display gtk
+	$(QEMU) -drive format=raw,file=$(DISK) -display gtk -serial pty
+	#$(QEMU) -fda $(DISK) -display gtk 
 
 clean:
 	rm -rf $(BUILD_DIR) $(DISK)
