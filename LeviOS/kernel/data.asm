@@ -54,12 +54,12 @@ init_file_name: db "levi.txt", 0
 section .bss
 ; --- State Variables ---
 active_ptr:         resw 1
-current_offset:     resw 2  ; (or resw 1, since a word is 2 bytes)
+current_offset:     resw 2
 command_offset:     resw 1
 space_pressed_flag: resb 1
 ignore_space_flag:  resb 1
 
-; --- Buffers (0 bytes in your .img file!) ---
+; --- Buffers ---
 num_buffer:         resb 8
 write_sector_buffer: resb 16 
 write_file_buffer:  resb FILE_ENTRY_SIZE

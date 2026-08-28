@@ -5,16 +5,15 @@ read_key:
     mov ah, 0x00
     int 0x16
 
-    cmp al, 0x0D          ; Enter?
+    cmp al, 0x0D      
     je .enter_pressed
-    cmp al, 0x1B          ; Escape?
-    je .enter_pressed    ; Also do new entry when esc is pressed
-    cmp al, 0x08          ; Backspace?
+    cmp al, 0x1B    
+    je .enter_pressed 
+    cmp al, 0x08         
     je .backspace
-    cmp al, 0x20          ; Space?
+    cmp al, 0x20         
     je .space_pressed
     
-    ; Otherwise, store the char
     call store_char
     ret
 
@@ -88,29 +87,28 @@ cursor_right:
     ret
 
 store_char:
-    mov di, [active_ptr]      ; di = current buffer address
-    mov bx, [current_offset]  ; bx = current offset
-
-    ; Check which buffer is active
-    cmp di, command           ; Is this the command buffer?
+    mov di, [active_ptr]      
+    mov bx, [current_offset]  
+    
+    cmp di, command           
     je .check_command
     
-    cmp di, value             ; Is this the value buffer?
+    cmp di, value            
     je .check_value
     
-    jmp .store                ; Fallback/Error handling
-    .check_command:               ; Check if input is too long
-        cmp bx, 31                ; Max 31 chars + 1 null = 32
+    jmp .store             
+    .check_command:             
+        cmp bx, 31             
         jae .done                 
         jmp .store
     .check_value:
-        cmp bx, 1599               ; Max 1599 chars
+        cmp bx, 1599            
         jae .done                 
     .store:
-        mov [di + bx], al         ; Store character
+        mov [di + bx], al        
         inc bx
         mov [current_offset], bx
-        mov byte [di + bx], 0     ; Null terminate
+        mov byte [di + bx], 0   
     .done:
         ret
 
@@ -119,12 +117,11 @@ store_char:
 ; ----- PROCESS INPUT -----
 
 clear_input:
-    mov di, command        ; Start at the beginning of the command buffer
-    mov cx, 160             ; Total size of both buffers (32+128)
+    mov di, command       
+    mov cx, 160          
     xor al, al
-    rep stosb              ; Efficiently clears the memory in one go
+    rep stosb              
     
-    ; Reset the state variables so we are ready for the next command
     mov word [active_ptr], command
     mov word [current_offset], 0
     mov byte [space_pressed_flag], 0
@@ -188,7 +185,7 @@ parse_input:
     je help_function
 
 
-    ret              ; Return if no match found (not_equal)
+    ret               
     .compare_loop:
         mov al, [si]
         mov bl, [di]
