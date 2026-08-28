@@ -19,6 +19,12 @@ start:
     pop ds
     mov [drive], al
 
+    ; disk reset
+    mov ah, 0x00
+    mov dl, byte [drive]
+    int 0x13
+    jc error
+
     mov word [write_sector_buffer], 12
     mov di, write_file_buffer
     mov si, init_file_name

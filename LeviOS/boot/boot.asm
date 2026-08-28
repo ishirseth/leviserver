@@ -3,10 +3,16 @@
 [org 0x7C00]      
 
 start:
+    cli            
     xor ax, ax
     mov ds, ax
     mov es, ax
 
+    mov ss, ax       
+    mov sp, 0xFFFF  
+    
+    sti
+    
     mov [boot_drive], dl
     mov [ds:0x0500], dl
     mov si, msg

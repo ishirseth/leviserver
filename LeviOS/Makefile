@@ -1,5 +1,3 @@
-# --- Configuration ---
-
 ifeq ($(OS),Windows_NT)
     SHELL := sh
     ASM = nasm
@@ -25,13 +23,11 @@ FILETABLE2 = $(BUILD_DIR)/filetable2.bin
 
 .PHONY: all clean programs run build_all web
 
-# --- Default Target ---
 all: clean
 	@$(MAKE) build_all
 
 build_all: programs $(DISK)
 
-# Assemble User Programs
 programs:
 	$(ASM) -f bin files/asm_programs/test.asm -o files/test.bin
 	$(ASM) -f bin files/asm_programs/fbird.asm -o files/fbird.bin
@@ -40,15 +36,12 @@ programs:
 	$(ASM) -f bin files/asm_programs/ball.asm -o files/ball.bin
 	$(ASM) -f bin files/asm_programs/serial.asm -o files/serial.bin
 
-# Build Bootloader
 $(BOOT_BIN): $(BOOT) | $(BUILD_DIR)
 	$(ASM) -f bin $(BOOT) -o $(BOOT_BIN)
 
-# Build Kernel
 $(KERNEL_BIN): $(KERNEL) | $(BUILD_DIR)
 	$(ASM) -f bin $(KERNEL) -i kernel/ -o $(KERNEL_BIN)
 
-# Create directory for build artifacts
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
@@ -79,19 +72,15 @@ $(FILETABLE2): | $(BUILD_DIR)
 
 # Assemble Disk Image
 $(DISK): $(BOOT_BIN) $(KERNEL_BIN) $(FILETABLE1) $(FILETABLE2)
-	dd if=/dev/zero of=$(DISK) bs=512 count=64 2>/dev/null
+	dd if=/dev/zero of=$(DISK) bs=512 count=2880 2>/dev/null
 	
-	# 2. Write Bootloader to Sector 0
 	dd if=$(BOOT_BIN) of=$(DISK) bs=512 count=1 conv=notrunc 2>/dev/null
 	
-	# 3. Write Kernel to Sector 1
 	dd if=$(KERNEL_BIN) of=$(DISK) bs=512 seek=1 count=9 conv=notrunc 2>/dev/null
-	
-	# 4. Write File Table to Sector 10 and 11
+
 	dd if=$(FILETABLE1) of=$(DISK) bs=512 seek=10 count=1 conv=notrunc 2>/dev/null
 	dd if=$(FILETABLE2) of=$(DISK) bs=512 seek=11 count=1 conv=notrunc 2>/dev/null
 	
-	# 5. Write files
 	dd if=$(FILES_DIR)/cats.txt of=$(DISK) bs=512 seek=12 count=1 conv=notrunc 2>/dev/null
 	dd if=$(FILES_DIR)/cats1.txt of=$(DISK) bs=512 seek=13 count=1 conv=notrunc 2>/dev/null
 	dd if=$(FILES_DIR)/test.bin of=$(DISK) bs=512 seek=14 count=1 conv=notrunc 2>/dev/null
@@ -114,5 +103,4 @@ run: $(DISK)
 	$(QEMU) -fda $(DISK) -display gtk
 
 clean:
-	rm -rf $(BUILD_DIR) $(DISK)# Execution
-
+	rm -rf $(BUILD_DIR) $(DISK)

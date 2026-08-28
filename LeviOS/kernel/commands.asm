@@ -52,18 +52,18 @@ read_function:
         mov si, txt_buffer
         mov cx, 512
         .dump_loop:
-            mov bl, [si]         ; Get the raw byte
-            push si              ; Save position in txt_buffer
+            mov bl, [si]         
+            push si             
             push cx
             
-            mov si, num_buffer   ; Point at scratch space
-            call byte_to_hex     ; Convert to 2-char hex string
-            call print           ; Print it (e.g., "7F" or "00")
+            mov si, num_buffer  
+            call byte_to_hex    
+            call print          
             
             pop cx
-            pop si               ; Restore position in txt_buffer
+            pop si               
             
-            mov al, ' '          ; Print a space between bytes
+            mov al, ' '        
             call print_char
             
             inc si
