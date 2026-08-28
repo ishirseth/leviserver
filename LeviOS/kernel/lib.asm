@@ -19,17 +19,17 @@ print_char:
 new_line:
     mov ah, 0x03
     mov bh, 0x00
-    int 0x10             ; row -> DH
+    int 0x10          
 
     cmp dh, 24
     jl .increment
-    ; already at last row: scroll the screen up ourselves
+
     push ax
-    mov ah, 0x06         ; scroll up function
-    mov al, 1            ; scroll by 1 line
-    mov bh, 0x07         ; attribute for blank line
-    mov cx, 0x0000       ; top-left
-    mov dx, 0x184F       ; bottom-right (24,79)
+    mov ah, 0x06        
+    mov al, 1            
+    mov bh, 0x07         
+    mov cx, 0x0000      
+    mov dx, 0x184F       
     int 0x10
     pop ax
     mov dh, 24           ; stay on last row after scrolling
@@ -71,12 +71,12 @@ str_to_num:
         sub al, '0'
         xor ah, ah
 
-        push ax              ; save digit
-        mov ax, bx           ; AX = current total
-        mov cx, 10           ; use CX as multiplier, not BX
-        mul cx               ; AX = AX * 10 (DX:AX, but DX=0 for small numbers)
-        mov bx, ax           ; BX = new total
-        pop ax               ; restore digit
+        push ax             
+        mov ax, bx       
+        mov cx, 10          
+        mul cx          
+        mov bx, ax          
+        pop ax            
 
         add bx, ax
         inc si
@@ -99,13 +99,13 @@ num_to_str:
     inc si
     jmp .done
     .loop:
-        cmp ax, 0 ; finish when quotient is 0
+        cmp ax, 0 
         je .reverse
-        mov cx, 10 ; divides to get remainder 
+        mov cx, 10
         div cx
-        add dx, '0' ; makes remainder a char
+        add dx, '0' 
         push dx
-        xor dx, dx ; clear remainder
+        xor dx, dx 
         inc bl
         jmp .loop
     .reverse:
@@ -117,7 +117,7 @@ num_to_str:
         dec bl
         jmp .reverse
     .done:
-        mov byte [si], 0  ; add the null termiantor at the end
+        mov byte [si], 0  ; add the null termiantor
         pop si
         pop bx
         ret
@@ -129,8 +129,8 @@ num_to_str:
 
     mov ax, bx
     mov dl, al
-    shr al, 4          ; high nibble
-    and dl, 0x0F       ; low nibble
+    shr al, 4         
+    and dl, 0x0F       
 
     call .nibble_to_char
     mov [si], al
@@ -207,7 +207,7 @@ hex_to_byte:
     mov al, ch  ; times 16
     mov bl, 16
     mul bl
-    add al, cl  ; add lower digit
+    add al, cl  
     mov bl, al
     ret
 
@@ -234,9 +234,9 @@ hex_to_byte:
 
 load_file_table:
     mov ah, 0x02
-    mov al, 2              ; load 2 sectors (1024 bytes) instead of 1
+    mov al, 2             
     mov ch, 0
-    mov cl, 11             ; start at sector 10 (BIOS 1-indexed = 11)
+    mov cl, 11           
     mov dh, 0
     mov dl, [drive]
     mov bx, file_table_buffer
@@ -245,7 +245,7 @@ load_file_table:
 write_file_table:
     push ax
     mov ah, 0x03
-    mov al, 2              ; write 2 sectors (both tables)
+    mov al, 2              ; write 2 sectors
     mov ch, 0
     mov cl, 11             ; start at sector 10 (11)
     mov dh, 0
@@ -273,13 +273,13 @@ write_sector:
     int 0x13                
     jnc .done            
 
-    call error     ; error
+    call error   
     ret
     .done:
         ret
 ; txt_buffer = text and bl = sector
 read_sector:
-    mov ax, ds           ; set ES = DS first, before touching AX for int 0x13
+    mov ax, ds           
     mov es, ax
     add bx, 1
     mov ah, 0x02
@@ -297,10 +297,10 @@ read_sector:
 ; OUTPUT: AX = sector number, or 0 if not found
 find_file:
     mov bx, file_table_buffer
-    mov dx, 64                    ; scan all 64 entries
+    mov dx, 64                    ; scan 64 entries
     .next_entry:
         cmp byte [bx], 0
-        je .skip                      ; empty entry? skip it, don't stop
+        je .skip                      
         
         push si
         mov di, bx
@@ -312,26 +312,25 @@ find_file:
         add bx, FILE_ENTRY_SIZE
         dec dx
         jnz .next_entry
-        xor ax, ax                    ; scanned everything, not found
+        xor ax, ax                   
         ret
     .found:
         mov ax, [bx + FILE_ENTRY_SIZE - 3]
         ret
 
-; finds first empty sector in the filetable 
 find_free_sector:
     mov bx, file_table_buffer
-    mov cx, 64                    ; scan all 64 entries
+    mov cx, 64                    
     .check_entry:
-        cmp byte [bx], 0               ; empty entry = name field starts with 0
+        cmp byte [bx], 0               
         je .found
         add bx, FILE_ENTRY_SIZE
         loop .check_entry
-        ; cx hit 0 -- scanned all 64 entries, none free
-        xor ax, ax                    ; no free entry found
+
+        xor ax, ax                    
         ret
     .found:
-        mov ax, [bx + FILE_ENTRY_SIZE - 3]   ; sector, pre-filled by the Makefile
+        mov ax, [bx + FILE_ENTRY_SIZE - 3]   
         ret
 
 ; check if value is not too long and exists
@@ -340,7 +339,7 @@ check_value:
     ; check if it exists
     cmp byte [value], 0
     je error
-    cmp byte [value], 0x20 ; space
+    cmp byte [value], 0x20 
     je error
     ; check length
     mov si, value
@@ -348,7 +347,7 @@ check_value:
     .count_loop:
         cmp byte [si], 0
         je .count_done
-        cmp byte [si], 0x20 ; space anywhere in the name?
+        cmp byte [si], 0x20
         je error
         inc cx
         inc si
@@ -356,7 +355,7 @@ check_value:
         ja error
         jmp .count_loop
     .count_done:
-    mov ax, 1 ; pass flag
+    mov ax, 1
     ret
 
 ; si = file name, ax = 1 (.bin file)
@@ -374,7 +373,7 @@ check_extension:
       
     add si, cx        
     sub si, 4         
-    mov di, bin_extension    ; reference string, ".bin"
+    mov di, bin_extension    ; reference string
     mov cx, 4
     repe cmpsb
     jne .no_match          ; no match means not a bin file
@@ -388,29 +387,27 @@ check_extension:
 find_disk_address:
     cmp byte [drive], 0x80
     je .disk
-    
-    ; --- Floppy Logic (BL is 0-indexed) ---
-    cmp bl, 17          ; 0 to 17 are on Head 0 (18 sectors total)
+
+    cmp bl, 17        
     jbe .floppy_head_0
     
-    ; If BL is 18 or higher (Head 1)
-    sub bl, 18          ; Shift down so it resets relative to Head 1
-    mov dh, 1           ; Switch to Head 1
+    sub bl, 18          
+    mov dh, 1          
     mov ch, 0           
-    inc bl              ; Convert from 0-indexed to 1-indexed for BIOS!
+    inc bl             
     mov cl, bl
     ret
 
     .floppy_head_0:
         mov ch, 0           
         mov dh, 0           
-        inc bl              ; Convert from 0-indexed to 1-indexed for BIOS!
+        inc bl            
         mov cl, bl
         ret
 
     .disk:
         mov ch, 0           
-        inc bl              ; Hard drives can also be 1-indexed depending on your counter
+        inc bl          
         mov cl, bl                       
         mov dh, 0    
         ret
@@ -420,20 +417,20 @@ find_disk_address:
 ; di = destination
 ; si = source
 mov_index_data:
-    lodsb           ; Load [SI] into AL, inc SI
-    stosb           ; Store AL into [DI], inc DI
-    test al, al     ; Check if 0 (null terminator)
-    jnz mov_index_data       ; Continue until 0 is copied
+    lodsb          
+    stosb           
+    test al, al     
+    jnz mov_index_data      
     ret
 
 ; ----- TIME -----
-delay:              ; ax = time in ms
-    push ax         ; preserve ax
+delay:           
+    push ax         
     mov cx, 1000 
     mul cx
 
-    mov cx, dx      ; high 16 bits
-    mov dx, ax      ; low 16 bits
+    mov cx, dx      
+    mov dx, ax      
     mov ah, 0x86
     int 0x15
     pop ax

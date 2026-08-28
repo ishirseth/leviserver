@@ -38,6 +38,7 @@ programs:
 	$(ASM) -f bin files/asm_programs/snake.asm -o files/snake.bin
 	$(ASM) -f bin files/asm_programs/pong.asm -o files/pong.bin
 	$(ASM) -f bin files/asm_programs/ball.asm -o files/ball.bin
+	$(ASM) -f bin files/asm_programs/serial.asm -o files/serial.bin
 
 # Build Bootloader
 $(BOOT_BIN): $(BOOT) | $(BUILD_DIR)
@@ -60,7 +61,8 @@ $(FILETABLE1): | $(BUILD_DIR)
 	@printf "snake.bin\x00\x00\x00\x00\x10\x00\x00" >> $(FILETABLE1)
 	@printf "pong.bin\x00\x00\x00\x00\x00\x11\x00\x00" >> $(FILETABLE1)
 	@printf "ball.bin\x00\x00\x00\x00\x00\x12\x00\x00" >> $(FILETABLE1)
-	@for i in $$(seq 19 43); do \
+	@printf "serial.bin\x00\x00\x00\x13\x00\x00" >> $(FILETABLE1)
+	@for i in $$(seq 20 43); do \
 		printf '\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00' >> $(FILETABLE1); \
 		printf "$$(printf '\\x%02x' $$i)" >> $(FILETABLE1); \
 		printf '\x00\x00' >> $(FILETABLE1); \
@@ -97,6 +99,8 @@ $(DISK): $(BOOT_BIN) $(KERNEL_BIN) $(FILETABLE1) $(FILETABLE2)
 	dd if=$(FILES_DIR)/snake.bin of=$(DISK) bs=512 seek=16 count=1 conv=notrunc 2>/dev/null
 	dd if=$(FILES_DIR)/pong.bin of=$(DISK) bs=512 seek=17 count=1 conv=notrunc 2>/dev/null
 	dd if=$(FILES_DIR)/ball.bin of=$(DISK) bs=512 seek=18 count=1 conv=notrunc 2>/dev/null
+	dd if=$(FILES_DIR)/serial.bin of=$(DISK) bs=512 seek=19 count=1 conv=notrunc 2>/dev/null
+
 	dd if=$(FILES_DIR)/cats2.txt of=$(DISK) bs=512 seek=44 count=1 conv=notrunc 2>/dev/null
 
 web: $(DISK)

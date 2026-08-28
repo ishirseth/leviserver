@@ -101,11 +101,11 @@ main:
     jmp 0x1000:0x0000   ; return to kernel LeviOS
 
 read_key:
-    mov ah, 0x01          ; Check if key is available
+    mov ah, 0x01       
     int 0x16
-    jz .no_key_waiting    ; If ZF=1, no key, skip out
+    jz .no_key_waiting    
 
-    mov ah, 0x00          ; FIX: Read and remove the key from the buffer
+    mov ah, 0x00        
     int 0x16
     ret
 .no_key_waiting:
@@ -113,7 +113,7 @@ read_key:
 
 
 
-print_char:     ; dh (row/y max 24) dl (column/x max 79)
+print_char:    
     mov ah, 0x02
     mov bh, 0x00
     int 0x10
@@ -223,7 +223,6 @@ draw_border:
     push cx
     mov cl, 177          ; border character
 
-    ; top row (row 0, all columns 0-79)
     mov dh, 0
     xor dl, dl
     .top_loop:
@@ -232,7 +231,6 @@ draw_border:
         cmp dl, 80
         jne .top_loop
 
-        ; bottom row (row 24, all columns 0-79)
         mov dh, 23
         xor dl, dl
     .bottom_loop:
@@ -241,7 +239,6 @@ draw_border:
         cmp dl, 80
         jne .bottom_loop
 
-        ; left column (column 0, all rows 0-24)
         mov dl, 0
         xor dh, dh
     .left_loop:
@@ -250,7 +247,6 @@ draw_border:
         cmp dh, 24
         jne .left_loop
 
-        ; right column (column 79, all rows 0-24)
         mov dl, 79
         xor dh, dh
     .right_loop:
@@ -281,8 +277,8 @@ clear_screen:
 
 ball_y: db 1
 ball_x: db 1
-ball_dy:  db 1     ; row velocity: +1 or -1 (0xFF)
-ball_dx:  db 1     ; column velocity: +1 or -1 (0xFF)
+ball_dy:  db 1  
+ball_dx:  db 1    
 
 paddle1_y: db 1
 paddle2_y: db 1
