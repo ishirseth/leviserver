@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Panel</title>
+
+    <style>
+
+        :root {
+        --text-color: #d6d6d6;
+        --accent-color: #39ff88;
+        --accent-glow: 0 0 8px rgba(57, 255, 136, 0.6);
+        --header-glow: 0 0 12px rgba(57, 255, 136, 0.25);
+        --background-color: #000000;
+        --background-gradient: linear-gradient(90deg, var(--background-color) 0%, rgb(27, 27, 27) 50%, var(--background-color) 100%);
+
+        --header-font: 'Oswald', sans-serif;
+        --text-font: 'Share Tech Mono', monospace;
+        }
+
+        body {
+        margin: 0;
+        padding: 0;
+        font-family: var(--text-font);
+        background: #121212;
+        background: var(--background-gradient);
+        color: var(--text-color);
+        text-align: left;
+        }
+
+        body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background-image: repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, transparent 1px, transparent 3px);
+        z-index: 1;
+        }
+
+        h1 {
+        font-family: var(--header-font);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-shadow: var(--header-glow);
+        }
+
+        h2, h3 {
+        font-family: var(--header-font);
+        letter-spacing: 1px;
+        text-shadow: var(--header-glow);
+        }
+
+
+
+        .control_divs {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        }
+
+        .rotor {
+        display: flex; 
+        flex-direction: column;
+        width: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 5px;
+        border-radius: 10px;
+        background-color: #1f1f1f;
+        text-align: center;
+        }
+
+        .rotor img {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        object-fit: contain;
+        display: block;
+        border: 2px solid rgba(30, 30, 30, 0.4);
+        border-radius: 10px;
+        box-sizing: border-box;
+        }
+
+        .rotorButtons {
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+        margin: 10px;
+        }
+
+        .rotorBtn {
+        background: rgba(210, 210, 210, 0.1);
+        border: 1px solid rgba(168, 168, 168, 0.1);
+        border-radius: 8px;
+        padding: 1.5rem;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        grid-column: span 1;
+        flex: 1;
+        color: #ffffff;
+        font-size: larger;
+        }
+
+        .rotorBtn:hover {
+        transform: scale(1.03);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        border: 1px solid var(--accent-color);
+        }
+
+        .rotorBtn:active { 
+        background: rgba(130, 130, 130, 0.1); 
+        transform: scale(1.00)
+        }
+
+        .antenna {
+        display: flex; 
+        flex-direction: column;
+        width: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 5px;
+        border-radius: 10px;
+        background-color: #1f1f1f;
+        text-align: center;
+        }
+
+        .antennaButtons {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        margin: 10px;
+        }
+
+        .antennaBtn {
+        background: rgba(210, 210, 210, 0.1);
+        border: 1px solid rgba(168, 168, 168, 0.1);
+        border-radius: 8px;
+        padding: 1.5rem;
+        transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        grid-column: span 1;
+        color: #ffffff;
+        font-size: larger;
+        }
+
+        .antennaBtn:hover {
+        transform: scale(1.015);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        border: 1px solid var(--accent-color);
+        }
+
+        .antennaBtn:active { 
+        background: rgba(130, 130, 130, 0.1); 
+        transform: scale(1.00)
+        }
+
+        .disconnectBtn {
+        background: rgba(223, 61, 61, 0.75);
+        border: 1px solid rgba(168, 168, 168, 0.1);
+        border-radius: 8px;
+        padding: 1.5rem;
+        transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        grid-column: span 1;
+        color: #ffffff;
+        font-size: larger;
+        }
+
+        .disconnectBtn:hover {
+        transform: scale(1.015);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        border: 1px solid var(--accent-color);
+        }
+
+        .disconnectBtn:active { 
+        background: rgba(110, 30, 30, 0.75); 
+        transform: scale(1.00)
+        }
+
+        .buttonLed {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #555;
+        box-shadow: none;
+        }
+
+        .buttonLed.active {
+        background: var(--accent-color);
+        box-shadow: 0 0 6px var(--accent-color);
+        }
+
+    </style>
+    </head>
+    <body>
+        <script>
+            var selectedAntenna = 0;
+            const url = "http://192.168.178.94"
+
+            function right(state) {
+                if (state == 1){
+                    fetch(url + "/right/on")
+                }
+                else {
+                    fetch(url + "/right/off")
+                }
+            }
+
+            function left(state) {
+                if (state == 1){
+                    fetch(url + "/left/on")
+                }
+                else {
+                    fetch(url + "/left/off")
+                }
+            }
+
+            function antenna_switch(clicked, antenna) {
+                const allButtons = clicked.parentElement.querySelectorAll('.antennaBtn');
+                selectedAntenna = antenna;
+                if (confirm("Are you sure?")) {
+                    if (selectedAntenna >= 0 && selectedAntenna <= 3){
+                        fetch(url + "/antenna/" + antenna)
+                        .then(response => {
+                            if (response.ok) {
+                                allButtons.forEach(btn => {btn.querySelector('.buttonLed').classList.remove('active');});
+                                clicked.querySelector('.buttonLed').classList.add('active');
+                            } 
+                            else {
+                                alert(`Device responded with error: ${response.status}`);
+                            }
+                        })
+                        .catch(error => {alert("Could not reach device")});
+                    }
+                    else {
+                        fetch(url + "/disconnect")
+                        .then(response => {
+                            if (response.ok) {
+                                allButtons.forEach(btn => {btn.querySelector('.buttonLed').classList.remove('active');});
+                            } 
+                            else {
+                                alert(`Device responded with error: ${response.status}`);
+                            }
+                        })
+                        .catch(error => {alert("Could not reach device")});
+                    }
+                }
+            }
+
+        </script>
+        <section style="margin: 20px;">
+            <h1>HamControl</h1>
+
+            <div class="control_divs">
+            <div class="rotor">
+                <h2>Rotor Control</h2>
+                <div class="rotorButtons">
+                    <button class="rotorBtn" onmousedown="left(1)" onmouseup="left(0)">◀ Left</button>
+                    <button class="rotorBtn" onmousedown="right(1)" onmouseup="right(0)">Right ▶</button>
+                </div>
+                <img src="http://192.168.178.197:8080/videofeed" alt="Live feed">
+            </div>
+
+            <div class="antenna">
+                <h2>Antenna Control</h2>
+                <div class="antennaButtons">
+                    <button class="antennaBtn" onclick="antenna_switch(this, 0)"><div class="buttonLed"></div>Hexbeam</button>
+                    <button class="antennaBtn" onclick="antenna_switch(this, 1)"><div class="buttonLed"></div>Dipole</button>
+                    <button class="antennaBtn" onclick="antenna_switch(this, 2)"><div class="buttonLed"></div>Vertical</button>
+                    <button class="antennaBtn" onclick="antenna_switch(this, 3)"><div class="buttonLed"></div>N/A</button>
+                    <button class="disconnectBtn" onclick="antenna_switch(this, 4)">Disconnect all</button>
+                </div>
+            </div>
+            </div>
+
+        </section>
+    </body>
+</html>
