@@ -15,7 +15,7 @@ void main() {
     float baseSize = (aType > 0.5) ? 70.0 : 5.0;
 
     // Perspective scaling
-    gl_PointSize = baseSize * 100.0 / gl_Position.w;
+    gl_PointSize = baseSize * 15.0 / gl_Position.w;
     gl_PointSize = clamp(gl_PointSize, 1.0, 50.0);
 
     vType = aType;
