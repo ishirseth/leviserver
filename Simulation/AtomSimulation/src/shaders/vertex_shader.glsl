@@ -14,8 +14,9 @@ void main() {
 
     float baseSize = (aType > 0.5) ? 70.0 : 5.0;
 
-    // Scale inversely by distance (gl_Position.w) so farther points shrink
-    gl_PointSize = baseSize / gl_Position.w;
+    // Perspective scaling
+    gl_PointSize = baseSize * 100.0 / gl_Position.w;
+    gl_PointSize = clamp(gl_PointSize, 1.0, 50.0);
 
     vType = aType;
     vr = ar;

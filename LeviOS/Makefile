@@ -14,7 +14,7 @@ KERNEL = kernel/kernel.asm
 FILES_DIR = files
 BUILD_DIR = build
 DISK = $(BUILD_DIR)/disk.img
-WEB_DISK = ../LeviServerWeb/demos/assets/levios-web/disk.img
+WEB_DISK = ../Web/LeviServerWeb/demos/assets/levios-web/disk.img
 
 BOOT_BIN = $(BUILD_DIR)/boot.bin
 KERNEL_BIN = $(BUILD_DIR)/kernel.bin
