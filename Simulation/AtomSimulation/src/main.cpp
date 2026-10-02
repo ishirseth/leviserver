@@ -13,13 +13,6 @@
 #include "imgui_impl_opengl3.h"
 #include <thread>
 
-
-// \dfrac{-\hbar^2}{2m}\nabla^2\Psi(\vec{r}) +V(\vec{r})\Psi(\vec{r}) = E\Psi(\vec{r}) \label{genSchr}
-// Radial: Rₙₗ(r) = -√[ (2/na₀)³ · (n-l-1)! / (2n·[(n+l)!]³) ] · e^(-r/na₀) · (2r/na₀)^l · L^(2l+1)_(n-l-1)(2r/na₀)
-// Prob: P(r) = 4πr² · [Rₙₗ(r)]²
-// Angular: Yₗ⁰(θ) = √[ (2l+1)/(4π) ] · Pₗ⁰(cos θ)
-// Prob: P(θ) = |Yₗ⁰(θ)|² · sin(θ) = [Pₗ⁰(cosθ)]² · (constant) · sin(θ)
-
 std::string load(const std::string& p) {
     std::ifstream f(p);
     std::stringstream ss;
@@ -102,7 +95,7 @@ float angularProbabilityGeneral(int l, int m, float theta, float phi) {
     float x = cos(theta);
     float P = legendre(l, abs(m), x); 
 
-    float phiPart = 1.0f; // default for m=0, no phi dependence
+    float phiPart = 1.0f; 
     if (m > 0) {
         phiPart = cos(m * phi);
     } else if (m < 0) {

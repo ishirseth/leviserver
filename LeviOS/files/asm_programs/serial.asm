@@ -59,50 +59,54 @@ read_key:
     jz .no_key           
     mov ah, 0x00
     int 0x16              
+    cmp al, 0x1B          
+    je .esc_pressed
+    call write_serial
+
     cmp al, 0x0D
     je .enter_pressed
-    call .store_char
     .no_key:
         ret
 
-.store_char:
-    mov di, send_msg     
-    mov bx, [current_offset]  
-    
-    jmp .store                           
-    .store:
-        mov [di + bx], al        
-        inc bx
-        mov [current_offset], bx
-        mov byte [di + bx], 0   
-    .done:
-        ret
 
 .enter_pressed:
-    call parse_input
-    call clear_input
-    jmp main
+    mov ah, 0x03
+    mov bh, 0x00
+    int 0x10          
 
-clear_input:
-    mov di, send_msg    
-    mov cx, 160          
-    xor al, al
-    rep stosb    
-    mov word [current_offset], 0          
-    ret
+    cmp dh, 24
+    jl .increment
 
-parse_input:
-    mov si, send_msg
-    .loop:
-        mov al, [si]
-        call write_serial
-        inc si
-        cmp byte [si], 0
-        jne .loop
-    ret
+    push ax
+    mov ah, 0x06        
+    mov al, 1            
+    mov bh, 0x07         
+    mov cx, 0x0000      
+    mov dx, 0x184F       
+    int 0x10
+    pop ax
+    mov dh, 24          
+    jmp .set_cursor
+    .increment:
+        inc dh
+    .set_cursor:
+        mov dl, 0x00
 
-call clear_screen
-jmp 0x1000:0x0000   ; return to kernel LeviOS
+        mov ah, 0x02
+        mov bh, 0x00
+        int 0x10
+        ret
+
+.esc_pressed:
+    ; clear, show cursor and then return to LeviOS
+    call clear_screen
+
+    mov ah, 0x01
+    mov ch, 0x06  
+    mov cl, 0x07 
+    int 0x10
+    
+    jmp 0x1000:0x0000
 
 clear_screen:
     mov ah, 0x06        

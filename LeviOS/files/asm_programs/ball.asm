@@ -18,15 +18,14 @@ start:
 
 main:
     call read_key
-    jz .no_key            ; check if there is no key pressed
-    cmp al, 0x1B          ; Escape?
+    jz .no_key          
+    cmp al, 0x1B          
     je .esc_pressed
     .no_key:
 
     call check_collision
     call update_ball
 
-    ;delay
     mov ax, 50
     call delay
 
@@ -36,8 +35,8 @@ main:
     ; clear, show cursor and then return to LeviOS
     call clear_screen
     mov ah, 0x01
-    mov ch, 0x06     ; bit 5 is 0 (visible), start scan line 6
-    mov cl, 0x07     ; end scan line 7
+    mov ch, 0x06    
+    mov cl, 0x07   
     int 0x10
     
     push 0x1000
@@ -49,12 +48,12 @@ read_key:
     int 0x16
     ret
 
-print_char:     ; dh (row/y max 24) dl (column/x max 79)
+print_char:     
     mov ah, 0x02
     mov bh, 0x00
     int 0x10
 
-    mov al, cl       ; character to print (ball)
+    mov al, cl       
     mov ah, 0x0E
     int 0x10
     ret
@@ -107,13 +106,13 @@ check_collision:
         mov byte [ball_dx], 1
         jmp .left_ret
 
-delay:              ; ax = time in ms
-    push ax         ; preserve ax
+delay:              
+    push ax        
     mov cx, 1000 
     mul cx
 
-    mov cx, dx      ; high 16 bits
-    mov dx, ax      ; low 16 bits
+    mov cx, dx      
+    mov dx, ax
     mov ah, 0x86
     int 0x15
     pop ax
@@ -121,7 +120,7 @@ delay:              ; ax = time in ms
 
 draw_border:
     push cx
-    mov cl, 177          ; border character
+    mov cl, 177          
 
     ; top row (row 0, all columns 0-79)
     mov dh, 0
@@ -170,7 +169,7 @@ clear_screen:
     mov dx, 0x184F    
     int 0x10
 
-    mov ah, 0x02        ; set cursor position
+    mov ah, 0x02 
     mov bh, 0x00
     mov dh, 0x00
     mov dl, 0x00
@@ -182,5 +181,5 @@ ball_y: db 1
 ball_x: db 1
 ball_old_y: db 1
 ball_old_x: db 1
-ball_dy:  db 1     ; row velocity: +1 or -1 (0xFF)
-ball_dx:  db 1     ; column velocity: +1 or -1 (0xFF)
+ball_dy:  db 1    
+ball_dx:  db 1    

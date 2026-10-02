@@ -27,17 +27,17 @@ start:
 
 main:
     call read_key
-    jz .no_key            ; check if there is no key pressed
+    jz .no_key           
 
-    cmp al, 0x1B          ; Escape?
+    cmp al, 0x1B      
     je .esc_pressed
-    cmp al, 'w'         ; w?
+    cmp al, 'w'       
     je .w_pressed
-    cmp al, 's'         ; s?
+    cmp al, 's'       
     je .s_pressed
-    cmp al, 'i'         ; i?
+    cmp al, 'i'      
     je .i_pressed
-    cmp al, 'k'         ; k?
+    cmp al, 'k'      
     je .k_pressed
     .no_key:
 
@@ -49,8 +49,8 @@ main:
     mov ax, SPEED
     mov cx, 1000 
     mul cx
-    mov cx, dx      ; high 16 bits
-    mov dx, ax      ; low 16 bits
+    mov cx, dx   
+    mov dx, ax    
     mov ah, 0x86
     int 0x15
 
@@ -94,11 +94,11 @@ main:
     call clear_screen
 
     mov ah, 0x01
-    mov ch, 0x06     ; bit 5 is 0 (visible), start scan line 6
-    mov cl, 0x07     ; end scan line 7
+    mov ch, 0x06  
+    mov cl, 0x07 
     int 0x10
     
-    jmp 0x1000:0x0000   ; return to kernel LeviOS
+    jmp 0x1000:0x0000   
 
 read_key:
     mov ah, 0x01       
@@ -118,7 +118,7 @@ print_char:
     mov bh, 0x00
     int 0x10
 
-    mov al, cl       ; character to print
+    mov al, cl       
     mov ah, 0x0E
     int 0x10
     ret
@@ -129,7 +129,7 @@ update_ball:
     mov cl, 32           ; clear ball character
     call print_char
 
-    ; update ball postion using ball velocity
+
     mov ah, [ball_y]
     mov al, [ball_x]
     add ah, [ball_dy]
@@ -138,9 +138,9 @@ update_ball:
     mov [ball_y], ah
     mov [ball_x], al
 
-    mov dh, [ball_y]    ; get y pos in correct register
-    mov dl, [ball_x]    ; get x pos in correct register
-    mov cl, 4           ; ball character
+    mov dh, [ball_y]    
+    mov dl, [ball_x]  
+    mov cl, 4           
     call print_char
     ret
 
@@ -148,26 +148,26 @@ print_paddles:
     mov bl, 0
     .paddle_loop1:
         inc bl
-        mov dh, [paddle1_y]    ; get y pos in correct register
+        mov dh, [paddle1_y]   
         add dh, bl
         mov dl, 3
         call print_char
-        cmp bl, PADDLE_SIZE             ; paddle size of 3
+        cmp bl, PADDLE_SIZE           
         jne .paddle_loop1
 
     mov bl, 0
     .paddle_loop2:
         inc bl
-        mov dh, [paddle2_y]    ; get y pos in correct register
+        mov dh, [paddle2_y]    
         add dh, bl
         mov dl, 77
         call print_char
-        cmp bl, PADDLE_SIZE             ; paddle size of 3
+        cmp bl, PADDLE_SIZE           
         jne .paddle_loop2
     ret
 
 update_paddles:
-    mov cl, 219           ; paddle character
+    mov cl, 219          
     call print_paddles
     ret
 
