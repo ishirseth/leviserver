@@ -12,11 +12,9 @@ out float vr;
 void main() {
     gl_Position = projection * view * vec4(aPos, 1.0);
 
-    float baseSize = (aType > 0.5) ? 70.0 : 5.0;
+    float baseSize = 20.0;
 
-    // Perspective scaling
-    gl_PointSize = baseSize * 15.0 / gl_Position.w;
-    gl_PointSize = clamp(gl_PointSize, 1.0, 50.0);
+    gl_PointSize = baseSize / gl_Position.w;
 
     vType = aType;
     vr = ar;
